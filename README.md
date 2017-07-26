@@ -2,9 +2,11 @@
 
 A Pythonic description of life.
 
+Feel free to contribute.
+
 
 # Frequently Asked Questions
 
 Q: The code doesn't work.
 
-A: It's not meant to work.
+A: It never does.
