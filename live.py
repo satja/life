@@ -1,5 +1,4 @@
 import random
-from mind import think_about
 
 def wake_up():
     while still_sleepy:
@@ -26,49 +25,34 @@ def sleep():
             insomnia = True
 
 def think_about_stuff():
-    thought = random.choice(subconsciousness + consciousness + ['anna-maria'])
+    thought = random.choice(subconsciousness + consciousness)
     while have_nothing_to_do:
-        think_about(thought)
+        think(thought)
         if random.randrange(10) > 0:
             thought = random.choice(related(thought))
         else:
-            thought = random.choice(subconsciousness + consciousness + ['anna-maria'])
+            thought = random.choice(subconsciousness + consciousness)
 
 def live():
     while len(things_you_can_do) > 0:
-        think_about('anna-maria')
+        think_about_stuff()
 
         if len(things_you_really_must_do) > 0:
             if random.randrange(2) == 0:
-                thing = random.choice(things_you_really_must_do)
-                do(thing)
-
-        think_about('♥ ')
+                thing_to_do = random.choice(things_you_really_must_do)
+                do(thing_to_do)
 
         if len(things_you_should_do) > 0:
             if random.randrange(3) == 0:
-                thing = random.choice(things_you_should_do)
-                do(thing)
-
-        think_about('anna-maria')
+                thing_to_do = random.choice(things_you_should_do)
+                do(thing_to_do)
 
         if len(things_you_should_never_do) > 0:
             if random.randrange(4) == 0:
-                thing = random.choice(things_you_should_never_do)
-                do(thing)
+                thing_to_do = random.choice(things_you_should_never_do)
+                do(thing_to_do)
 
-        think_about('♥ ')
-
-        thing = random.choice(
-                things_to_do_with('anna-maria') + things_to_do_for('anna-maria'))
-        do(thing)
+        thing_to_do = random.choice(things_you_can_do)
+        do(thing_to_do)
         
-        think_about('anna-maria')
-
-    # rename this function
-    live.__name__[1] = 'o'
-
-
-if True:
-    # rename the whole module live.py
-    __name__[1] = 'o'
+        think_about_stuff()
