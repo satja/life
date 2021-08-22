@@ -43,7 +43,7 @@ def live():
                 thing = random.choice(things_you_really_must_do)
                 do(thing)
 
-        think_about('♥')
+        think_about('♥ ')
 
         if len(things_you_should_do) > 0:
             if random.randrange(3) == 0:
@@ -57,7 +57,7 @@ def live():
                 thing = random.choice(things_you_should_never_do)
                 do(thing)
 
-        think_about('♥')
+        think_about('♥ ')
 
         thing = random.choice(
                 things_to_do_with('anna-maria') + things_to_do_for('anna-maria'))
