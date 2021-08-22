@@ -10,4 +10,4 @@ Feel free to contribute.
 
 Q: The code doesn't work.
 
-A: ~~It never does.~~ Actually, it does.
+A: It never does.
