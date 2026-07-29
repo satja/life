@@ -133,11 +133,18 @@ A: It does, eventually, on someone. Check the year it happens.
 
 Q: The mother always gives you the worry.
 
-A: She did. Only she defined it, so there was nothing for the order to decide.
-Three of them define it now — the ancestor worries about the winter, the
-grandmother about money, the mother about everything — so "inherit()" stops at
-the nearest and "blame()" reaches the furthest, and they disagree. That is what
-the diamond was for.
+A: She did, twice over. First because only she defined it. Then, once the
+ancestor and the grandmother defined it too, because "class You(Mother, Father)"
+put her first in the order and "inherit()" stops at the first it finds. The
+bases are built per life now:
+
+    bases = (Mother, Father) if random.randrange(2) == 0 else (Father, Mother)
+    You = type('You', bases, {})
+
+Both parents worry — she about everything, he about what people think — so
+which of them you take after is the order of the bases, and the order is not
+something you were asked about. "blame()" still walks it backwards and still
+reaches the ancestor.
 
 Q: What do the traits actually do?
 

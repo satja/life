@@ -23,14 +23,20 @@ class Mother(Grandmother, Grandfather):
     worry = float('inf')
     eyes = "green"
     everything_else = "hers"
+    patience = "with everyone but you"
 
 class Father(Grandmother, Grandfather):
+    worry = "about what people think"
     posture = "bad"
     eyes = "grey"
     silence = "at the table"
+    stubbornness = "the quiet kind"
 
-class You(Mother, Father):
-    pass
+# which of them you take after is the order of the bases, and the order is
+# not something you were asked about
+bases = (Mother, Father) if random.randrange(2) == 0 else (Father, Mother)
+You = type('You', bases, {})
+take_after = bases[0].__name__
 
 TRAITS = ['hope', 'fear_of_the_dark', 'stubbornness', 'worry', 'posture',
           'silence', 'recipe', 'eyes', 'patience', 'a way with people']

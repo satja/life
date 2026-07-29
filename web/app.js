@@ -37,15 +37,30 @@ function listing(box, text, margins) {
   for (const b of box.querySelectorAll("button.nm")) {
     b.addEventListener("click", () => toggle(b.dataset.name));
   }
+  for (const b of box.querySelectorAll("button.dial")) {
+    b.addEventListener("click", () => {
+      const key = "dial:" + b.dataset.dial;
+      if (state.open.has(key)) state.open.delete(key); else state.open.add(key);
+      draw();
+    });
+  }
 }
 
 function counts(no) {
   const life = state.life;
   if (!life) return "";
   if (!life.hits[no]) return TRACED.includes(no) ? null : "";
-  const ran = '<span class="n">' + fmt(life.hits[no]) + "×</span>";
-  if (!life.conds.has(no)) return ran;
-  return ran + '  <span class="t">' + t("tru") + " " + fmt(life.trues[no]) + "</span>";
+  let out = '<span class="n">' + fmt(life.hits[no]) + "×</span>";
+  if (life.conds.has(no)) {
+    out += '  <span class="t">' + t("tru") + " " + fmt(life.trues[no]) + "</span>";
+  }
+  const now = dialsNow();
+  if (DIAL_ON[no] && now) {
+    const dial = DIAL_ON[no];
+    out += '  <button class="dial" type="button" data-dial="' + dial + '" data-at="' + no +
+      '">' + dial + " " + now.dials[dial].toFixed(SHOW[dial]) + "</button>";
+  }
+  return out;
 }
 
 // both listings are redrawn together, because a name clicked in main.py
@@ -53,7 +68,23 @@ function counts(no) {
 function draw() {
   listing($("#main"), SRC.main, null);
   listing($("#live"), SRC.live, state.life ? counts : null);
-  for (const name of state.open) insert(name);
+  for (const name of state.open) {
+    if (name.startsWith("dial:")) insertDial(name.slice(5)); else insert(name);
+  }
+}
+
+// the working for a dial, opened on the line of live.py that reads it
+function insertDial(dial) {
+  const now = dialsNow();
+  if (!now) return;
+  const line = Object.keys(DIAL_ON).find((k) => DIAL_ON[k] === dial);
+  const host = $('#live .ln[data-line="' + line + '"]');
+  if (!host) return;
+  const div = document.createElement("div");
+  div.className = "reveal"; div.dataset.for = "dial:" + dial;
+  div.innerHTML = '<div class="where">world.py:wind_up</div><pre>' +
+    esc(derivation(dial, now)) + "</pre>";
+  host.after(div);
 }
 
 // ---- clicking a name shows what it is, from the file it is in ------------
@@ -150,6 +181,32 @@ const READS = {
 };
 const SHOW = { sleep: 4, restless: 3, conscience: 6, temptation: 4,
                persistence: 3, frailty: 3 };
+// which line of live.py reads which dial, so the working can be opened there
+const DIAL_ON = { 17: "sleep", 30: "restless", 46: "conscience", 51: "temptation" };
+
+function dialsNow() {
+  const life = state.life;
+  if (!life || !life.diedAt) return null;
+  const want = Math.max(0, Math.min(life.diedAt[0], Number($("#walkage").value) || 0));
+  let at = want;
+  while (at >= 0 && !life.dialsAt[at]) at--;
+  return at < 0 ? null : Object.assign({ at }, life.dialsAt[at]);
+}
+
+function derivation(dial, now) {
+  const dp = SHOW[dial] || 3;
+  const base = dial === "conscience" ? 1 / 26000
+    : dial === "temptation" ? 1 / 12 : DIALS[dial];
+  const out = [dial + "  " + base.toFixed(dp) + "   " + t("base")];
+  for (const [source, how, amount] of now.working[dial] || []) {
+    const shown = how === "+" ? (amount > 0 ? "+" : "") + amount.toFixed(dp)
+                              : "x" + amount.toFixed(2);
+    out.push("   " + shown.padStart(9) + "   " + source);
+  }
+  out.push("   " + "-".repeat(9));
+  out.push("   " + now.dials[dial].toFixed(dp).padStart(9) + "   " + t("atAge") + " " + now.at);
+  return out.join("\n");
+}
 
 function clockwork() {
   const life = state.life;
@@ -186,6 +243,10 @@ function account() {
   const out = [];
   const pad = (v, k) => String(v).padStart(11) + "   " + k;
 
+  out.push("You(" + (life.takeAfter === "Mother" ? "Mother, Father" : "Father, Mother") +
+           ")  — the bases in that order, which is why inherit() reaches " +
+           life.takeAfter + " first");
+  out.push("");
   out.push("inherited" + " ".repeat(17) + "inherit()      blame()");
   for (const [trait, blamed] of Object.entries(life.fromWhom)) {
     const near = life.inheritedFrom[trait] || blamed;
@@ -266,7 +327,9 @@ function init() {
   $("#seed").addEventListener("input", () => (state.seed = Number($("#seed").value) || 0));
   $("#walk").addEventListener("click", () => (state.walk ? stopWalk() : startWalk()));
   $("#walkage").addEventListener("input", () => {
-    if (state.life) $("#clockwork").textContent = clockwork();
+    // the dials shown in the margin belong to an age, so the listing is
+    // redrawn with the table
+    if (state.life) { draw(); $("#clockwork").textContent = clockwork(); }
   });
   $("#lang").addEventListener("click", () => {
     state.lang = state.lang === "hr" ? "en" : "hr";

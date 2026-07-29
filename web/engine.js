@@ -386,10 +386,19 @@ export class Life {
   inherit() {
     // the same attributes genes.py puts on the same classes, so that the
     // order Python resolves them in is the order resolved here
+    const mother = ["Mother", { worry: 1, eyes: "green", everything_else: "hers",
+                                patience: "with everyone but you" }];
+    const father = ["Father", { worry: "about what people think", posture: "bad",
+                                eyes: "grey", silence: "at the table",
+                                stubbornness: "the quiet kind" }];
+    // genes.py builds You with the bases in one order or the other; whichever
+    // comes first is the one the resolution order reaches first
+    const takesAfterMother = this.rint(2) === 0;
+    this.takeAfter = takesAfterMother ? "Mother" : "Father";
     const MRO = [
       ["You", {}],
-      ["Mother", { worry: 1, eyes: "green", everything_else: "hers" }],
-      ["Father", { posture: "bad", eyes: "grey", silence: "at the table" }],
+      takesAfterMother ? mother : father,
+      takesAfterMother ? father : mother,
       ["Grandmother", { stubbornness: 1, recipe: "never written down", worry: "about money" }],
       ["Grandfather", { silence: "long", patience: 1 }],
       ["Ancestor", { hope: 1, fear_of_the_dark: 1, eyes: "brown",
