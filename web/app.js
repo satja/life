@@ -359,19 +359,31 @@ function paint() {
 
   // the mind
   $("#preocc").textContent = life.preoccupation ? life.preoccupation[0][0] : "—";
-  const cloud = $("#cloud"); cloud.innerHTML = "";
-  const hottest = topOf(life.thoughtCount, 14);
-  const max = hottest.length ? hottest[0][1] : 1;
-  for (const [text, n] of hottest) {
-    const s = document.createElement("span");
-    const rel = n / max;
-    s.textContent = text;
-    s.style.fontSize = (11.5 + rel * 5.5).toFixed(1) + "px";
-    if (rel > .55) s.className = "hot";
-    cloud.appendChild(s);
+  $("#preoccsince").textContent = life.preoccupation
+    ? "preoccupied since " + life.preoccupation[2] : "";
+  const deepShare = life.totalThoughts
+    ? Math.round(100 * life.deepCount / life.totalThoughts) : 0;
+  $("#distinct").textContent = fmt(life.totalThoughts) + " thoughts · " +
+    life.thoughtCount.size + " different · " + deepShare + "% from underneath";
+
+  const themes = $("#themes"); themes.innerHTML = "";
+  const byTheme = topOf(life.themeCount, 5);
+  const themeMax = byTheme.length ? byTheme[0][1] : 1;
+  for (const [theme, n] of byTheme) {
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = "<span>" + theme + '</span><span class="track"><span class="fill" ' +
+      'style="width:' + (100 * n / themeMax).toFixed(1) + '%"></span></span>' +
+      '<span class="pct">' + Math.round(100 * n / life.totalThoughts) + "%</span>";
+    themes.appendChild(row);
   }
-  $("#distinct").textContent = life.thoughtCount.size + " distinct · " +
-    fmt(life.totalThoughts) + " thought";
+
+  const back = $("#backmost"); back.innerHTML = "";
+  for (const [text, n] of topOf(life.thoughtCount, 4)) {
+    const row = document.createElement("div");
+    row.className = "row" + (life.deepTexts.has(text) ? " under" : "");
+    row.innerHTML = '<span class="t">' + text + '</span><span class="n">' + fmt(n) + "</span>";
+    back.appendChild(row);
+  }
 
   // the lists
   const thisYear = tally(yearSlice(Math.max(0, life.age)));

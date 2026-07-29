@@ -125,6 +125,22 @@ canvas { display: block; width: 100%; height: 186px; cursor: crosshair; }
 .cloud span { color: var(--muted); line-height: 1.2; }
 .cloud span.hot { color: var(--ink); }
 
+.themes { display: grid; gap: 3px; }
+.themes .row { display: grid; grid-template-columns: 4.8em 1fr 2.8em; gap: 8px;
+               align-items: center; font-size: 12.5px; }
+.themes .track { display: block; height: 7px; background: var(--grid);
+                 border-radius: 1px; overflow: hidden; }
+.themes .fill { display: block; height: 100%; background: var(--trace); }
+.themes .pct { font-family: var(--mono); font-size: 11px; color: var(--muted);
+               text-align: right; font-variant-numeric: tabular-nums; }
+.backmost { display: grid; gap: 3px; font-size: 13.5px; }
+.backmost .row { display: flex; justify-content: space-between; gap: 12px;
+                 align-items: baseline; }
+.backmost .row .t { flex: 1 1 auto; }
+.backmost .row .n { font-family: var(--mono); font-size: 11.5px; color: var(--faint);
+                    font-variant-numeric: tabular-nums; white-space: nowrap; }
+.backmost .under .t { color: var(--muted); font-style: italic; }
+
 .lists { display: grid; gap: 10px; }
 .listbox .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 ul.items { list-style: none; margin: 4px 0 0; padding: 0; font-size: 13.5px; }
@@ -272,8 +288,12 @@ blockquote { margin: 0; padding-left: 14px; border-left: 2px solid var(--rule);
       <div class="gauge panel">
         <h2>The mind</h2>
         <div class="preocc" id="preocc">—</div>
+        <div class="lab" id="preoccsince"></div>
         <div class="lab" id="distinct"></div>
-        <div class="cloud" id="cloud"></div>
+        <div class="lab">what they were about</div>
+        <div class="themes" id="themes"></div>
+        <div class="lab">comes back to</div>
+        <div class="backmost" id="backmost"></div>
       </div>
 
       <div class="gauge panel lists">
@@ -435,6 +455,11 @@ const WORK = new Set(["working","working, still","answering messages","how to lo
   "looking for work","driving somewhere","going back to it"]);
 const SCHOOL = new Set(["going to school","doing the homework","handing it in"]);
 const TERM_ONLY = new Set(["lying about homework","studying the night before"]);
+// what a regret is actually about, so that the subconscious is not all shame
+const REGRET = {"checking the phone at three in the morning":"time","saying it out loud":"shame",
+  "comparing":"shame","keeping score":"love","reading the comments":"shame",
+  "replying immediately":"work","looking back too long":"time","having one more":"body",
+  "bringing it up again":"love"};
 
 const SEASONS = ["winter","winter","spring","spring","spring","summer",
                  "summer","summer","autumn","autumn","autumn","winter"];
@@ -565,7 +590,8 @@ class Life {
     this.totalDone = 0; this.totalThoughts = 0;
     this.neverTotal = 0; this.rememberedTotal = 0;
     this.doneCount = new Map(); this.doneMinutes = new Map();
-    this.thoughtCount = new Map();
+    this.thoughtCount = new Map(); this.themeCount = new Map();
+    this.deepCount = 0; this.deepTexts = new Set();
 
     this.days = [];            // one record per day lived
     this.events = [];          // {age, month, text, kind}
@@ -745,12 +771,12 @@ class Life {
     let thoughts = THOUGHTS[stageAt(age)].slice();
     for (const c of this.circumstances) if (c.thinks) thoughts = thoughts.concat(c.thinks);
     if (!this.preoccupation || this.preoccupation[1] <= age) {
-      this.preoccupation = [this.pick(thoughts), age + this.rrange(2, 8)];
+      this.preoccupation = [this.pick(thoughts), age + this.rrange(2, 8), age];
     }
     thoughts = thoughts.concat([this.preoccupation[0], this.preoccupation[0], this.preoccupation[0]]);
-    this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1] }));
-    this.subconscious = DEEP.filter((d) => age >= d[2]).map((d) => ({ text: d[0], theme: d[1] }))
-      .concat(this.scars);
+    this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1], deep: false }));
+    this.subconscious = DEEP.filter((d) => age >= d[2])
+      .map((d) => ({ text: d[0], theme: d[1], deep: true })).concat(this.scars);
     this.neverDo = age >= 13
       ? NEVER_DO.map((n) => ({ name: n, kind: 3, minutes: this.rrange(5, 40) })) : [];
     this.byTheme = new Map();
@@ -763,7 +789,7 @@ class Life {
   remember(text, theme) {
     if (this.scars.length >= 8) return;
     if (this.scars.some((s) => s.text === text)) return;
-    const t = { text, theme };
+    const t = { text, theme, deep: true };
     this.scars.push(t); this.subconscious.push(t);
     if (!this.byTheme.has(theme)) this.byTheme.set(theme, []);
     this.byTheme.get(theme).push(t);
@@ -938,7 +964,9 @@ class Life {
       (this.doneMinutes.get(thing.name) || 0) + thing.minutes);
     if (thing.kind === 3) {
       this.record.never++; this.neverTotal++;
-      if (this.rint(9) === 0) this.remember(thing.name + ", again", "shame");
+      if (this.rint(9) === 0) {
+        this.remember(thing.name + ", again", REGRET[thing.name] || "shame");
+      }
     } else {
       if (thing.kind === 2) {
         this.reminded = false; this.gotRoundTo++; this.record.should++;
@@ -963,6 +991,8 @@ class Life {
     this.totalThoughts++;
     this.record.thoughts.push(this.thoughtId(thought.text));
     this.thoughtCount.set(thought.text, (this.thoughtCount.get(thought.text) || 0) + 1);
+    this.themeCount.set(thought.theme, (this.themeCount.get(thought.theme) || 0) + 1);
+    if (thought.deep) { this.deepCount++; this.deepTexts.add(thought.text); }
   }
 
   related(thought) { return this.byTheme.get(thought.theme) || this.conscious; }
@@ -1460,19 +1490,31 @@ function paint() {
 
   // the mind
   $("#preocc").textContent = life.preoccupation ? life.preoccupation[0][0] : "—";
-  const cloud = $("#cloud"); cloud.innerHTML = "";
-  const hottest = topOf(life.thoughtCount, 14);
-  const max = hottest.length ? hottest[0][1] : 1;
-  for (const [text, n] of hottest) {
-    const s = document.createElement("span");
-    const rel = n / max;
-    s.textContent = text;
-    s.style.fontSize = (11.5 + rel * 5.5).toFixed(1) + "px";
-    if (rel > .55) s.className = "hot";
-    cloud.appendChild(s);
+  $("#preoccsince").textContent = life.preoccupation
+    ? "preoccupied since " + life.preoccupation[2] : "";
+  const deepShare = life.totalThoughts
+    ? Math.round(100 * life.deepCount / life.totalThoughts) : 0;
+  $("#distinct").textContent = fmt(life.totalThoughts) + " thoughts · " +
+    life.thoughtCount.size + " different · " + deepShare + "% from underneath";
+
+  const themes = $("#themes"); themes.innerHTML = "";
+  const byTheme = topOf(life.themeCount, 5);
+  const themeMax = byTheme.length ? byTheme[0][1] : 1;
+  for (const [theme, n] of byTheme) {
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = "<span>" + theme + '</span><span class="track"><span class="fill" ' +
+      'style="width:' + (100 * n / themeMax).toFixed(1) + '%"></span></span>' +
+      '<span class="pct">' + Math.round(100 * n / life.totalThoughts) + "%</span>";
+    themes.appendChild(row);
   }
-  $("#distinct").textContent = life.thoughtCount.size + " distinct · " +
-    fmt(life.totalThoughts) + " thought";
+
+  const back = $("#backmost"); back.innerHTML = "";
+  for (const [text, n] of topOf(life.thoughtCount, 4)) {
+    const row = document.createElement("div");
+    row.className = "row" + (life.deepTexts.has(text) ? " under" : "");
+    row.innerHTML = '<span class="t">' + text + '</span><span class="n">' + fmt(n) + "</span>";
+    back.appendChild(row);
+  }
 
   // the lists
   const thisYear = tally(yearSlice(Math.max(0, life.age)));

@@ -186,6 +186,19 @@ SCHOOL = {"going to school", "doing the homework", "handing it in"}
 
 TERM_ONLY = {"lying about homework", "studying the night before"}
 
+# what a regret is actually about, so that the subconscious is not all shame
+REGRET = {
+    "checking the phone at three in the morning": 'time',
+    "saying it out loud": 'shame',
+    "comparing": 'shame',
+    "keeping score": 'love',
+    "reading the comments": 'shame',
+    "replying immediately": 'work',
+    "looking back too long": 'time',
+    "having one more": 'body',
+    "bringing it up again": 'love',
+}
+
 RECOVERS = 1 / 26000.0
 
 
@@ -432,7 +445,7 @@ def remember(text, theme):
 
 
 def scar(name):
-    remember(name + ", again", 'shame')
+    remember(name + ", again", REGRET.get(name, 'shame'))
 
 
 def _still_sleepy():

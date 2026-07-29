@@ -111,6 +111,11 @@ const WORK = new Set(["working","working, still","answering messages","how to lo
   "looking for work","driving somewhere","going back to it"]);
 const SCHOOL = new Set(["going to school","doing the homework","handing it in"]);
 const TERM_ONLY = new Set(["lying about homework","studying the night before"]);
+// what a regret is actually about, so that the subconscious is not all shame
+const REGRET = {"checking the phone at three in the morning":"time","saying it out loud":"shame",
+  "comparing":"shame","keeping score":"love","reading the comments":"shame",
+  "replying immediately":"work","looking back too long":"time","having one more":"body",
+  "bringing it up again":"love"};
 
 const SEASONS = ["winter","winter","spring","spring","spring","summer",
                  "summer","summer","autumn","autumn","autumn","winter"];
@@ -241,7 +246,8 @@ export class Life {
     this.totalDone = 0; this.totalThoughts = 0;
     this.neverTotal = 0; this.rememberedTotal = 0;
     this.doneCount = new Map(); this.doneMinutes = new Map();
-    this.thoughtCount = new Map();
+    this.thoughtCount = new Map(); this.themeCount = new Map();
+    this.deepCount = 0; this.deepTexts = new Set();
 
     this.days = [];            // one record per day lived
     this.events = [];          // {age, month, text, kind}
@@ -421,12 +427,12 @@ export class Life {
     let thoughts = THOUGHTS[stageAt(age)].slice();
     for (const c of this.circumstances) if (c.thinks) thoughts = thoughts.concat(c.thinks);
     if (!this.preoccupation || this.preoccupation[1] <= age) {
-      this.preoccupation = [this.pick(thoughts), age + this.rrange(2, 8)];
+      this.preoccupation = [this.pick(thoughts), age + this.rrange(2, 8), age];
     }
     thoughts = thoughts.concat([this.preoccupation[0], this.preoccupation[0], this.preoccupation[0]]);
-    this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1] }));
-    this.subconscious = DEEP.filter((d) => age >= d[2]).map((d) => ({ text: d[0], theme: d[1] }))
-      .concat(this.scars);
+    this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1], deep: false }));
+    this.subconscious = DEEP.filter((d) => age >= d[2])
+      .map((d) => ({ text: d[0], theme: d[1], deep: true })).concat(this.scars);
     this.neverDo = age >= 13
       ? NEVER_DO.map((n) => ({ name: n, kind: 3, minutes: this.rrange(5, 40) })) : [];
     this.byTheme = new Map();
@@ -439,7 +445,7 @@ export class Life {
   remember(text, theme) {
     if (this.scars.length >= 8) return;
     if (this.scars.some((s) => s.text === text)) return;
-    const t = { text, theme };
+    const t = { text, theme, deep: true };
     this.scars.push(t); this.subconscious.push(t);
     if (!this.byTheme.has(theme)) this.byTheme.set(theme, []);
     this.byTheme.get(theme).push(t);
@@ -614,7 +620,9 @@ export class Life {
       (this.doneMinutes.get(thing.name) || 0) + thing.minutes);
     if (thing.kind === 3) {
       this.record.never++; this.neverTotal++;
-      if (this.rint(9) === 0) this.remember(thing.name + ", again", "shame");
+      if (this.rint(9) === 0) {
+        this.remember(thing.name + ", again", REGRET[thing.name] || "shame");
+      }
     } else {
       if (thing.kind === 2) {
         this.reminded = false; this.gotRoundTo++; this.record.should++;
@@ -639,6 +647,8 @@ export class Life {
     this.totalThoughts++;
     this.record.thoughts.push(this.thoughtId(thought.text));
     this.thoughtCount.set(thought.text, (this.thoughtCount.get(thought.text) || 0) + 1);
+    this.themeCount.set(thought.theme, (this.themeCount.get(thought.theme) || 0) + 1);
+    if (thought.deep) { this.deepCount++; this.deepTexts.add(thought.text); }
   }
 
   related(thought) { return this.byTheme.get(thought.theme) || this.conscious; }
