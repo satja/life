@@ -20,7 +20,10 @@ For one row per year instead, which is shorter and shows the shape better:
 There is also a web version in "web/", which runs the same model in a browser
 at one year per second, with settings for the century you were born into and
 for how often you remember the list. Build it with "python3 web/build.py" and
-open "web/life.html".
+open "web/life.html". The build also writes "docs/index.html", so switching on
+GitHub Pages for a branch with the /docs folder publishes it at
+https://satja.github.io/life/ — the page is one file and loads nothing from
+anywhere, so any static host will do.
 
 Feel free to contribute.
 
