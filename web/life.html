@@ -401,6 +401,13 @@ const SEASON = {
   summer: [["sitting in the shade",90],["going to the water",240],["lying awake in the heat",60]],
   autumn: [["going back to it",60],["watching it get dark early",40]],
 };
+const HOLIDAY = [["being at the sea",320],["doing nothing, on purpose",190],
+                 ["reading half a book",110],["eating outside",95]];
+const WORK = new Set(["working","working, still","answering messages","how to look busy",
+  "looking for work","driving somewhere","going back to it"]);
+const SCHOOL = new Set(["going to school","doing the homework","handing it in"]);
+const TERM_ONLY = new Set(["lying about homework","studying the night before"]);
+
 const SEASONS = ["winter","winter","spring","spring","spring","summer",
                  "summer","summer","autumn","autumn","autumn","winter"];
 const MONTHS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
@@ -517,6 +524,7 @@ class Life {
     this.sleepAttempts = 0; this.insomniaNoted = false;
     this.dayIndex = 0; this.yearSeen = -1; this.monthSeen = -1;
     this.stage = null; this.choices = []; this.skillsKept = [];
+    this.holidayFrom = -1; this.holidayTo = -1;
     this.salience = new Map(); this.scars = []; this.circumstances = [];
     this.pending = []; this.noLonger = new Set(); this.preoccupation = null;
     this.cause = null; this.diedAt = null;
@@ -755,10 +763,10 @@ class Life {
     }
   }
 
-  weightedPick(wanted) {
+  weightedPick(choices, wanted) {
     const scored = [];
-    for (let i = 0; i < this.choices.length; i++) {
-      const [name, minutes] = this.choices[i];
+    for (let i = 0; i < choices.length; i++) {
+      const [name, minutes] = choices[i];
       const w = this.salience.get(name) || 1.0;
       scored.push([Math.pow(this.rnd(), 1.0 / w), name, minutes]);
     }
@@ -833,6 +841,10 @@ class Life {
     const keeping = (52 - age) / 32.0;
     this.skillsKept = this.skills.filter(() => age >= 20 && age < 52 && this.rnd() < keeping);
     this.monthSeen = -1;
+    if (age >= 5 && age < 66) {
+      this.holidayFrom = this.rrange(176, 232);
+      this.holidayTo = this.holidayFrom + this.rrange(12, 25);
+    } else { this.holidayFrom = this.holidayTo = -1; }
     this.refreshMind();
   }
 
@@ -866,11 +878,22 @@ class Life {
     if (!this.alive) { this.canDo = []; return; }
     if (this.month !== this.monthSeen) this.newMonth();
     const energy = energyAt(age) - (full ? 0 : 1);
-    this.canDo = this.weightedPick(Math.max(1, energy)).map(
+    const doy = this.day % DAYS_YEAR;
+    const away = doy >= this.holidayFrom && doy < this.holidayTo;
+    let pool = this.choices;
+    if (away) {
+      pool = pool.filter((c) => !WORK.has(c[0]) && !TERM_ONLY.has(c[0])).concat(HOLIDAY);
+    } else if (age < 20 && doy >= 172 && doy < 244) {
+      pool = pool.filter((c) => !TERM_ONLY.has(c[0]));
+    }
+    this.canDo = this.weightedPick(pool, Math.max(1, energy)).map(
       ([name, minutes]) => ({ name, kind: 0, minutes }));
-    if (this.mustDo.length < 9 && this.rint(2) === 0) {
-      this.mustDo.push({ name: this.pick(MUST_DO[this.stage]), kind: 1,
-                         minutes: this.rrange(20, 90) });
+    if (!away && this.mustDo.length < 9 && this.rint(2) === 0) {
+      let owed = MUST_DO[this.stage];
+      if (doy >= 172 && doy < 244) owed = owed.filter((o) => !SCHOOL.has(o));
+      if (owed.length) {
+        this.mustDo.push({ name: this.pick(owed), kind: 1, minutes: this.rrange(20, 90) });
+      }
     }
     this.tempted = this.rint(this.opts.temptation) === 0;
     this.reminded = false;

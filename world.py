@@ -176,6 +176,16 @@ SEASONS = ['winter', 'winter', 'spring', 'spring', 'spring', 'summer',
 MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
           'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
+HOLIDAY = [("being at the sea", 320), ("doing nothing, on purpose", 190),
+           ("reading half a book", 110), ("eating outside", 95)]
+
+WORK = {"working", "working, still", "answering messages", "how to look busy",
+        "looking for work", "driving somewhere", "going back to it"}
+
+SCHOOL = {"going to school", "doing the homework", "handing it in"}
+
+TERM_ONLY = {"lying about homework", "studying the night before"}
+
 RECOVERS = 1 / 26000.0
 
 
@@ -295,6 +305,8 @@ class State:
         self.year_seen = -1
         self.month_seen = -1
         self.skills_kept = []
+        self.holiday_from = -1
+        self.holiday_to = -1
         self.cause = None
         self.pending = []
         self.preoccupation = None
@@ -529,14 +541,24 @@ def morning_of(full):
         new_month()
 
     energy = energy_at(age) - (0 if full else 1)
+    doy = clock.day % DAYS_PER_YEAR
+    away = state.holiday_from <= doy < state.holiday_to
+    pool = state.choices
+    if away:
+        pool = [c for c in pool
+                if c[0] not in WORK and c[0] not in TERM_ONLY] + HOLIDAY
+    elif age < 20 and 172 <= doy < 244:
+        pool = [c for c in pool if c[0] not in TERM_ONLY]
     things_you_can_do[:] = [
-        Doing(n, 'can', m)
-        for n, m in weighted_pick(state.choices, max(1, energy))]
+        Doing(n, 'can', m) for n, m in weighted_pick(pool, max(1, energy))]
 
-    if len(things_you_really_must_do) < 9 and random.randrange(2) == 0:
-        obligation = random.choice(MUST_DO[state.stage])
-        things_you_really_must_do.append(
-            Doing(obligation, 'must', random.randrange(20, 90)))
+    if not away and len(things_you_really_must_do) < 9 and random.randrange(2) == 0:
+        owed = MUST_DO[state.stage]
+        if 172 <= doy < 244:
+            owed = [o for o in owed if o not in SCHOOL]
+        if owed:
+            things_you_really_must_do.append(
+                Doing(random.choice(owed), 'must', random.randrange(20, 90)))
     state.tempted = random.randrange(12) == 0
     state.reminded = False
 
@@ -625,6 +647,11 @@ def birthday(age):
     state.skills_kept = [s for s in education.skills
                          if 20 <= age < 52 and random.random() < keeping]
     state.month_seen = -1
+    if 5 <= age < 66:
+        state.holiday_from = random.randrange(176, 232)
+        state.holiday_to = state.holiday_from + random.randrange(12, 25)
+    else:
+        state.holiday_from = state.holiday_to = -1
     refresh_mind()
 
 
