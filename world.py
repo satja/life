@@ -160,6 +160,22 @@ DEEP = [
     ("the light in a hospital corridor", 'death', 27),
 ]
 
+SEASON = {
+    'winter': [("keeping warm", 90), ("waiting for it to get light", 40),
+               ("staying in", 120)],
+    'spring': [("opening the windows", 25), ("being outside again", 80)],
+    'summer': [("sitting in the shade", 90), ("going to the water", 240),
+               ("lying awake in the heat", 60)],
+    'autumn': [("going back to it", 60),
+               ("watching it get dark early", 40)],
+}
+
+SEASONS = ['winter', 'winter', 'spring', 'spring', 'spring', 'summer',
+           'summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter']
+
+MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
+          'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
 RECOVERS = 1 / 26000.0
 
 
@@ -201,6 +217,10 @@ class Clock:
     @property
     def age(self):
         return self.day // DAYS_PER_YEAR
+
+    @property
+    def month(self):
+        return min(11, (self.day % DAYS_PER_YEAR) * 12 // DAYS_PER_YEAR)
 
     def time(self):
         rest = self.minute % MINUTES_PER_DAY
@@ -273,7 +293,10 @@ class State:
         self.world_events = []
         self.no_longer_possible = set()
         self.year_seen = -1
+        self.month_seen = -1
+        self.skills_kept = []
         self.cause = None
+        self.pending = []
         self.preoccupation = None
         self.died_at = None
 
@@ -320,7 +343,7 @@ def drift():
     for name in salience:
         anchor = math.log(BASE.get(name, 1.0))
         here = math.log(salience[name])
-        moved = anchor + 0.7 * (here - anchor) + random.gauss(0, 0.4)
+        moved = anchor + 0.96 * (here - anchor) + random.gauss(0, 0.14)
         salience[name] = min(4.0, max(0.15, math.exp(moved)))
 
 
@@ -361,12 +384,12 @@ def related(thought):
 def think(thought):
     clock.tick(random.randrange(1, 4))
     state.idle -= 1
-    chronicle.thought(clock.age, thought.text)
+    chronicle.thought(clock.age, clock.month, thought.text)
 
 
 def do(thing):
     clock.tick(thing.minutes)
-    chronicle.did(clock.age, thing.name, thing.kind)
+    chronicle.did(clock.age, clock.month, thing.name, thing.kind)
     if thing.kind == 'never':
         if random.randrange(9) == 0:
             scar(thing.name)
@@ -502,6 +525,8 @@ def morning_of(full):
     if not state.alive:
         things_you_can_do[:] = []
         return
+    if clock.month != state.month_seen:
+        new_month()
 
     energy = energy_at(age) - (0 if full else 1)
     things_you_can_do[:] = [
@@ -534,8 +559,9 @@ def die(age, cause):
     state.alive = False
     state.died_at = (age, clock.time())
     state.cause = cause
-    chronicle.year(age)
-    chronicle.event(age, 'does not get up')
+    state.pending = []
+    chronicle.cell(age, clock.month)
+    chronicle.event(age, clock.month, 'does not get up')
     things_you_can_do[:] = []
 
 
@@ -544,8 +570,9 @@ def take_place(event):
     state.circumstances.append(
         {'text': event.text, 'until': age + event.years, 'risk': event.risk,
          'does': event.does, 'thinks': event.thinks})
-    state.world_events.append((age, event.text))
-    chronicle.world(age, event.text)
+    month = random.randrange(12)
+    state.world_events.append((age, month, event.text))
+    chronicle.world(age, month, event.text)
     if event.costs:
         owe(event.costs)
 
@@ -590,23 +617,36 @@ def birthday(age):
         if chance and random.random() < chance:
             die(age, circumstance['text'])
             return
-    milestones(age)
+    state.pending = [(random.randrange(12), text, effect)
+                     for text, effect in schedule.pop(age, [])]
+    offer_something_you_should_do(age)
     state.stage = stage_at(age)
-    state.choices = list(CAN_DO[state.stage])
-    if 20 <= age < 52 and education.skills:
-        keeping = (52 - age) / 32.0
-        state.choices += [(s, 45) for s in education.skills
-                          if random.random() < keeping]
+    keeping = (52 - age) / 32.0
+    state.skills_kept = [s for s in education.skills
+                         if 20 <= age < 52 and random.random() < keeping]
+    state.month_seen = -1
+    refresh_mind()
+
+
+def restock():
+    choices = list(CAN_DO[state.stage])
+    choices += [(s, 45) for s in state.skills_kept]
     for circumstance in state.circumstances:
-        state.choices += circumstance['does']
+        choices += circumstance['does']
+    choices += SEASON[SEASONS[clock.month]]
     already = set()
     distinct = []
-    for name, minutes in state.choices:
+    for name, minutes in choices:
         if name not in already:
             already.add(name)
             distinct.append((name, minutes))
     state.choices = distinct
-    refresh_mind()
+
+
+def new_month():
+    state.month_seen = clock.month
+    fire_pending()
+    restock()
     drift()
 
 
@@ -616,15 +656,22 @@ seen = set()
 def once(age, text):
     if text not in seen:
         seen.add(text)
-        chronicle.event(age, text)
+        chronicle.event(age, clock.month, text)
 
 
-def milestones(age):
-    if age in schedule:
-        for text, effect in schedule.pop(age):
-            once(age, text)
-            if effect:
-                take_effect(effect)
+def fire_pending():
+    still_to_come = []
+    for month, text, effect in state.pending:
+        if month != clock.month:
+            still_to_come.append((month, text, effect))
+            continue
+        once(clock.age, text)
+        if effect:
+            take_effect(effect)
+    state.pending = still_to_come
+
+
+def offer_something_you_should_do(age):
     if age < 5 or random.randrange(4) > 0:
         return
     if list.__len__(things_you_should_do) >= 9:
@@ -724,8 +771,8 @@ def epilogue():
 
     if state.world_events:
         closing.append('meanwhile, outside:')
-        for when, text in state.world_events:
-            closing.append('    %3d   %s' % (when, text))
+        for when, month, text in state.world_events:
+            closing.append('    %3d %s   %s' % (when, MONTHS[month], text))
         closing.append('')
 
     if age >= 18:

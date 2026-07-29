@@ -8,9 +8,14 @@ It runs now.
     $ python3 main.py
 
 It prints one life, from the first morning to the last, and then what it
-came to. Every run is a different life. To live the same one twice:
+came to — a row per month, about a thousand of them. Every run is a different
+life. To live the same one twice:
 
     $ LIFE_SEED=33 python3 main.py
+
+For one row per year instead, which is shorter and shows the shape better:
+
+    $ LIFE_DETAIL=year python3 main.py
 
 Feel free to contribute.
 
@@ -51,8 +56,14 @@ are objects rather than values:
 - "dead" is a condition, so "main.py" does not have to set it.
 
 What you can do on a given day is drawn from the pool by weight, and the
-weights wander from year to year and pull slowly back towards where they
+weights wander from month to month and pull slowly back towards where they
 started. This is why a stretch of years has a character, and why it passes.
+
+Months are worth printing only because they differ. The seasons put their own
+things in the pool — opening the windows in spring, lying awake in the heat,
+going back to it in October, keeping warm and waiting for it to get light —
+and everything that happens to you is dated to a month rather than to a
+birthday. Without that a monthly row would be a yearly row twelve times.
 
 "history.py" runs on its own schedule and does not consult you. Most of it
 you only read about. Some of it changes what there is to do for a few years —
