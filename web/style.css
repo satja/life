@@ -205,7 +205,7 @@ blockquote { margin: 0; padding-left: 14px; border-left: 2px solid var(--rule);
 }
 @media (max-width: 560px) {
   .wrap { padding: 16px 12px 44px; }
-  .only-wide { display: none; }
+  .only-wide, .wide-only { display: none; }
   .tabs button { padding: 11px 9px; }
   .tabs button.step { padding: 11px 10px; }
   .legend { gap: 3px 14px; padding: 8px 12px; }

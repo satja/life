@@ -338,6 +338,13 @@ function tally(records) {
            days: records.length };
 }
 
+function spanOf(minutes) {
+  const hours = minutes / 60;
+  if (hours >= 8760) return (hours / 8760).toFixed(1) + " years";
+  if (hours >= 48) return fmt(Math.round(hours / 24)) + " days";
+  return Math.round(hours) + " hours";
+}
+
 function topOf(map, n) {
   return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
 }
@@ -482,12 +489,16 @@ function lifeView() {
     [fmt(life.insomniaNights), "nights still awake at three"],
   ]);
   html += '<h3 style="font-weight:400;font-size:15px;margin:18px 0 6px">What most of it was</h3>';
-  html += '<table class="grid"><tbody>';
-  const most = topOf(life.doneCount, 10);
+  html += '<table class="grid"><thead><tr><th>doing</th><th>times</th>' +
+          '<th>time spent</th><th class="wide-only">share of it</th></tr></thead><tbody>';
+  const most = topOf(life.doneMinutes, 10);
   const max = most.length ? most[0][1] : 1;
-  for (const [name, n] of most) {
-    html += '<tr><td style="width:44%">' + name + '</td><td class="n">' + fmt(n) +
-      '</td><td><span class="barcell" style="width:' + (100 * n / max).toFixed(1) + '%"></span></td></tr>';
+  for (const [name, minutes] of most) {
+    html += '<tr><td style="width:40%">' + name + '</td>' +
+      '<td class="n">' + fmt(life.doneCount.get(name) || 0) + '</td>' +
+      '<td class="n">' + spanOf(minutes) + '</td>' +
+      '<td class="wide-only"><span class="barcell" style="width:' +
+      (100 * minutes / max).toFixed(1) + '%"></span></td></tr>';
   }
   html += "</tbody></table>";
   if (!life.alive) html += epilogue();

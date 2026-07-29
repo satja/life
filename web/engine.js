@@ -240,7 +240,8 @@ export class Life {
     this.insomniaNights = 0; this.worstNight = [0, 0, ""];
     this.totalDone = 0; this.totalThoughts = 0;
     this.neverTotal = 0; this.rememberedTotal = 0;
-    this.doneCount = new Map(); this.thoughtCount = new Map();
+    this.doneCount = new Map(); this.doneMinutes = new Map();
+    this.thoughtCount = new Map();
 
     this.days = [];            // one record per day lived
     this.events = [];          // {age, month, text, kind}
@@ -609,6 +610,8 @@ export class Life {
     this.record.busy += thing.minutes;
     this.totalDone++;
     this.doneCount.set(thing.name, (this.doneCount.get(thing.name) || 0) + 1);
+    this.doneMinutes.set(thing.name,
+      (this.doneMinutes.get(thing.name) || 0) + thing.minutes);
     if (thing.kind === 3) {
       this.record.never++; this.neverTotal++;
       if (this.rint(9) === 0) this.remember(thing.name + ", again", "shame");
