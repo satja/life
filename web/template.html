@@ -12,8 +12,9 @@
     <p class="intro">
       This runs the simulation from <b>satja/life</b> — a description of a life in Python
       whose loops terminate only because checking a condition costs a minute. Set the
-      conditions, then watch one life happen. Click the chart to inspect a year; double-click
-      to go further in, down to a single day.
+      conditions, then watch one life happen. Click the chart to inspect a moment, use
+      ‹ and › or the arrow keys to move through it, and the tabs to go from the whole
+      span down to a single day.
     </p>
     <div class="knobs" id="knobs"></div>
     <div class="begin">
@@ -88,6 +89,10 @@
         <button type="button" data-level="year">Year</button>
         <button type="button" data-level="month">Month</button>
         <button type="button" data-level="day">Day</button>
+        <span class="navgap"></span>
+        <button class="step" id="prev" type="button" aria-label="previous">‹</button>
+        <button class="step" id="next" type="button" aria-label="next">›</button>
+        <button class="step wide" id="now" type="button">now</button>
       </div>
       <div class="detail" id="detail"></div>
     </div>

@@ -149,7 +149,19 @@ ul.items li.gone { text-decoration: line-through; color: var(--faint); }
   text-transform: uppercase; background: transparent; border: 0; padding: 10px 15px;
   color: var(--faint); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--trace); }
-.tabs button:disabled { opacity: .35; cursor: default; }
+.tabs button:disabled { opacity: .3; cursor: default; }
+.tabs .navgap { margin-left: auto; }
+.tabs button.step { font-size: 13px; padding: 8px 12px; color: var(--muted);
+  border-bottom-color: transparent; }
+.tabs button.step:hover:not(:disabled) { color: var(--ink); background: var(--grid); }
+.tabs button.step.wide { font-size: 10.5px; letter-spacing: .12em; }
+.tabs button.step[data-live="true"] { color: var(--trace); }
+.crumb button { font: inherit; font-family: var(--mono); font-size: 11.5px;
+  background: none; border: 0; padding: 0; color: var(--muted); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px; }
+.crumb button:hover { color: var(--ink); }
+.crumb .sep { color: var(--faint); padding: 0 6px; }
+.crumb .here { color: var(--ink); }
 .detail { padding: 15px; min-height: 210px; }
 .crumb { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-bottom: 12px; }
 

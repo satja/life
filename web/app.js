@@ -15,7 +15,7 @@ const PRESETS = {
 
 const state = {
   life: null, playing: false, speed: 1, acc: 0, last: 0,
-  zoom: { level: "life", year: 0, month: 0, day: 0 },
+  zoom: { level: "life", year: 0, month: 0, day: 0 }, following: true,
   choice: { century: "ordinary", conscience: "sometimes", temptation: "ordinary",
             sleep: "ordinarily", seed: Math.floor(Math.random() * 1e6) },
 };
@@ -102,6 +102,7 @@ function optionsFromChoice() {
 function begin() {
   state.life = new Life(optionsFromChoice());
   state.zoom = { level: "life", year: 0, month: 0, day: 0 };
+  state.following = true;
   $("#setup").hidden = true;
   $("#run").hidden = false;
   $("#seedout").textContent = "seed " + state.choice.seed;
@@ -121,7 +122,7 @@ function loop(now) {
     while (state.acc >= 1000 && life.alive && guard++ < 40) {
       state.acc -= 1000;
       life.stepYear();
-      if (state.zoom.level === "life") state.zoom.year = life.age;
+      if (state.following) followNow();
     }
     draw();
     if (now - (state.lastPaint || 0) > 180) { state.lastPaint = now; paint(); }
@@ -134,7 +135,60 @@ function runToEnd() {
   const life = state.life;
   let guard = 0;
   while (life.alive && guard++ < 130) life.stepYear();
-  state.playing = false; setTransport(); draw(); paint();
+  state.playing = false;
+  if (state.following) followNow();
+  setTransport(); draw(); paint();
+}
+
+// ------------------------------------------------------- moving about in time
+
+function monthStart(year, month) { return year * 365 + Math.floor(month * 365 / 12); }
+function lastLivedDay() { return Math.max(0, state.life.days.length - 1); }
+
+function placeOf(absolute) {
+  const day = Math.max(0, Math.min(lastLivedDay(), absolute));
+  const year = Math.floor(day / 365);
+  const month = Math.min(11, Math.floor((day - year * 365) * 12 / 365));
+  return { year, month, day: day - monthStart(year, month) };
+}
+
+function absoluteDay(z) { return monthStart(z.year, z.month) + z.day; }
+
+function followNow() {
+  const z = state.zoom, life = state.life;
+  const here = placeOf(lastLivedDay());
+  if (z.level === "life" || z.level === "year") z.year = life.age;
+  else { z.year = here.year; z.month = here.month; z.day = here.day; }
+}
+
+function stepView(delta) {
+  const z = state.zoom;
+  state.following = false;
+  if (z.level === "day") {
+    const at = placeOf(absoluteDay(z) + delta);
+    z.year = at.year; z.month = at.month; z.day = at.day;
+  } else if (z.level === "month") {
+    const limit = placeOf(lastLivedDay());
+    let n = z.year * 12 + z.month + delta;
+    n = Math.max(0, Math.min(limit.year * 12 + limit.month, n));
+    z.year = Math.floor(n / 12); z.month = n % 12; z.day = 0;
+  } else {
+    z.year = Math.max(0, Math.min(placeOf(lastLivedDay()).year, z.year + delta));
+    z.month = 0; z.day = 0;
+  }
+  draw(); paintDetail(); setSteppers();
+}
+
+function setSteppers() {
+  const z = state.zoom, limit = placeOf(lastLivedDay());
+  const atStart = z.level === "day" ? absoluteDay(z) <= 0
+    : z.level === "month" ? z.year * 12 + z.month <= 0 : z.year <= 0;
+  const atEnd = z.level === "day" ? absoluteDay(z) >= lastLivedDay()
+    : z.level === "month" ? z.year * 12 + z.month >= limit.year * 12 + limit.month
+    : z.year >= limit.year;
+  $("#prev").disabled = atStart;
+  $("#next").disabled = atEnd;
+  $("#now").dataset.live = String(state.following);
 }
 
 function setTransport() {
@@ -365,24 +419,36 @@ function paint() {
 
 function crumb() {
   const z = state.zoom;
-  const parts = ["whole life"];
-  if (z.level !== "life") parts.push("age " + z.year);
-  if (z.level === "month" || z.level === "day") parts.push(MONTHS[z.month]);
-  if (z.level === "day") parts.push("day " + (z.day + 1));
-  return parts.join("  ›  ");
+  const parts = [["life", "whole life"]];
+  if (z.level !== "life") parts.push(["year", "age " + z.year]);
+  if (z.level === "month" || z.level === "day") parts.push(["month", MONTHS[z.month]]);
+  if (z.level === "day") parts.push(["day", "day " + (z.day + 1)]);
+  return parts.map(([level, text], i) => {
+    const last = i === parts.length - 1;
+    const bit = last ? '<span class="here">' + text + "</span>"
+                     : '<button type="button" data-goto="' + level + '">' + text + "</button>";
+    return (i ? '<span class="sep">›</span>' : "") + bit;
+  }).join("");
 }
 
 function paintDetail() {
   const life = state.life, z = state.zoom, out = $("#detail");
-  for (const b of $("#tabs").children) {
+  for (const b of document.querySelectorAll("#tabs button[data-level]")) {
     b.setAttribute("aria-pressed", String(b.dataset.level === z.level));
   }
   let html = '<div class="crumb">' + crumb() + "</div>";
+  setSteppers();
   if (z.level === "life") html += lifeView();
   else if (z.level === "year") html += yearView(z.year);
   else if (z.level === "month") html += monthView(z.year, z.month);
   else html += dayView(z.year, z.month, z.day);
   out.innerHTML = html;
+  for (const b of out.querySelectorAll(".crumb button[data-goto]")) {
+    b.addEventListener("click", () => {
+      state.zoom.level = b.dataset.goto;
+      draw(); paintDetail();
+    });
+  }
   for (const row of out.querySelectorAll("tr.click")) {
     row.addEventListener("click", () => {
       const z2 = state.zoom;
@@ -568,14 +634,17 @@ function init() {
   for (const btn of $("#speeds").children) {
     btn.addEventListener("click", () => { state.speed = Number(btn.dataset.speed); setTransport(); });
   }
-  for (const btn of $("#tabs").children) {
+  for (const btn of document.querySelectorAll("#tabs button[data-level]")) {
     btn.addEventListener("click", () => {
-      const level = btn.dataset.level;
-      const z = state.zoom;
-      state.zoom = { level, year: z.year, month: z.month, day: z.day };
+      state.zoom.level = btn.dataset.level;
       draw(); paintDetail();
     });
   }
+  $("#prev").addEventListener("click", () => stepView(-1));
+  $("#next").addEventListener("click", () => stepView(1));
+  $("#now").addEventListener("click", () => {
+    state.following = true; followNow(); draw(); paint();
+  });
   const cv = $("#chart");
   const inspect = (ev) => {
     const life = state.life;
@@ -585,6 +654,7 @@ function init() {
     const [d0, d1] = window_();
     const day = Math.floor(d0 + frac * (d1 - d0));
     const z = state.zoom;
+    state.following = false;
     if (z.level === "life") { z.year = Math.max(0, Math.floor(day / 365)); }
     else if (z.level === "year") { z.month = Math.min(11, Math.floor((day - z.year * 365) * 12 / 365)); }
     else { z.day = Math.max(0, day - d0); }
@@ -598,10 +668,12 @@ function init() {
   });
   window.addEventListener("resize", () => draw());
   window.addEventListener("keydown", (e) => {
-    if (e.key === " " && state.life) {
+    if (!state.life || $("#run").hidden) return;
+    if (e.key === " ") {
       e.preventDefault(); state.playing = !state.playing;
       state.last = performance.now(); setTransport();
-    }
+    } else if (e.key === "ArrowLeft") { e.preventDefault(); stepView(-1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); stepView(1); }
   });
   setTransport();
 }
