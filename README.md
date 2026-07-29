@@ -22,8 +22,9 @@ at one year per second, with settings for the century you were born into and
 for how often you remember the list. Build it with "python3 web/build.py" and
 open "web/life.html". The build also writes "docs/index.html", so switching on
 GitHub Pages for a branch with the /docs folder publishes it at
-https://satja.github.io/life/ — the page is one file and loads nothing from
-anywhere, so any static host will do.
+https://life.blogaritam.com/ — the page is one file and loads nothing from
+anywhere, so any static host will do. "docs/CNAME" holds the custom domain
+and is not touched by the build.
 
 Feel free to contribute.
 
