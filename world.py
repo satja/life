@@ -570,4 +570,9 @@ def epilogue():
     return {'opening': opening, 'closing': closing}
 
 
-atexit.register(lambda: chronicle.render(epilogue()))
+def account():
+    if state.mornings:
+        chronicle.render(epilogue())
+
+
+atexit.register(account)
