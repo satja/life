@@ -1,115 +1,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A Life — an instrument</title>
+<title>Život — a life</title>
 <style>/*CSS*/</style>
 
 <div class="wrap">
   <header class="mast">
-    <h1>A life</h1>
-    <span class="sub">watched at one year per second</span>
-    <span class="right"><span class="lab" id="seedout"></span></span>
+    <h1 id="title">Život</h1>
+    <span class="sub" id="sub"></span>
+    <span class="right">
+      <span class="lab" id="seedout"></span>
+      <button class="ghost" id="lang" type="button">english</button>
+    </span>
   </header>
 
-  <section id="setup" class="setup">
-    <p class="intro">
-      This runs the simulation from <b>satja/life</b> — a description of a life in Python
-      whose loops terminate only because checking a condition costs a minute. Set the
-      conditions, then watch one life happen. Click the chart to inspect a moment, use
-      ‹ and › or the arrow keys to move through it, and the tabs to go from the whole
-      span down to a single day.
-    </p>
+  <section id="setup">
+    <p class="intro" id="intro"></p>
     <div class="knobs" id="knobs"></div>
     <div class="begin">
-      <button class="go" id="start" type="button">Begin</button>
-      <span class="lab">or press space, later, to pause</span>
+      <button class="go" id="start" type="button">Proživi jedan</button>
     </div>
   </section>
 
   <section id="run" hidden>
-    <div class="transport panel">
-      <div class="readout">
-        <span class="age num" id="age">0</span>
-        <span class="of num" id="of"></span>
-      </div>
-      <span class="lab" id="stage"></span>
-      <span class="spacer"></span>
-      <button class="ghost" id="play" type="button">pause</button>
-      <span class="speeds" id="speeds">
-        <button class="ghost" type="button" data-speed="1">×1</button>
-        <button class="ghost" type="button" data-speed="4">×4</button>
-        <button class="ghost" type="button" data-speed="16">×16</button>
-      </span>
-      <button class="ghost" id="toend" type="button">to the end</button>
-      <button class="ghost" id="again" type="button">another</button>
+
+    <h2 class="act"><span id="h-given"></span></h2>
+    <div class="panel given">
+      <div class="tree" id="tree"></div>
+      <div class="inherit" id="inherit"></div>
+      <p class="allot" id="allot"></p>
+      <p class="note" id="blamenote"></p>
     </div>
 
-    <div class="chartbox panel">
-      <canvas id="chart" aria-label="A trace of how full each day was, across the whole life"></canvas>
-      <div class="legend lab">
-        <span><i class="band" style="background:var(--trace)"></i> how full the day was</span>
-        <span><i class="band" style="background:var(--loss)"></i> things you knew better than to do</span>
-        <span><i class="line" style="background:var(--trace)"></i> the rare thing you got round to</span>
-        <span><i class="line" style="background:var(--world)"></i> the world, happening</span>
-        <span><i style="background:var(--ink)"></i> what happened to you</span>
-      </div>
-    </div>
-
-    <div class="deck">
-      <div class="gauge panel">
-        <h2>The mind</h2>
-        <div class="preocc" id="preocc">—</div>
-        <div class="lab" id="preoccsince"></div>
-        <div class="lab" id="distinct"></div>
-        <div class="lab">what they were about</div>
-        <div class="themes" id="themes"></div>
-        <div class="lab">comes back to</div>
-        <div class="backmost" id="backmost"></div>
-      </div>
-
-      <div class="gauge panel lists">
-        <h2>The lists</h2>
-        <div class="listbox" id="shouldbox">
-          <div class="head">
-            <span class="lab">things you should do</span>
-            <span class="lab flare" id="remembered"></span>
-          </div>
-          <ul class="items dim" id="shouldlist"></ul>
-        </div>
-        <div class="listbox" id="neverbox">
-          <div class="head"><span class="lab">things you should never do</span><span class="lab">times</span></div>
-          <ul class="items tempt" id="neverlist"></ul>
-        </div>
-      </div>
-
-      <div class="gauge panel">
-        <h2>The world</h2>
-        <div class="circ" id="circ"></div>
-        <div class="lab" style="margin-top:4px">lately</div>
-        <div class="circ" id="recent"></div>
-      </div>
-    </div>
-
+    <h2 class="act">
+      <span id="h-life"></span>
+      <button class="ghost small" id="replay" type="button"></button>
+    </h2>
     <div class="panel">
-      <div class="tabs" id="tabs">
-        <button type="button" data-level="life"><span class="only-wide">Whole </span>life</button>
-        <button type="button" data-level="year">Year</button>
-        <button type="button" data-level="month">Month</button>
-        <button type="button" data-level="day">Day</button>
-        <span class="navgap"></span>
-        <button class="step" id="prev" type="button" aria-label="previous">‹</button>
-        <button class="step" id="next" type="button" aria-label="next">›</button>
-        <button class="step wide" id="now" type="button">now</button>
-      </div>
-      <div class="detail" id="detail"></div>
+      <div class="years" id="years"></div>
+      <p class="note lab" id="gridnote"></p>
+      <div class="yearcard" id="yearcard"></div>
     </div>
 
-    <p class="foot">
-      The two lists behave as they do in the source. <code>things_you_should_do</code> has a
-      length of zero unless you happen to remember it, so it sits at eighteen per cent opacity
-      and lights only in the instants it is in view. <code>things_you_should_never_do</code> has
-      a length of zero unless you are tempted. Both are there the whole time.
-    </p>
+    <h2 class="act"><span id="h-account"></span></h2>
+    <div class="panel account" id="account"></div>
+
+    <div class="begin end">
+      <button class="go" id="again" type="button">Još jedan</button>
+    </div>
   </section>
 </div>
 
+<script>/*LANG*/</script>
 <script>/*ENGINE*/</script>
 <script>/*APP*/</script>

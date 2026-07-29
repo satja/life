@@ -17,11 +17,19 @@ For one row per year instead, which is shorter and shows the shape better:
 
     $ LIFE_DETAIL=year python3 main.py
 
-There is also a web version in "web/", which runs the same model in a browser
-at one year per second, with settings for the century you were born into and
-for how often you remember the list. Build it with "python3 web/build.py" and
-open "web/life.html". The build also writes "docs/index.html", so switching on
-GitHub Pages for a branch with the /docs folder publishes it at
+There is also a web version in "web/". It runs the same model in a browser —
+a whole life at once — and tells it in three parts: what you were given,
+drawn as the family it came down through; the life itself, a square a year;
+and the account, which includes where the time actually went. It is bilingual,
+Croatian and English, and picks by the browser's language.
+
+The model stays in English inside "web/engine.js". "web/lang.js" is a display
+layer over it — every string the model can put on screen, and nothing else —
+so changing language cannot change a life. The Python in the root of this
+repository is unchanged, and stays in English: it is the original.
+
+Build with "python3 web/build.py", which writes "web/life.html" and
+"docs/index.html". GitHub Pages serves the /docs folder at
 https://life.blogaritam.com/ — the page is one file and loads nothing from
 anywhere, so any static host will do. "docs/CNAME" holds the custom domain
 and is not touched by the build.

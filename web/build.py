@@ -26,19 +26,22 @@ def declared(src):
 RESERVED = {'top', 'self', 'parent', 'window', 'document', 'location', 'name',
             'status', 'length', 'closed', 'frames', 'history', 'origin'}
 
+lang = read('lang.js')
 app = read('app.js')
-clash = declared(engine) & declared(app)
+clash = (declared(engine) & declared(app)) | (declared(engine) & declared(lang)) \
+        | (declared(app) & declared(lang))
 if clash:
     raise SystemExit('both scripts declare %s at top level, which collides in one page'
                      % ', '.join(sorted(clash)))
 
-taken = (declared(engine) | declared(app)) & RESERVED
+taken = (declared(engine) | declared(app) | declared(lang)) & RESERVED
 if taken:
     raise SystemExit('%s shadows a window property and will break on load'
                      % ', '.join(sorted(taken)))
 
 page = read('template.html')
 page = page.replace('/*CSS*/', read('style.css'))
+page = page.replace('/*LANG*/', lang)
 page = page.replace('/*ENGINE*/', engine)
 page = page.replace('/*APP*/', app)
 

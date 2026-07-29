@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A Life — an instrument</title>
+<title>Život — a life</title>
 <style>:root {
   --paper:   #F4F6F4;
   --panel:   #FBFCFB;
@@ -45,195 +45,146 @@
 [hidden] { display: none !important; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
-  font-family: var(--serif); font-size: 16px; line-height: 1.5;
+  font-family: var(--serif); font-size: 17px; line-height: 1.5;
   background-image:
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 28px 28px, 28px 28px;
+  background-size: 30px 30px, 30px 30px;
   -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
-
+.wrap { max-width: 720px; margin: 0 auto; padding: 24px 18px 70px; }
 .lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em;
        text-transform: uppercase; color: var(--faint); }
 .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 2px;
-         box-shadow: var(--shadow); }
+         box-shadow: var(--shadow); padding: 18px; margin-bottom: 8px; }
 
-/* ---- masthead ---- */
-.mast { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
-        border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 20px; }
-.mast h1 { font-size: 27px; font-weight: 400; margin: 0; letter-spacing: -.01em; }
+.mast { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+        border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 22px; }
+.mast h1 { font-size: 30px; font-weight: 400; margin: 0; letter-spacing: -.01em; }
 .mast .sub { color: var(--muted); font-size: 14px; font-style: italic; }
-.mast .right { margin-left: auto; display: flex; gap: 14px; align-items: baseline; }
+.mast .right { margin-left: auto; display: flex; gap: 12px; align-items: baseline; }
+
+h2.act { font-size: 13px; font-family: var(--mono); font-weight: 400;
+         letter-spacing: .16em; text-transform: uppercase; color: var(--faint);
+         margin: 30px 0 9px; display: flex; align-items: baseline; gap: 12px; }
+h2.act:first-of-type { margin-top: 6px; }
 
 /* ---- setup ---- */
-.setup { display: grid; gap: 18px; }
-.setup .intro { max-width: 62ch; color: var(--muted); font-size: 15.5px; }
-.setup .intro b { color: var(--ink); font-weight: 400; font-style: italic; }
-.knob { padding: 14px 16px; display: grid; gap: 8px; }
+.intro { max-width: 60ch; color: var(--muted); font-size: 16px; margin: 0 0 20px; }
+.intro b { color: var(--ink); font-weight: 400; font-style: italic; }
+.knobs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.knob { padding: 14px 15px; display: grid; gap: 8px; }
 .knob h3 { margin: 0; font-size: 16px; font-weight: 400; }
-.knob .why { color: var(--muted); font-size: 13.5px; margin: 0; min-height: 2.6em; }
-.knobs { display: grid; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr)); gap: 14px; }
-.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(66px, 1fr)); gap: 1px;
+.knob .why { color: var(--muted); font-size: 13.5px; margin: 0; }
+.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: 1px;
        background: var(--rule); border: 1px solid var(--rule); border-radius: 2px;
        overflow: hidden; }
-.seg button { font-family: var(--mono); font-size: 11.5px; padding: 7px 6px;
-  background: var(--panel); color: var(--muted); border: 0;
-  cursor: pointer; letter-spacing: .04em; }
+.seg button { font-family: var(--mono); font-size: 11.5px; padding: 8px 6px;
+  background: var(--panel); color: var(--muted); border: 0; cursor: pointer;
+  letter-spacing: .04em; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .seg button:hover:not([aria-pressed="true"]) { background: var(--grid); color: var(--ink); }
-
-.begin { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-button.go { font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
-  background: var(--ink); color: var(--paper); border: 0; padding: 12px 26px; border-radius: 2px;
-  cursor: pointer; }
+.begin { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+.begin.end { justify-content: center; margin-top: 30px; }
+button.go { font-family: var(--mono); font-size: 13px; letter-spacing: .08em;
+  text-transform: uppercase; background: var(--ink); color: var(--paper); border: 0;
+  padding: 13px 28px; border-radius: 2px; cursor: pointer; }
 button.go:hover { background: var(--trace-d); }
-button.ghost { font-family: var(--mono); font-size: 12px; background: transparent; color: var(--muted);
-  border: 1px solid var(--rule); padding: 7px 12px; border-radius: 2px; cursor: pointer; }
+button.ghost { font-family: var(--mono); font-size: 12px; background: transparent;
+  color: var(--muted); border: 1px solid var(--rule); padding: 6px 11px;
+  border-radius: 2px; cursor: pointer; }
 button.ghost:hover { color: var(--ink); border-color: var(--ink); }
-button.ghost[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-input.seed { font-family: var(--mono); font-size: 13px; width: 9ch; background: var(--paper);
+button.ghost.small { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+                     padding: 4px 9px; }
+input.seed { font-family: var(--mono); font-size: 13px; width: 8.5ch; background: var(--paper);
   color: var(--ink); border: 1px solid var(--rule); padding: 6px 8px; border-radius: 2px; }
 :focus-visible { outline: 2px solid var(--trace); outline-offset: 2px; }
 
-/* ---- transport ---- */
-.transport { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-             padding: 10px 14px; margin-bottom: 12px; }
-.readout { display: flex; align-items: baseline; gap: 9px; }
-.readout .age { font-family: var(--mono); font-size: 30px; font-variant-numeric: tabular-nums;
-                line-height: 1; }
-.readout .of { color: var(--faint); font-family: var(--mono); font-size: 13px; }
-.transport .spacer { margin-left: auto; }
-.speeds { display: flex; gap: 6px; }
+/* ---- act one: the family ---- */
+.given .tree { display: flex; justify-content: center; }
+.given svg { max-width: 100%; height: auto; }
+.given .node { font-family: var(--mono); font-size: 13px; letter-spacing: .08em;
+               text-transform: uppercase; fill: var(--ink); }
+.inherit { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+           gap: 2px 22px; margin-top: 14px; }
+.inherit .row { display: flex; align-items: baseline; gap: 8px; font-size: 15px; }
+.inherit .ar { color: var(--faint); margin-left: auto; }
+.inherit .wh { font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+               text-transform: uppercase; color: var(--trace); }
+.given .edge { stroke: var(--rule); fill: none; }
+.given .edge.carries { stroke: var(--trace); }
+.allot { margin: 14px 0 0; font-size: 19px; font-style: italic; text-wrap: balance; }
+.note { color: var(--faint); font-size: 13px; margin: 6px 0 0; max-width: 58ch; }
 
-/* ---- chart ---- */
-.chartbox { padding: 0; margin-bottom: 12px; overflow: hidden; position: relative; }
-canvas { display: block; width: 100%; height: 186px; cursor: crosshair; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 7px 14px;
-          border-top: 1px solid var(--rule); }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-.legend i.line { width: 2px; height: 12px; border-radius: 0; }
-.legend i.band { width: 14px; height: 4px; border-radius: 1px; }
+/* ---- act two: the years ---- */
+.years { display: grid; grid-template-columns: 2.4em repeat(10, 1fr); gap: 5px; }
+.years .decade { font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+                 align-self: center; }
+.cell { position: relative; aspect-ratio: 1; border-radius: 1px; border: 0;
+        padding: 0; cursor: pointer; background: var(--grid); }
+.cell:hover { outline: 2px solid var(--trace); outline-offset: 1px; }
+.cell[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 1px; }
+.cell.unlived { background: transparent; border: 1px dashed var(--grid); cursor: default; }
+.cell.unlived:hover { outline: none; }
+.cell .ev { position: absolute; width: 4px; height: 4px; border-radius: 50%; }
+.cell .ev.world { top: 2px; right: 2px; background: var(--world); }
+.cell .ev.mine { bottom: 2px; right: 2px; background: var(--ink); }
+.cell.dying { outline: 2px solid var(--loss); outline-offset: 1px; }
+.years.reveal .cell { opacity: 0; }
+.years.reveal .cell.shown { opacity: 1; transition: opacity .25s ease; }
 
-/* ---- deck ---- */
-.deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 12px; margin-bottom: 12px; }
-.gauge { padding: 13px 15px; display: grid; gap: 9px; align-content: start; min-height: 210px; }
-.gauge h2 { margin: 0; font-size: 11px; font-family: var(--mono); letter-spacing: .13em;
-            text-transform: uppercase; color: var(--faint); font-weight: 400; }
-.preocc { font-size: 21px; line-height: 1.25; font-style: italic; text-wrap: balance; }
-.cloud { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline;
-         max-height: 148px; overflow: hidden; }
-.cloud span { color: var(--muted); line-height: 1.2; }
-.cloud span.hot { color: var(--ink); }
-
-.themes { display: grid; gap: 3px; }
-.themes .row { display: grid; grid-template-columns: 4.8em 1fr 2.8em; gap: 8px;
-               align-items: center; font-size: 12.5px; }
-.themes .track { display: block; height: 7px; background: var(--grid);
-                 border-radius: 1px; overflow: hidden; }
-.themes .fill { display: block; height: 100%; background: var(--trace); }
-.themes .pct { font-family: var(--mono); font-size: 11px; color: var(--muted);
-               text-align: right; font-variant-numeric: tabular-nums; }
-.backmost { display: grid; gap: 3px; font-size: 13.5px; }
-.backmost .row { display: flex; justify-content: space-between; gap: 12px;
-                 align-items: baseline; }
-.backmost .row .t { flex: 1 1 auto; }
-.backmost .row .n { font-family: var(--mono); font-size: 11.5px; color: var(--faint);
-                    font-variant-numeric: tabular-nums; white-space: nowrap; }
-.backmost .under .t { color: var(--muted); font-style: italic; }
-
-.lists { display: grid; gap: 10px; }
-.listbox .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-ul.items { list-style: none; margin: 4px 0 0; padding: 0; font-size: 13.5px; }
-ul.items li { padding: 1px 0; color: var(--ink); }
-ul.items li.gone { text-decoration: line-through; color: var(--faint); }
-.dim { opacity: .18; transition: opacity .45s ease; }
-.dim.lit { opacity: 1; }
-.flare { color: var(--trace); }
-.tempt { opacity: .18; transition: opacity .3s ease; }
-.tempt.lit { opacity: .95; }
-
-.circ { display: grid; gap: 4px; font-size: 13.5px; }
-.circ .row { display: flex; gap: 8px; align-items: baseline; }
-.circ .row b { font-weight: 400; }
-.tag { font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
-       padding: 1px 6px; border-radius: 2px; border: 1px solid currentColor; }
+.yearcard { margin-top: 16px; border-top: 1px solid var(--rule); padding-top: 14px;
+            min-height: 132px; }
+.yearcard .age { font-family: var(--mono); font-size: 30px; line-height: 1;
+                 font-variant-numeric: tabular-nums; }
+.yearcard .stage { color: var(--faint); font-family: var(--mono); font-size: 11px;
+                   letter-spacing: .12em; text-transform: uppercase; margin-left: 10px; }
+.yearcard .mostly { font-size: 18px; margin: 10px 0 0; text-wrap: balance; }
+.yearcard .thought { color: var(--muted); font-style: italic; margin: 6px 0 0; }
+.yearcard ul { list-style: none; margin: 12px 0 0; padding: 0; }
+.yearcard li { padding: 2px 0; display: flex; gap: 10px; align-items: baseline; }
+.tag { font-family: var(--mono); font-size: 10px; letter-spacing: .07em;
+       text-transform: uppercase; padding: 1px 6px; border-radius: 2px;
+       border: 1px solid currentColor; color: var(--faint); white-space: nowrap; }
 .tag.world { color: var(--world); }
 .tag.loss { color: var(--loss); }
 .tag.kept { color: var(--trace); }
 
-/* ---- detail ---- */
-.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin-bottom: 0; }
-.tabs button { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em;
-  text-transform: uppercase; background: transparent; border: 0; padding: 10px 15px;
-  color: var(--faint); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-.tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--trace); }
-.tabs button:disabled { opacity: .3; cursor: default; }
-.tabs .navgap { margin-left: auto; }
-.tabs button.step { font-size: 13px; padding: 8px 12px; color: var(--muted);
-  border-bottom-color: transparent; }
-.tabs button.step:hover:not(:disabled) { color: var(--ink); background: var(--grid); }
-.tabs button.step.wide { font-size: 10.5px; letter-spacing: .12em; }
-.tabs button.step[data-live="true"] { color: var(--trace); }
-.crumb button { font: inherit; font-family: var(--mono); font-size: 11.5px;
-  background: none; border: 0; padding: 0; color: var(--muted); cursor: pointer;
-  text-decoration: underline; text-underline-offset: 3px; }
-.crumb button:hover { color: var(--ink); }
-.crumb .sep { color: var(--faint); padding: 0 6px; }
-.crumb .here { color: var(--ink); }
-.detail { padding: 15px; min-height: 210px; }
-.crumb { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-bottom: 12px; }
-
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
-.stat { display: grid; gap: 1px; }
-.stat .v { font-family: var(--mono); font-size: 22px; font-variant-numeric: tabular-nums; }
-.stat .k { color: var(--muted); font-size: 13px; }
-
-table.grid { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-table.grid th { text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--faint); font-weight: 400; padding: 4px 8px 4px 0;
-  border-bottom: 1px solid var(--rule); }
-table.grid td { padding: 3px 8px 3px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
-table.grid tr.click { cursor: pointer; }
-table.grid tr.click:hover td { background: var(--grid); }
-td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--muted);
-       white-space: nowrap; }
-.barcell { display: block; height: 7px; background: var(--trace); opacity: .8; border-radius: 1px; }
-
-.dayband { display: flex; width: 100%; height: 34px; border: 1px solid var(--rule);
-           border-radius: 2px; overflow: hidden; margin: 6px 0 10px; }
-.dayband div { height: 100%; }
-.daylist { columns: 2; column-gap: 26px; font-size: 13.5px; }
-.daylist div { break-inside: avoid; }
-.kind0 { background: var(--trace); opacity: .55; }
-.kind1 { background: var(--ink); opacity: .45; }
-.kind2 { background: var(--trace); }
-.kind3 { background: var(--loss); }
-
-.epi { display: grid; gap: 10px; }
-.epi .big { font-size: 23px; font-style: italic; text-wrap: balance; }
-.epi .cause { color: var(--loss); }
-blockquote { margin: 0; padding-left: 14px; border-left: 2px solid var(--rule);
+/* ---- act three: the account ---- */
+.went { display: flex; height: 30px; border-radius: 2px; overflow: hidden;
+        margin: 4px 0 14px; border: 1px solid var(--rule); }
+.went div { height: 100%; }
+.wentkey { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+           gap: 4px 18px; margin-bottom: 20px; }
+.wentkey .row { display: flex; align-items: baseline; gap: 8px; font-size: 14px; }
+.wentkey .sw { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.wentkey .yr { margin-left: auto; font-family: var(--mono); font-size: 12px;
+               color: var(--muted); font-variant-numeric: tabular-nums; }
+.big { font-size: 21px; font-style: italic; text-wrap: balance; margin: 0 0 4px; }
+.figures { display: grid; gap: 7px; margin: 18px 0; }
+.fig { display: flex; align-items: baseline; gap: 12px; }
+.fig .v { font-family: var(--mono); font-size: 18px; font-variant-numeric: tabular-nums;
+          min-width: 5.6em; text-align: right; }
+.fig .k { color: var(--muted); font-size: 14.5px; }
+.account h3 { font-size: 12px; font-family: var(--mono); font-weight: 400;
+              letter-spacing: .14em; text-transform: uppercase; color: var(--faint);
+              margin: 22px 0 7px; }
+.account ul { list-style: none; margin: 0; padding: 0; }
+.account li { padding: 2px 0; display: flex; gap: 10px; align-items: baseline; }
+.account li .n { font-family: var(--mono); font-size: 11.5px; color: var(--faint);
+                 white-space: nowrap; }
+blockquote { margin: 14px 0 0; padding-left: 14px; border-left: 2px solid var(--loss);
              color: var(--muted); font-style: italic; }
-.foot { margin-top: 22px; color: var(--faint); font-size: 13px; max-width: 70ch; }
-.foot code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-@media (max-width: 640px) {
-  .readout .age { font-size: 24px; }
-  .daylist { columns: 1; }
-}
 @media (max-width: 560px) {
-  .wrap { padding: 16px 12px 44px; }
-  .only-wide, .wide-only { display: none; }
-  .tabs button { padding: 11px 9px; }
-  .tabs button.step { padding: 11px 10px; }
-  .legend { gap: 3px 14px; padding: 8px 12px; }
-  .legend span { font-size: 9.5px; }
-  .gauge { min-height: 0; }
-  canvas { height: 150px; }
+  body { font-size: 16px; }
+  .wrap { padding: 18px 12px 50px; }
+  .panel { padding: 14px; }
+  .years { grid-template-columns: 2em repeat(10, 1fr); gap: 4px; }
+  .yearcard .age { font-size: 25px; }
+  .fig .v { font-size: 16px; min-width: 5em; }
 }
 </style>
 </head>
@@ -242,113 +193,481 @@ blockquote { margin: 0; padding-left: 14px; border-left: 2px solid var(--rule);
 
 <div class="wrap">
   <header class="mast">
-    <h1>A life</h1>
-    <span class="sub">watched at one year per second</span>
-    <span class="right"><span class="lab" id="seedout"></span></span>
+    <h1 id="title">Život</h1>
+    <span class="sub" id="sub"></span>
+    <span class="right">
+      <span class="lab" id="seedout"></span>
+      <button class="ghost" id="lang" type="button">english</button>
+    </span>
   </header>
 
-  <section id="setup" class="setup">
-    <p class="intro">
-      This runs the simulation from <b>satja/life</b> — a description of a life in Python
-      whose loops terminate only because checking a condition costs a minute. Set the
-      conditions, then watch one life happen. Click the chart to inspect a moment, use
-      ‹ and › or the arrow keys to move through it, and the tabs to go from the whole
-      span down to a single day.
-    </p>
+  <section id="setup">
+    <p class="intro" id="intro"></p>
     <div class="knobs" id="knobs"></div>
     <div class="begin">
-      <button class="go" id="start" type="button">Begin</button>
-      <span class="lab">or press space, later, to pause</span>
+      <button class="go" id="start" type="button">Proživi jedan</button>
     </div>
   </section>
 
   <section id="run" hidden>
-    <div class="transport panel">
-      <div class="readout">
-        <span class="age num" id="age">0</span>
-        <span class="of num" id="of"></span>
-      </div>
-      <span class="lab" id="stage"></span>
-      <span class="spacer"></span>
-      <button class="ghost" id="play" type="button">pause</button>
-      <span class="speeds" id="speeds">
-        <button class="ghost" type="button" data-speed="1">×1</button>
-        <button class="ghost" type="button" data-speed="4">×4</button>
-        <button class="ghost" type="button" data-speed="16">×16</button>
-      </span>
-      <button class="ghost" id="toend" type="button">to the end</button>
-      <button class="ghost" id="again" type="button">another</button>
+
+    <h2 class="act"><span id="h-given"></span></h2>
+    <div class="panel given">
+      <div class="tree" id="tree"></div>
+      <div class="inherit" id="inherit"></div>
+      <p class="allot" id="allot"></p>
+      <p class="note" id="blamenote"></p>
     </div>
 
-    <div class="chartbox panel">
-      <canvas id="chart" aria-label="A trace of how full each day was, across the whole life"></canvas>
-      <div class="legend lab">
-        <span><i class="band" style="background:var(--trace)"></i> how full the day was</span>
-        <span><i class="band" style="background:var(--loss)"></i> things you knew better than to do</span>
-        <span><i class="line" style="background:var(--trace)"></i> the rare thing you got round to</span>
-        <span><i class="line" style="background:var(--world)"></i> the world, happening</span>
-        <span><i style="background:var(--ink)"></i> what happened to you</span>
-      </div>
-    </div>
-
-    <div class="deck">
-      <div class="gauge panel">
-        <h2>The mind</h2>
-        <div class="preocc" id="preocc">—</div>
-        <div class="lab" id="preoccsince"></div>
-        <div class="lab" id="distinct"></div>
-        <div class="lab">what they were about</div>
-        <div class="themes" id="themes"></div>
-        <div class="lab">comes back to</div>
-        <div class="backmost" id="backmost"></div>
-      </div>
-
-      <div class="gauge panel lists">
-        <h2>The lists</h2>
-        <div class="listbox" id="shouldbox">
-          <div class="head">
-            <span class="lab">things you should do</span>
-            <span class="lab flare" id="remembered"></span>
-          </div>
-          <ul class="items dim" id="shouldlist"></ul>
-        </div>
-        <div class="listbox" id="neverbox">
-          <div class="head"><span class="lab">things you should never do</span><span class="lab">times</span></div>
-          <ul class="items tempt" id="neverlist"></ul>
-        </div>
-      </div>
-
-      <div class="gauge panel">
-        <h2>The world</h2>
-        <div class="circ" id="circ"></div>
-        <div class="lab" style="margin-top:4px">lately</div>
-        <div class="circ" id="recent"></div>
-      </div>
-    </div>
-
+    <h2 class="act">
+      <span id="h-life"></span>
+      <button class="ghost small" id="replay" type="button"></button>
+    </h2>
     <div class="panel">
-      <div class="tabs" id="tabs">
-        <button type="button" data-level="life"><span class="only-wide">Whole </span>life</button>
-        <button type="button" data-level="year">Year</button>
-        <button type="button" data-level="month">Month</button>
-        <button type="button" data-level="day">Day</button>
-        <span class="navgap"></span>
-        <button class="step" id="prev" type="button" aria-label="previous">‹</button>
-        <button class="step" id="next" type="button" aria-label="next">›</button>
-        <button class="step wide" id="now" type="button">now</button>
-      </div>
-      <div class="detail" id="detail"></div>
+      <div class="years" id="years"></div>
+      <p class="note lab" id="gridnote"></p>
+      <div class="yearcard" id="yearcard"></div>
     </div>
 
-    <p class="foot">
-      The two lists behave as they do in the source. <code>things_you_should_do</code> has a
-      length of zero unless you happen to remember it, so it sits at eighteen per cent opacity
-      and lights only in the instants it is in view. <code>things_you_should_never_do</code> has
-      a length of zero unless you are tempted. Both are there the whole time.
-    </p>
+    <h2 class="act"><span id="h-account"></span></h2>
+    <div class="panel account" id="account"></div>
+
+    <div class="begin end">
+      <button class="go" id="again" type="button">Još jedan</button>
+    </div>
   </section>
 </div>
 
+<script>// Croatian for everything the model can put on screen. The engine stays in
+// English internally, so this is a display layer and nothing else: swapping
+// language cannot change a life.
+
+const HR = {
+
+  // ---- što se radi -------------------------------------------------------
+  "sleeping": "spavanje",
+  "being carried": "nošenje na rukama",
+  "crying": "plakanje",
+  "staring at the lamp": "gledanje u lampu",
+  "eating": "jelo",
+  "putting it in your mouth": "stavljanje svega u usta",
+  "laughing at nothing": "smijanje bez razloga",
+  "being put down again": "opet spuštanje u krevetić",
+  "running": "trčanje",
+  "asking why": "pitanje zašto",
+  "drawing a house": "crtanje kuće s dimom iz dimnjaka",
+  "breaking something": "razbijanje nečega",
+  "watching cartoons": "gledanje crtića",
+  "riding a bike": "vožnja bicikla",
+  "collecting stones": "skupljanje kamenčića",
+  "lying about homework": "laganje o zadaći",
+  "playing until it is dark": "igranje do mraka",
+  "being bored": "dosada",
+  "staying up too late": "predugo ostajanje budnim",
+  "arguing": "svađanje",
+  "listening to the same song": "slušanje iste pjesme",
+  "being embarrassed": "sram",
+  "studying the night before": "učenje noć prije",
+  "slamming a door": "zalupljivanje vratima",
+  "looking in the mirror": "gledanje u ogledalo",
+  "loving someone who does not know": "voljeti nekoga tko ne zna",
+  "saying nothing at dinner": "šutnja za stolom",
+  "working": "posao",
+  "working, still": "posao, i dalje",
+  "moving out": "selidba",
+  "falling in love": "zaljubljivanje",
+  "going somewhere cheap": "putovanje nekamo jeftino",
+  "drinking too much": "previše pića",
+  "starting something": "započinjanje nečega",
+  "quitting something": "odustajanje od nečega",
+  "applying": "slanje prijava",
+  "waiting for an answer": "čekanje odgovora",
+  "calling home, briefly": "kratki poziv doma",
+  "fixing the same thing again": "opet popravljanje istoga",
+  "worrying about money": "briga oko novca",
+  "driving somewhere": "vožnja nekamo",
+  "answering messages": "odgovaranje na poruke",
+  "carrying something heavy": "nošenje nečega teškog",
+  "cancelling": "otkazivanje",
+  "being needed": "biti nekome potreban",
+  "seeing fewer friends": "sve rjeđe viđanje prijatelja",
+  "sleeping badly": "loše spavanje",
+  "looking after someone": "briga o nekome",
+  "going to funerals": "odlasci na sprovode",
+  "walking for the sake of it": "šetnja bez razloga",
+  "reading the news too closely": "prečitavanje vijesti",
+  "having the same argument": "ista svađa",
+  "putting something aside": "odvajanje sa strane",
+  "standing in the doorway of a room": "stajanje na vratima sobe",
+  "walking slowly": "polagano hodanje",
+  "reading the same page twice": "čitanje iste stranice dvaput",
+  "watering the plants": "zalijevanje cvijeća",
+  "watching the news": "gledanje vijesti",
+  "waiting for the phone": "čekanje da telefon zazvoni",
+  "telling the story again": "opet ista priča",
+  "sitting in the sun": "sjedenje na suncu",
+  "going to the doctor": "odlazak liječniku",
+  "sitting": "sjedenje",
+  "being visited": "posjeti",
+  "waiting": "čekanje",
+  "sleeping in the afternoon": "popodnevno spavanje",
+  "not recognising the street": "neprepoznavanje ulice",
+  "looking at photographs": "gledanje fotografija",
+  "carrying someone who is asleep": "nošenje nekoga tko je zaspao",
+  "reading the same book aloud": "čitanje iste knjige naglas",
+  "worrying about someone else": "briga za nekoga drugog",
+
+  // obveze
+  "being fed": "hranjenje",
+  "going to school": "škola",
+  "doing the homework": "zadaća",
+  "handing it in": "predaja zadaće",
+  "explaining yourself": "objašnjavanje",
+  "going to work": "odlazak na posao",
+  "paying the bill": "plaćanje računa",
+  "answering the message": "odgovor na poruku",
+  "renewing the documents": "produljenje dokumenata",
+  "taking the bins out": "iznošenje smeća",
+  "getting it repaired": "popravak",
+  "taking the pills": "tablete",
+  "going to the check-up": "kontrolni pregled",
+
+  // ono što se ne bi smjelo
+  "checking the phone at three in the morning": "mobitel u tri ujutro",
+  "saying it out loud": "izgovaranje naglas",
+  "comparing": "uspoređivanje",
+  "keeping score": "brojanje tuđih grešaka",
+  "reading the comments": "čitanje komentara",
+  "replying immediately": "odgovaranje odmah",
+  "looking back too long": "predugo osvrtanje",
+  "having one more": "još jedno piće",
+  "bringing it up again": "opet spominjanje toga",
+
+  // godišnja doba i more
+  "keeping warm": "grijanje",
+  "waiting for it to get light": "čekanje da se razdani",
+  "staying in": "ostajanje unutra",
+  "opening the windows": "otvaranje prozora",
+  "being outside again": "opet vani",
+  "sitting in the shade": "sjedenje u hladu",
+  "going to the water": "odlazak na vodu",
+  "lying awake in the heat": "budnost u vrućini",
+  "going back to it": "povratak na posao",
+  "watching it get dark early": "rano smrkavanje",
+  "being at the sea": "more",
+  "doing nothing, on purpose": "namjerno ništa",
+  "reading half a book": "pola knjige",
+  "eating outside": "jelo vani",
+
+  // ono što svijet donese
+  "listening for news": "osluškivanje vijesti",
+  "queueing": "stajanje u redu",
+  "counting it again": "ponovno prebrojavanje",
+  "going without": "snalaženje bez",
+  "looking for work": "traženje posla",
+  "staying put": "ostajanje gdje jesi",
+  "going to look at it": "odlazak da se to vidi",
+  "sending what you can": "slanje koliko se može",
+  "listening for the all-clear": "čekanje znaka da je gotovo",
+  "boarding up the windows": "zabijanje dasaka na prozore",
+  "carrying things upstairs": "nošenje stvari na kat",
+  "drying it out": "sušenje svega",
+  "sleeping in the car": "spavanje u autu",
+  "sitting in the dark with the shutters closed": "sjedenje u mraku sa spuštenim roletama",
+  "keeping one room warm": "grijanje jedne sobe",
+  "staying indoors": "ostajanje unutra, cijelu godinu",
+  "going the new way": "novi put",
+  "walking it instead": "hodanje umjesto toga",
+
+  // ono što je od škole ostalo
+  "long division": "dijeljenje s ostatkom",
+  "the other language, badly": "onaj drugi jezik, loše",
+  "how to look busy": "kako izgledati zauzeto",
+  "the word for window": "riječ za prozor",
+  "how to sit through things": "kako izdržati do kraja",
+
+  // ---- misli -------------------------------------------------------------
+  "the ceiling": "strop",
+  "that face again": "opet ono lice",
+  "hunger": "glad",
+  "warm": "toplo",
+  "the sound of the door": "zvuk vrata",
+  "being put down": "spuštanje",
+  "what is under the bed": "što je pod krevetom",
+  "why the sky": "zašto nebo",
+  "Saturday": "subota",
+  "the smell of the hallway": "miris haustora",
+  "whether they saw": "jesu li vidjeli",
+  "what they said about you": "što su rekli o tebi",
+  "being allowed to stay out": "hoće li te pustiti van",
+  "what you said in the corridor": "što si rekao na hodniku",
+  "whether they meant it": "jesu li to mislili ozbiljno",
+  "the same song": "ista pjesma",
+  "getting out of here": "otići odavde",
+  "your own face": "vlastito lice",
+  "nothing, loudly": "ništa, glasno",
+  "the rent": "najamnina",
+  "they said 'sure', not 'yes'": "rekli su „može”, ne „da”",
+  "whether this is the job": "je li ovo taj posao",
+  "it is August already": "već je kolovoz",
+  "what you said in 2009": "što si rekao 2009.",
+  "calling home": "nazvati doma",
+  "the noise the knee makes": "zvuk koji koljeno ispušta",
+  "the bill due on the eleventh": "račun dospijeva jedanaestog",
+  "that meeting could have been an email": "taj sastanak mogao je biti mail",
+  "everyone in this photograph is older now": "svi na ovoj fotografiji sada su stariji",
+  "whether they are all right": "jesu li dobro",
+  "who is left": "tko je još ostao",
+  "what it used to cost": "koliko je to prije koštalo",
+  "whether they will call": "hoće li nazvati",
+  "the stairs": "stepenice",
+  "what it used to be": "što je ovdje prije bilo",
+  "whether it makes any difference": "mijenja li to išta",
+  "the stairs in the dark": "stepenice u mraku",
+  "being the last one collected": "biti zadnji po kojeg dolaze",
+  "water, further out than you thought": "voda, dublja nego što si mislio",
+  "a door you cannot find in a house you know": "vrata koja ne možeš naći u kući koju znaš",
+  "your own name, said wrong": "vlastito ime, krivo izgovoreno",
+  "the light in a hospital corridor": "svjetlo u bolničkom hodniku",
+
+  // ---- teme --------------------------------------------------------------
+  "home": "dom", "love": "ljubav", "body": "tijelo", "fear": "strah",
+  "time": "vrijeme", "shame": "sram", "money": "novac", "work": "posao",
+  "death": "smrt", "politics": "politika",
+
+  // ---- popis koji si namjeravao -----------------------------------------
+  "call your mother": "nazvati mamu",
+  "sleep more": "više spavati",
+  "get it looked at": "dati to pogledati",
+  "learn the other language properly": "naučiti onaj jezik kako treba",
+  "write it down": "zapisati",
+  "forgive him": "oprostiti mu",
+  "throw out the boxes": "baciti kutije",
+  "say it while there is time": "reći dok ima vremena",
+  "go outside": "izaći van",
+  "read the book you bought": "pročitati knjigu koju si kupio",
+  "fix the tap": "popraviti slavinu",
+  "apologise properly": "ispričati se kako treba",
+  "find out what happened to Marko": "saznati što je bilo s Markom",
+  "stand up straight": "uspraviti se",
+
+  // ---- svijet ------------------------------------------------------------
+  "the government falls": "vlada pada",
+  "a new government, much like the last": "nova vlada, slična prošloj",
+  "the currency is reformed": "mijenja se valuta",
+  "prices double, and then double": "cijene se udvostruče, pa opet",
+  "the factory closes": "tvornica se zatvara",
+  "the border closes": "granica se zatvara",
+  "the border opens": "granica se otvara",
+  "war, somewhere else": "rat, negdje drugdje",
+  "war, here": "rat, ovdje",
+  "the river takes the lower streets": "rijeka odnosi donje ulice",
+  "an earthquake, in the night": "potres, noću",
+  "the summer that would not end": "ljeto koje nije prestajalo",
+  "a winter with no coal": "zima bez ugljena",
+  "everyone stays indoors for a year": "godinu dana svi ostaju unutra",
+  "a bridge is built": "gradi se most",
+  "the mill is turned into flats": "mlin postaje stanovi",
+  "the trams stop running": "tramvaji prestaju voziti",
+
+  // ---- ono maleno iz djetinjstva ----------------------------------------
+  "being laughed at by the whole table": "smijeh cijelog stola",
+  "the door closing": "vrata koja se zatvaraju",
+  "not being believed": "to što ti nisu vjerovali",
+  "coming last, in front of everyone": "zadnje mjesto, pred svima",
+  "the word he used": "riječ koju je upotrijebio",
+  "a promise about Saturday": "obećanje za subotu",
+  "the silence after the question": "tišina nakon pitanja",
+  "being told you were fine": "to što su rekli da si dobro",
+
+  // ---- škola -------------------------------------------------------------
+  "arithmetic": "računanje", "geography": "zemljopis", "history": "povijest",
+  "biology": "biologija", "the other language": "onaj drugi jezik",
+  "chemistry": "kemija", "physics": "fizika", "literature": "književnost",
+
+  // ---- obitelj i ono što od nje dolazi ----------------------------------
+  "You": "Ti", "Mother": "Majka", "Father": "Otac",
+  "Grandmother": "Baka", "Grandfather": "Djed", "Ancestor": "Predak",
+  "hope": "nada",
+  "fear_of_the_dark": "strah od mraka",
+  "stubbornness": "tvrdoglavost",
+  "worry": "briga",
+  "posture": "držanje",
+  "silence": "šutnja",
+  "recipe": "recept koji nikad nije zapisan",
+  "eyes": "oči",
+  "patience": "strpljenje",
+  "a way with people": "dar za ljude",
+
+  // ---- što se dogodilo ---------------------------------------------------
+  "says a word, on purpose": "izgovara riječ, namjerno",
+  "starts school": "kreće u školu",
+  "leaves school with a certificate stating that you can be taught":
+    "izlazi iz škole s potvrdom da se može podučiti",
+  "falls in love, silently": "zaljubljuje se, u tišini",
+  "first job": "prvi posao",
+  "moves out for good": "odlazi zauvijek",
+  "becomes a parent, and promises not to": "postaje roditelj i obećava da neće",
+  "stops speaking to someone": "prestaje razgovarati s nekim",
+  "your father dies": "umire mu otac",
+  "your mother dies": "umire mu majka",
+  "stops going to work": "prestaje ići na posao",
+  "does not get up": "ne ustaje",
+  "a child": "dijete",
+
+  // ---- razdoblja ---------------------------------------------------------
+  "infant": "dojenče", "child": "dijete", "teenager": "tinejdžer",
+  "young": "mladost", "middle": "srednje godine", "later": "kasnije godine",
+  "old": "starost", "late": "duboka starost",
+
+  // ---- kamo je otišlo ----------------------------------------------------
+  "work_cat": "posao", "worry_cat": "briga", "care_cat": "briga o drugima",
+  "rest_cat": "odmor i ništa", "school_cat": "škola", "house_cat": "kuća",
+  "body_cat": "tijelo", "regret_cat": "ono što nisi smio",
+  "other_cat": "sve ostalo",
+};
+
+// chrome, in both languages
+const UI = {
+  en: {
+    title: "A life", sub: "one run, whole",
+    intro: "This runs the model from <b>satja/life</b> — a description of a life in Python whose loops end only because checking a condition costs a minute. Choose the conditions and it will live one, all at once.",
+    century: "The century",
+    centuryWhy: "How much happens that is not about you. Governments, borders, money, weather, war. A little of it can kill you.",
+    conscience: "Conscience",
+    conscienceWhy: "How often the list of things you meant to do is visible to you at all. At <i>sometimes</i>, about eight moments in a lifetime.",
+    seed: "Seed", seedWhy: "The same seed and the same settings give the same life, exactly, every time.",
+    roll: "roll", begin: "Live one", again: "Another",
+    given: "What you were given", allotted: "years allotted. Nobody said so out loud.",
+    inheritedFrom: "from", blameNote: "Everything above came down the family in the usual order. Nothing skipped a generation; some of it went round one.",
+    theLife: "The life", replay: "watch it again",
+    gridNote: "One square a year, darker the fuller. Click one.",
+    mostly: "mostly", thoughtOf: "thought mostly about", thatYear: "that year",
+    account: "The account", whereItWent: "Where it went",
+    awakeLine: "%1 awake and doing something, out of %2.",
+    worstLine: "tries on the worst night — at %1, finally asleep at %2",
+    stillMeaning: "Still meaning to", meantNote: "The list was in view",
+    times: "times", outside: "Meanwhile, outside",
+    died: "Died at", at: "at", gotUp: "having got up", timesUp: "times",
+    inTheYearOf: "in the year of",
+    thoughts: "thoughts", different: "of them different",
+    nightsAwake: "nights still awake at three",
+
+    questions: "questions left open at school",
+    neverUnderstood: "never understood", keptFromSchool: "kept from school",
+    raisedIt: "Brought it up at", raisedAt: ", at someone who was not there",
+    nothingLeft: "Nothing left on the list. This is rarer than it sounds.",
+    noYear: "Not lived.", lang: "hrvatski",
+  },
+  hr: {
+    title: "Život", sub: "jedan, cijeli",
+    intro: "Ovo pokreće model iz <b>satja/life</b> — opis života u Pythonu čije petlje završavaju samo zato što provjera uvjeta troši minutu. Odaberi uvjete i proživjet će jedan, odjednom.",
+    century: "Stoljeće",
+    centuryWhy: "Koliko se toga događa što nema veze s tobom. Vlade, granice, novac, vrijeme, rat. Ponešto od toga te može ubiti.",
+    conscience: "Savjest",
+    conscienceWhy: "Koliko često ti je popis onoga što si namjeravao uopće vidljiv. Na <i>ponekad</i>, otprilike osam trenutaka u životu.",
+    seed: "Sjeme", seedWhy: "Isto sjeme i iste postavke daju isti život, točno, svaki put.",
+    roll: "baci", begin: "Proživi jedan", again: "Još jedan",
+    given: "Što si dobio", allotted: "godina. Nitko to nije rekao naglas.",
+    inheritedFrom: "od", blameNote: "Sve gore došlo je po obitelji uobičajenim redom. Ništa nije preskočilo naraštaj; ponešto ga je obišlo.",
+    theLife: "Život", replay: "pogledaj ponovno",
+    gridNote: "Jedan kvadratić po godini, tamniji što je punija. Klikni.",
+    mostly: "uglavnom", thoughtOf: "najviše je mislio na", thatYear: "te godine",
+    account: "Račun", whereItWent: "Kamo je otišlo",
+    awakeLine: "%1 bio je budan i nešto radio, od ukupno %2.",
+    worstLine: "pokušaja u najgoroj noći — u %1. godini, zaspao tek u %2",
+    stillMeaning: "Još uvijek namjerava", meantNote: "Popis je bio vidljiv",
+    times: "puta", outside: "U međuvremenu, vani",
+    died: "Umro u", at: "u", gotUp: "ustavši ukupno", timesUp: "puta",
+    inTheYearOf: "u godini kad je bilo:",
+    thoughts: "misli", different: "različitih",
+    nightsAwake: "noći budan u tri",
+
+    questions: "pitanja ostalo otvoreno u školi",
+    neverUnderstood: "nikad nije razumio", keptFromSchool: "od škole ostalo",
+    raisedIt: "Iznio je to u", raisedAt: ", pred nekim tko nije bio ondje",
+    nothingLeft: "Na popisu nije ostalo ništa. To je rjeđe nego što zvuči.",
+    noYear: "Nije proživljeno.", lang: "english",
+  },
+};
+
+const MONTHS_HR = ["sij", "velj", "ožu", "tra", "svi", "lip",
+                   "srp", "kol", "ruj", "lis", "stu", "pro"];
+
+// what a life divides into, for "where it went"
+const CATEGORY = {
+  work: ["working", "working, still", "going to work", "how to look busy",
+         "looking for work", "answering messages", "answering the message",
+         "applying", "waiting for an answer", "driving somewhere",
+         "going back to it", "starting something", "quitting something"],
+  worry: ["worrying about money", "worrying about someone else", "sleeping badly",
+          "being embarrassed", "waiting for the phone", "having the same argument",
+          "arguing", "cancelling", "reading the news too closely",
+          "listening for news", "listening for the all-clear",
+          "saying nothing at dinner", "slamming a door",
+          "counting it again", "going without", "queueing", "explaining yourself",
+          "seeing fewer friends", "lying awake in the heat", "crying"],
+  care: ["carrying someone who is asleep", "reading the same book aloud",
+         "looking after someone", "being needed", "going to funerals",
+         "calling home, briefly", "sending what you can", "being visited",
+         "loving someone who does not know", "falling in love"],
+  rest: ["sleeping", "being bored", "waiting", "sitting", "sitting in the sun",
+         "sitting in the shade", "doing nothing, on purpose", "being at the sea",
+         "reading half a book", "eating outside", "going to the water",
+         "sleeping in the afternoon", "staying up too late", "sitting in the dark with the shutters closed",
+         "watching cartoons", "watching the news", "listening to the same song",
+         "playing until it is dark", "walking for the sake of it", "walking slowly",
+         "being outside again", "looking at photographs", "telling the story again",
+         "reading the same page twice", "staying in", "staying indoors",
+         "drinking too much", "going somewhere cheap", "riding a bike",
+         "running", "collecting stones", "drawing a house", "eating",
+         "breaking something", "standing in the doorway of a room",
+         "laughing at nothing", "opening the windows", "watching it get dark early"],
+  school: ["going to school", "doing the homework", "handing it in",
+           "lying about homework", "studying the night before", "asking why",
+           "long division", "the other language, badly", "the word for window",
+           "how to sit through things"],
+  house: ["fixing the same thing again", "getting it repaired", "paying the bill",
+          "taking the bins out", "renewing the documents", "carrying something heavy",
+          "watering the plants", "keeping warm", "keeping one room warm",
+          "carrying things upstairs", "drying it out", "boarding up the windows",
+          "putting something aside", "moving out", "going the new way",
+          "walking it instead", "staying put", "going to look at it"],
+  body: ["going to the doctor", "going to the check-up", "taking the pills",
+         "being fed", "being carried", "being put down again",
+         "putting it in your mouth", "staring at the lamp", "sleeping in the car",
+         "waiting for it to get light", "looking in the mirror",
+         "not recognising the street"],
+  regret: ["checking the phone at three in the morning", "saying it out loud",
+           "comparing", "keeping score", "reading the comments",
+           "replying immediately", "looking back too long", "having one more",
+           "bringing it up again"],
+};
+
+const CAT_ORDER = ["work", "rest", "care", "worry", "house", "school",
+                   "body", "regret", "other"];
+const CAT_OF = {};
+for (const [cat, names] of Object.entries(CATEGORY)) for (const n of names) CAT_OF[n] = cat;
+
+function say(text, lang) {
+  if (lang !== "hr" || text === undefined || text === null) return text;
+  if (HR[text]) return HR[text];
+  // scars arrive already composed, and so does the one kept promise
+  if (text.endsWith(", again")) {
+    const base = text.slice(0, -", again".length);
+    return (HR[base] || base) + ", opet";
+  }
+  if (text.startsWith("gets round to it — ")) {
+    const base = text.slice("gets round to it — ".length);
+    return "stigao je do: " + (HR[base] || base);
+  }
+  if (text.startsWith("raises it — ")) return text;   // rebuilt in the app
+  if (text.startsWith("average mark: ")) {
+    return "prosjek: " + text.slice("average mark: ".length);
+  }
+  return text;
+}
+</script>
 <script>// A life, ported from the Python in this repository.
 // live.py's loops are reproduced faithfully: checking a condition costs a
 // minute, which is what makes them terminate.
@@ -1137,718 +1456,380 @@ class Life {
 
 </script>
 <script>const $ = (s, r) => (r || document).querySelector(s);
-const fmt = (n) => n.toLocaleString("en-US");
 
 const PRESETS = {
   century: {
-    quiet:        { turbulence: 0.030, lethality: 0.4 },
-    ordinary:     { turbulence: 0.075, lethality: 1.0 },
-    turbulent:    { turbulence: 0.130, lethality: 1.8 },
-    catastrophic: { turbulence: 0.200, lethality: 3.0 },
+    en: ["quiet", "ordinary", "turbulent", "catastrophic"],
+    hr: ["mirno", "obično", "burno", "katastrofalno"],
+    val: [{ turbulence: .030, lethality: .4 }, { turbulence: .075, lethality: 1 },
+          { turbulence: .130, lethality: 1.8 }, { turbulence: .200, lethality: 3 }],
   },
-  conscience: { rarely: 1/60000, sometimes: 1/26000, often: 1/8000, constantly: 1/1500 },
-  temptation: { seldom: 30, ordinary: 12, often: 6, constantly: 3 },
-  sleep:      { badly: 0.02, ordinarily: 0.05, easily: 0.12 },
+  conscience: {
+    en: ["rarely", "sometimes", "often", "constantly"],
+    hr: ["rijetko", "ponekad", "često", "stalno"],
+    val: [1 / 60000, 1 / 26000, 1 / 8000, 1 / 1500],
+  },
 };
 
 const state = {
-  life: null, playing: false, speed: 1, acc: 0, last: 0,
-  zoom: { level: "life", year: 0, month: 0, day: 0 }, following: true,
-  choice: { century: "ordinary", conscience: "sometimes", temptation: "ordinary",
-            sleep: "ordinarily", seed: Math.floor(Math.random() * 1e6) },
+  life: null, lang: (navigator.language || "en").startsWith("hr") ? "hr" : "en",
+  century: 1, conscience: 1, seed: Math.floor(Math.random() * 1e6), year: null,
 };
 
-// ---------------------------------------------------------------- setup
-
-function segment(name, options, current, onPick) {
-  const seg = document.createElement("div");
-  seg.className = "seg";
-  seg.setAttribute("role", "group");
-  for (const opt of options) {
-    const b = document.createElement("button");
-    b.type = "button"; b.textContent = opt;
-    b.setAttribute("aria-pressed", String(opt === current()));
-    b.addEventListener("click", () => {
-      onPick(opt);
-      for (const other of seg.children) other.setAttribute("aria-pressed", String(other === b));
-    });
-    seg.appendChild(b);
-  }
-  return seg;
-}
-
-function buildSetup() {
-  const knobs = $("#knobs");
-  const make = (title, why, node) => {
-    const k = document.createElement("div");
-    k.className = "knob panel";
-    k.innerHTML = `<h3>${title}</h3><p class="why">${why}</p>`;
-    k.appendChild(node);
-    knobs.appendChild(k);
-  };
-
-  make("The century",
-    "How much happens that is not about you. Governments, borders, money, weather, war. A little of it can kill you.",
-    segment("century", Object.keys(PRESETS.century), () => state.choice.century,
-            (v) => (state.choice.century = v)));
-
-  make("Conscience",
-    "How often the list of things you meant to do is visible to you at all. At <i>sometimes</i>, roughly eight moments in a lifetime.",
-    segment("conscience", Object.keys(PRESETS.conscience), () => state.choice.conscience,
-            (v) => (state.choice.conscience = v)));
-
-  make("Temptation",
-    "How often the things you know better than to do have a length greater than zero.",
-    segment("temptation", Object.keys(PRESETS.temptation), () => state.choice.temptation,
-            (v) => (state.choice.temptation = v)));
-
-  make("Sleep",
-    "How readily you fall asleep once you are lying down. The rest of the night is spent thinking.",
-    segment("sleep", Object.keys(PRESETS.sleep), () => state.choice.sleep,
-            (v) => (state.choice.sleep = v)));
-
-  const seedWrap = document.createElement("div");
-  seedWrap.className = "begin";
-  const input = document.createElement("input");
-  input.className = "seed"; input.type = "number"; input.value = state.choice.seed;
-  input.setAttribute("aria-label", "seed");
-  input.addEventListener("input", () => (state.choice.seed = Number(input.value) || 0));
-  const roll = document.createElement("button");
-  roll.className = "ghost"; roll.type = "button"; roll.textContent = "roll";
-  roll.addEventListener("click", () => {
-    state.choice.seed = Math.floor(Math.random() * 1e6); input.value = state.choice.seed;
-  });
-  seedWrap.append(input, roll);
-  make("Seed", "The same seed and the same settings give the same life, exactly, every time.",
-       seedWrap);
-}
-
-function optionsFromChoice() {
-  const c = PRESETS.century[state.choice.century];
-  return {
-    seed: state.choice.seed,
-    turbulence: c.turbulence, lethality: c.lethality,
-    conscience: PRESETS.conscience[state.choice.conscience],
-    temptation: PRESETS.temptation[state.choice.temptation],
-    sleepBase: PRESETS.sleep[state.choice.sleep],
-    allotted: 0,
-  };
-}
-
-// ---------------------------------------------------------------- running
-
-function begin() {
-  state.life = new Life(optionsFromChoice());
-  state.zoom = { level: "life", year: 0, month: 0, day: 0 };
-  state.following = true;
-  $("#setup").hidden = true;
-  $("#run").hidden = false;
-  $("#seedout").textContent = "seed " + state.choice.seed;
-  state.playing = true; state.acc = 0; state.last = performance.now();
-  requestAnimationFrame(loop);
-  draw(); paint();
-}
-
-function loop(now) {
-  const life = state.life;
-  if (!life) return;
-  const dt = Math.min(250, now - state.last);
-  state.last = now;
-  if (state.playing && life.alive) {
-    state.acc += dt * state.speed;
-    let guard = 0;
-    while (state.acc >= 1000 && life.alive && guard++ < 40) {
-      state.acc -= 1000;
-      life.stepYear();
-      if (state.following) followNow();
-    }
-    draw();
-    if (now - (state.lastPaint || 0) > 180) { state.lastPaint = now; paint(); }
-    if (!life.alive) { state.playing = false; setTransport(); paint(); }
-  }
-  requestAnimationFrame(loop);
-}
-
-function runToEnd() {
-  const life = state.life;
-  let guard = 0;
-  while (life.alive && guard++ < 130) life.stepYear();
-  state.playing = false;
-  if (state.following) followNow();
-  setTransport(); draw(); paint();
-}
-
-// ------------------------------------------------------- moving about in time
-
-function monthStart(year, month) { return year * 365 + Math.floor(month * 365 / 12); }
-function lastLivedDay() { return Math.max(0, state.life.days.length - 1); }
-
-function placeOf(absolute) {
-  const day = Math.max(0, Math.min(lastLivedDay(), absolute));
-  const year = Math.floor(day / 365);
-  const month = Math.min(11, Math.floor((day - year * 365) * 12 / 365));
-  return { year, month, day: day - monthStart(year, month) };
-}
-
-function absoluteDay(z) { return monthStart(z.year, z.month) + z.day; }
-
-function followNow() {
-  // the clock reaches the next year on the morning of the death, before any
-  // of it is lived, so the last recorded day is what can actually be shown
-  const z = state.zoom, here = placeOf(lastLivedDay());
-  z.year = here.year;
-  if (z.level === "month" || z.level === "day") { z.month = here.month; z.day = here.day; }
-}
-
-function stepView(delta) {
-  const z = state.zoom;
-  state.following = false;
-  if (z.level === "day") {
-    const at = placeOf(absoluteDay(z) + delta);
-    z.year = at.year; z.month = at.month; z.day = at.day;
-  } else if (z.level === "month") {
-    const limit = placeOf(lastLivedDay());
-    let n = z.year * 12 + z.month + delta;
-    n = Math.max(0, Math.min(limit.year * 12 + limit.month, n));
-    z.year = Math.floor(n / 12); z.month = n % 12; z.day = 0;
-  } else {
-    z.year = Math.max(0, Math.min(placeOf(lastLivedDay()).year, z.year + delta));
-    z.month = 0; z.day = 0;
-  }
-  draw(); paintDetail(); setSteppers();
-}
-
-function setSteppers() {
-  const z = state.zoom, limit = placeOf(lastLivedDay());
-  const atStart = z.level === "day" ? absoluteDay(z) <= 0
-    : z.level === "month" ? z.year * 12 + z.month <= 0 : z.year <= 0;
-  const atEnd = z.level === "day" ? absoluteDay(z) >= lastLivedDay()
-    : z.level === "month" ? z.year * 12 + z.month >= limit.year * 12 + limit.month
-    : z.year >= limit.year;
-  $("#prev").disabled = atStart;
-  $("#next").disabled = atEnd;
-  $("#now").dataset.live = String(state.following);
-}
-
-function setTransport() {
-  const b = $("#play");
-  b.textContent = state.playing ? "pause" : (state.life && state.life.alive ? "play" : "ended");
-  b.disabled = !state.life || !state.life.alive;
-  for (const btn of $("#speeds").children) {
-    btn.setAttribute("aria-pressed", String(Number(btn.dataset.speed) === state.speed));
-  }
-}
-
-// ---------------------------------------------------------------- the chart
-
-function window_() {
-  const life = state.life, z = state.zoom;
-  if (z.level === "life") return [0, (life.lifespan + 2) * 365];
-  if (z.level === "year") return [z.year * 365, (z.year + 1) * 365];
-  return [z.year * 365 + Math.floor(z.month * 365 / 12),
-          z.year * 365 + Math.floor((z.month + 1) * 365 / 12)];
-}
-
-function draw() {
-  const life = state.life, cv = $("#chart");
-  if (!life) return;
-  const dpr = window.devicePixelRatio || 1;
-  const W = cv.clientWidth, H = cv.clientHeight;
-  if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
-  const g = cv.getContext("2d");
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const css = getComputedStyle(document.documentElement);
-  const col = (n) => css.getPropertyValue(n).trim();
-  g.clearRect(0, 0, W, H);
-
-  const [d0, d1] = window_();
-  const span = Math.max(1, d1 - d0);
-  const pad = 22, base = H - pad, top = 16;
-  const xOf = (d) => ((d - d0) / span) * W;
-
-  // grid: decades at life scale, months inside a year, days inside a month
-  g.strokeStyle = col("--grid"); g.fillStyle = col("--faint");
-  g.lineWidth = 1; g.font = '10px ui-monospace, monospace';
-  const marks = [];
-  if (state.zoom.level === "life") {
-    for (let a = 0; a <= life.lifespan + 2; a += 10) marks.push([a * 365, String(a)]);
-  } else if (state.zoom.level === "year") {
-    for (let m = 0; m < 12; m++)
-      marks.push([state.zoom.year * 365 + Math.floor(m * 365 / 12), MONTHS[m]]);
-  } else {
-    for (let d = d0; d < d1; d += 7) marks.push([d, ""]);
-  }
-  for (const [d, label] of marks) {
-    const x = Math.round(xOf(d)) + .5;
-    g.beginPath(); g.moveTo(x, top - 8); g.lineTo(x, base); g.stroke();
-    if (label) g.fillText(label, x + 4, H - 7);
-  }
-  g.strokeStyle = col("--rule");
-  g.beginPath(); g.moveTo(0, base + .5); g.lineTo(W, base + .5); g.stroke();
-
-  // the trace: how full each day was
-  const perPx = Math.max(1, Math.ceil(span / W));
-  const height = base - top;
-  g.beginPath(); g.moveTo(xOf(d0), base);
-  let drew = false;
-  for (let d = d0; d < d1; d += perPx) {
-    let sum = 0, n = 0;
-    for (let k = 0; k < perPx && d + k < d1; k++) {
-      const rec = life.days[d + k];
-      if (rec) { sum += rec.busy; n++; }
-    }
-    if (!n) continue;
-    const y = base - Math.min(1, sum / n / 1000) * height;
-    g.lineTo(xOf(d), y); drew = true;
-  }
-  if (drew) {
-    const lastDay = Math.min(d1, life.days.length);
-    g.lineTo(xOf(lastDay), base); g.closePath();
-    const grad = g.createLinearGradient(0, top, 0, base);
-    grad.addColorStop(0, col("--trace")); grad.addColorStop(1, "transparent");
-    g.globalAlpha = .30; g.fillStyle = grad; g.fill(); g.globalAlpha = 1;
-    g.strokeStyle = col("--trace"); g.lineWidth = 1.2; g.stroke();
-  }
-
-  // what you knew better than to do, and the rare thing you got round to
-  for (let d = d0; d < Math.min(d1, life.days.length); d++) {
-    const rec = life.days[d];
-    if (!rec) continue;
-    if (rec.never) {
-      g.fillStyle = col("--loss"); g.globalAlpha = .30;
-      g.fillRect(xOf(d), base + 3, Math.max(1, W / span), 3);
-      g.globalAlpha = 1;
-    }
-    if (rec.should) {
-      g.fillStyle = col("--trace");
-      g.fillRect(xOf(d) - 1, top - 12, 2.5, height + 12);
-      g.globalAlpha = .12; g.fillRect(xOf(d) - 3, top - 12, 7, height + 12); g.globalAlpha = 1;
-    }
-  }
-
-  // events
-  for (const e of life.events) {
-    const d = e.age * 365 + Math.floor(e.month * 365 / 12);
-    if (d < d0 || d > d1) continue;
-    const x = xOf(d);
-    const c = e.kind === "world" ? col("--world") : e.kind === "loss" ? col("--loss") : col("--ink");
-    g.fillStyle = c;
-    if (e.kind === "world") { g.fillRect(x - 1, top - 14, 2, 9); }
-    else { g.beginPath(); g.arc(x, base, 2.6, 0, 7); g.fill(); }
-  }
-
-  // playhead
-  const nowDay = life.days.length;
-  if (nowDay >= d0 && nowDay <= d1) {
-    g.strokeStyle = col("--ink"); g.globalAlpha = .5; g.lineWidth = 1;
-    const x = Math.round(xOf(nowDay)) + .5;
-    g.beginPath(); g.moveTo(x, top - 14); g.lineTo(x, base + 6); g.stroke(); g.globalAlpha = 1;
-  }
-
-  // the selected year, when looking at the whole life
-  if (state.zoom.level === "life" && state.zoom.year >= 0) {
-    const a = xOf(state.zoom.year * 365), b = xOf((state.zoom.year + 1) * 365);
-    g.fillStyle = col("--ink"); g.globalAlpha = .07;
-    g.fillRect(a, top - 14, Math.max(1.5, b - a), base - top + 20); g.globalAlpha = 1;
-  }
-}
-
-// ---------------------------------------------------------------- panels
-
-function yearSlice(year) {
-  const life = state.life;
-  const from = year * 365, to = Math.min(life.days.length, (year + 1) * 365);
-  return life.days.slice(Math.min(from, life.days.length), to);
-}
-
-function tally(records) {
-  const done = new Map(); let busy = 0, thoughts = 0, never = 0, should = 0,
-      remembered = 0, attempts = 0, insomnia = 0;
-  for (const r of records) {
-    for (let i = 0; i < r.acts.length; i += 3) {
-      const name = state.life.names[r.acts[i + 1]];
-      done.set(name, (done.get(name) || 0) + 1);
-    }
-    busy += r.busy; thoughts += r.thoughts.length; never += r.never; should += r.should;
-    remembered += r.remembered; attempts += r.attempts; insomnia += r.insomnia ? 1 : 0;
-  }
-  return { done, busy, thoughts, never, should, remembered, attempts, insomnia,
-           days: records.length };
-}
+const t = (k) => UI[state.lang][k];
+const w = (s) => say(s, state.lang);
+const num = (n) => n.toLocaleString(state.lang === "hr" ? "hr-HR" : "en-US");
+const months = () => (state.lang === "hr" ? MONTHS_HR : MONTHS);
 
 function spanOf(minutes) {
   const hours = minutes / 60;
-  if (hours >= 8760) return (hours / 8760).toFixed(1) + " years";
-  if (hours >= 48) return fmt(Math.round(hours / 24)) + " days";
-  return Math.round(hours) + " hours";
+  if (hours >= 8760) {
+    const y = hours / 8760;
+    const s = y.toFixed(1);
+    return (state.lang === "hr" ? s.replace(".", ",") + " god." : s + " years");
+  }
+  if (hours >= 48) {
+    return Math.round(hours / 24) + (state.lang === "hr" ? " dana" : " days");
+  }
+  return Math.round(hours) + (state.lang === "hr" ? " h" : " h");
 }
 
-function topOf(map, n) {
-  return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
+// ------------------------------------------------------------------ setup
+
+function buildSetup() {
+  const knobs = $("#knobs");
+  knobs.innerHTML = "";
+  const make = (title, why, node) => {
+    const k = document.createElement("div");
+    k.className = "knob panel";
+    k.innerHTML = "<h3>" + title + '</h3><p class="why">' + why + "</p>";
+    k.appendChild(node);
+    knobs.appendChild(k);
+  };
+  const seg = (key, chosen, onPick) => {
+    const box = document.createElement("div");
+    box.className = "seg"; box.setAttribute("role", "group");
+    PRESETS[key][state.lang].forEach((label, i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = label;
+      b.setAttribute("aria-pressed", String(i === chosen()));
+      b.addEventListener("click", () => {
+        onPick(i);
+        for (const other of box.children) {
+          other.setAttribute("aria-pressed", String(other === b));
+        }
+      });
+      box.appendChild(b);
+    });
+    return box;
+  };
+
+  make(t("century"), t("centuryWhy"),
+       seg("century", () => state.century, (i) => (state.century = i)));
+  make(t("conscience"), t("conscienceWhy"),
+       seg("conscience", () => state.conscience, (i) => (state.conscience = i)));
+
+  const wrap = document.createElement("div");
+  wrap.className = "begin"; wrap.style.marginTop = "0";
+  const input = document.createElement("input");
+  input.className = "seed"; input.type = "number"; input.value = state.seed;
+  input.setAttribute("aria-label", t("seed"));
+  input.addEventListener("input", () => (state.seed = Number(input.value) || 0));
+  const roll = document.createElement("button");
+  roll.className = "ghost"; roll.type = "button"; roll.textContent = t("roll");
+  roll.addEventListener("click", () => {
+    state.seed = Math.floor(Math.random() * 1e6); input.value = state.seed;
+  });
+  wrap.append(input, roll);
+  make(t("seed"), t("seedWhy"), wrap);
 }
 
-function paint() {
+function chrome() {
+  $("#title").textContent = t("title");
+  $("#sub").textContent = t("sub");
+  $("#intro").innerHTML = t("intro");
+  $("#start").textContent = t("begin");
+  $("#again").textContent = t("again");
+  $("#lang").textContent = t("lang");
+  $("#h-given").textContent = t("given");
+  $("#h-life").textContent = t("theLife");
+  $("#h-account").textContent = t("account");
+  $("#replay").textContent = t("replay");
+  $("#gridnote").textContent = t("gridNote");
+  document.documentElement.lang = state.lang;
+}
+
+// ------------------------------------------------------------------ living
+
+function live() {
+  const c = PRESETS.century.val[state.century];
+  state.life = new Life({
+    seed: state.seed, turbulence: c.turbulence, lethality: c.lethality,
+    conscience: PRESETS.conscience.val[state.conscience],
+    temptation: 12, sleepBase: .05, allotted: 0,
+  });
+  let guard = 0;
+  while (state.life.alive && guard++ < 130) state.life.stepYear();
+  state.year = null;
+  $("#setup").hidden = true;
+  $("#run").hidden = false;
+  $("#seedout").textContent = (state.lang === "hr" ? "sjeme " : "seed ") + state.seed;
+  drawAll();
+}
+
+function drawAll() { drawTree(); drawYears(); drawYearCard(); drawAccount(); }
+
+// ---- act one: the family, drawn in the order Python resolves it -----------
+
+function drawTree() {
   const life = state.life;
-  if (!life) return;
-  const age = life.diedAt ? life.diedAt[0] : life.age;
-  $("#age").textContent = age;
-  $("#of").textContent = "of " + life.lifespan + " allotted · " + MONTHS[life.month];
-  $("#stage").textContent = life.alive ? stageAt(life.age) : "ended";
-
-  // the mind
-  $("#preocc").textContent = life.preoccupation ? life.preoccupation[0][0] : "—";
-  $("#preoccsince").textContent = life.preoccupation
-    ? "preoccupied since " + life.preoccupation[2] : "";
-  const deepShare = life.totalThoughts
-    ? Math.round(100 * life.deepCount / life.totalThoughts) : 0;
-  $("#distinct").textContent = fmt(life.totalThoughts) + " thoughts · " +
-    life.thoughtCount.size + " different · " + deepShare + "% from underneath";
-
-  const themes = $("#themes"); themes.innerHTML = "";
-  const byTheme = topOf(life.themeCount, 5);
-  const themeMax = byTheme.length ? byTheme[0][1] : 1;
-  for (const [theme, n] of byTheme) {
-    const row = document.createElement("div"); row.className = "row";
-    row.innerHTML = "<span>" + theme + '</span><span class="track"><span class="fill" ' +
-      'style="width:' + (100 * n / themeMax).toFixed(1) + '%"></span></span>' +
-      '<span class="pct">' + Math.round(100 * n / life.totalThoughts) + "%</span>";
-    themes.appendChild(row);
+  const W = 520, H = 176;
+  const at = {
+    Ancestor: [260, 22], Grandmother: [110, 74], Grandfather: [410, 74],
+    Mother: [150, 128], Father: [370, 128], You: [260, 168],
+  };
+  const edges = [
+    ["Grandmother", "Ancestor"], ["Grandfather", "Ancestor"],
+    ["Mother", "Grandmother"], ["Mother", "Grandfather"],
+    ["Father", "Grandmother"], ["Father", "Grandfather"],
+    ["You", "Mother"], ["You", "Father"],
+  ];
+  let svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' +
+    t("given") + '">';
+  for (const [a, b] of edges) {
+    const [x1, y1] = at[a], [x2, y2] = at[b];
+    svg += '<path class="edge" d="M' + x1 + " " + (y1 - 11) + "C" + x1 + " " +
+      (y1 - 30) + " " + x2 + " " + (y2 + 22) + " " + x2 + " " + (y2 + 6) + '"/>';
   }
-
-  const back = $("#backmost"); back.innerHTML = "";
-  for (const [text, n] of topOf(life.thoughtCount, 4)) {
-    const row = document.createElement("div");
-    row.className = "row" + (life.deepTexts.has(text) ? " under" : "");
-    row.innerHTML = '<span class="t">' + text + '</span><span class="n">' + fmt(n) + "</span>";
-    back.appendChild(row);
+  for (const [who, [x, y]] of Object.entries(at)) {
+    svg += '<text class="node" x="' + x + '" y="' + y + '" text-anchor="middle">' +
+      w(who) + "</text>";
   }
+  svg += "</svg>";
+  $("#tree").innerHTML = svg;
 
-  // the lists
-  const thisYear = tally(yearSlice(Math.max(0, life.age)));
-  const should = $("#shouldlist");
-  should.innerHTML = "";
-  for (const item of life.shouldDo) {
-    const li = document.createElement("li");
-    li.textContent = item.name;
-    should.appendChild(li);
-  }
-  if (life.noLonger.size) {
-    for (const gone of life.noLonger) {
-      const li = document.createElement("li"); li.className = "gone"; li.textContent = gone;
-      should.appendChild(li);
+  // the traits read as a list, which stays legible at any width and never
+  // collides with the drawing
+  const rows = Object.entries(life.fromWhom)
+    .map(([trait, who]) => '<div class="row"><span class="tr">' + w(trait) +
+      '</span><span class="ar">←</span><span class="wh">' + w(who) + "</span></div>");
+  $("#inherit").innerHTML = rows.join("");
+  $("#allot").textContent = life.lifespan + " " + t("allotted");
+  $("#blamenote").textContent = t("blameNote");
+}
+
+// ---- act two: a square a year -------------------------------------------
+
+function yearsOf(age) {
+  const life = state.life;
+  const from = age * 365, to = Math.min(life.days.length, (age + 1) * 365);
+  return from >= life.days.length ? [] : life.days.slice(from, to);
+}
+
+function tallyYear(age) {
+  const life = state.life, done = new Map(), thoughts = new Map();
+  let busy = 0, tries = 0, worstNight = 0;
+  for (const r of yearsOf(age)) {
+    for (let i = 0; i < r.acts.length; i += 3) {
+      const name = life.names[r.acts[i + 1]];
+      done.set(name, (done.get(name) || 0) + r.acts[i + 2]);
     }
+    for (const id of r.thoughts) {
+      const text = life.thoughtNames[id];
+      thoughts.set(text, (thoughts.get(text) || 0) + 1);
+    }
+    busy += r.busy; tries += r.attempts;
+    if (r.attempts > worstNight) worstNight = r.attempts;
   }
-  const box = $("#shouldbox");
-  box.classList.toggle("lit", thisYear.remembered > 0);
-  $("#remembered").textContent = life.gotRoundTo + " done · in view " +
-    fmt(life.rememberedTotal) + "×";
-
-  const never = $("#neverlist"); never.innerHTML = "";
-  for (const [name, n] of topOf(new Map(NEVER_DO.map(
-        (nm) => [nm, life.doneCount.get(nm) || 0])), 9)) {
-    const li = document.createElement("li");
-    li.innerHTML = name + ' <span class="num" style="color:var(--faint)">' + fmt(n) + "</span>";
-    never.appendChild(li);
-  }
-  $("#neverbox").classList.toggle("lit", life.tempted);
-
-  // the world
-  const circ = $("#circ"); circ.innerHTML = "";
-  const active = life.circumstances.filter((c) => c.until > life.age);
-  if (!active.length) {
-    circ.innerHTML = '<div style="color:var(--faint)">nothing in particular</div>';
-  }
-  for (const c of active) {
-    const row = document.createElement("div"); row.className = "row";
-    row.innerHTML = '<span class="tag world">until ' + c.until + "</span> <b>" + c.text + "</b>";
-    circ.appendChild(row);
-  }
-  const recent = $("#recent"); recent.innerHTML = "";
-  for (const e of life.events.slice(-6).reverse()) {
-    const row = document.createElement("div"); row.className = "row";
-    const cls = e.kind === "world" ? "world" : e.kind === "kept" ? "kept"
-              : e.kind === "loss" ? "loss" : "";
-    row.innerHTML = '<span class="num" style="color:var(--faint)">' + e.age +
-      "</span> " + (cls ? '<span class="tag ' + cls + '">' + e.kind + "</span> " : "") + e.text;
-    recent.appendChild(row);
-  }
-  paintDetail();
+  return { done, thoughts, busy, tries, worstNight, days: yearsOf(age).length };
 }
 
-function crumb() {
-  const z = state.zoom;
-  const parts = [["life", "whole life"]];
-  if (z.level !== "life") parts.push(["year", "age " + z.year]);
-  if (z.level === "month" || z.level === "day") parts.push(["month", MONTHS[z.month]]);
-  if (z.level === "day") parts.push(["day", "day " + (z.day + 1)]);
-  return parts.map(([level, text], i) => {
-    const last = i === parts.length - 1;
-    const bit = last ? '<span class="here">' + text + "</span>"
-                     : '<button type="button" data-goto="' + level + '">' + text + "</button>";
-    return (i ? '<span class="sep">›</span>' : "") + bit;
-  }).join("");
-}
+function drawYears() {
+  const life = state.life, box = $("#years");
+  box.innerHTML = "";
+  const lived = Math.floor((life.days.length - 1) / 365);
+  const span = Math.max(lived, life.lifespan);
+  const fullness = [];
+  for (let a = 0; a <= span; a++) {
+    const days = yearsOf(a);
+    fullness.push(days.length ? days.reduce((s, r) => s + r.busy, 0) / days.length : 0);
+  }
+  const peak = Math.max(1, ...fullness);
+  const evented = new Set(life.events.filter((e) => e.kind !== "world").map((e) => e.age));
+  const worldly = new Set(life.worldEvents.map((e) => e.age));
 
-function paintDetail() {
-  const life = state.life, z = state.zoom, out = $("#detail");
-  for (const b of document.querySelectorAll("#tabs button[data-level]")) {
-    b.setAttribute("aria-pressed", String(b.dataset.level === z.level));
-  }
-  let html = '<div class="crumb">' + crumb() + "</div>";
-  setSteppers();
-  if (z.level === "life") html += lifeView();
-  else if (z.level === "year") html += yearView(z.year);
-  else if (z.level === "month") html += monthView(z.year, z.month);
-  else html += dayView(z.year, z.month, z.day);
-  out.innerHTML = html;
-  for (const b of out.querySelectorAll(".crumb button[data-goto]")) {
-    b.addEventListener("click", () => {
-      state.zoom.level = b.dataset.goto;
-      draw(); paintDetail();
-    });
-  }
-  for (const row of out.querySelectorAll("tr.click")) {
-    row.addEventListener("click", () => {
-      const z2 = state.zoom;
-      if (row.dataset.year !== undefined) {
-        state.zoom = { level: "year", year: +row.dataset.year, month: 0, day: 0 };
-      } else if (row.dataset.month !== undefined) {
-        state.zoom = { level: "month", year: z2.year, month: +row.dataset.month, day: 0 };
-      } else if (row.dataset.day !== undefined) {
-        state.zoom = { level: "day", year: z2.year, month: z2.month, day: +row.dataset.day };
-      }
-      draw(); paintDetail();
-    });
+  for (let a = 0; a <= span; a++) {
+    if (a % 10 === 0) {
+      const d = document.createElement("div");
+      d.className = "decade"; d.textContent = a;
+      box.appendChild(d);
+    }
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "cell" + (fullness[a] ? "" : " unlived");
+    cell.setAttribute("aria-label", String(a));
+    if (fullness[a]) {
+      const k = .18 + .82 * (fullness[a] / peak);
+      cell.style.background = "color-mix(in srgb, var(--trace) " +
+        Math.round(k * 100) + "%, transparent)";
+      cell.addEventListener("click", () => { state.year = a; drawYears(); drawYearCard(); });
+    } else {
+      cell.disabled = true;
+    }
+    if (worldly.has(a)) cell.innerHTML += '<span class="ev world"></span>';
+    if (evented.has(a)) cell.innerHTML += '<span class="ev mine"></span>';
+    if (life.diedAt && a === life.diedAt[0]) cell.classList.add("dying");
+    if (state.year === a) cell.setAttribute("aria-pressed", "true");
+    box.appendChild(cell);
   }
 }
 
-function statBlock(pairs) {
-  return '<div class="stats">' + pairs.map(
-    ([v, k]) => '<div class="stat"><span class="v">' + v + '</span><span class="k">' + k +
-                "</span></div>").join("") + "</div>";
+function eventLine(e) {
+  const cls = e.kind === "world" ? "world" : e.kind === "loss" ? "loss"
+            : e.kind === "kept" ? "kept" : "";
+  return '<li><span class="tag ' + cls + '">' + months()[e.month] + "</span><span>" +
+    eventText(e) + "</span></li>";
 }
 
-function lifeView() {
+function eventText(e) {
   const life = state.life;
-  let html = statBlock([
-    [fmt(life.totalDone), "things done"],
-    [fmt(life.totalThoughts), "thoughts, " + life.thoughtCount.size + " of them different"],
-    [fmt(life.mornings), "mornings"],
-    [String(life.gotRoundTo), "things you got round to"],
-    [fmt(life.neverTotal), "things you knew better"],
-    [fmt(life.insomniaNights), "nights still awake at three"],
-  ]);
-  html += '<h3 style="font-weight:400;font-size:15px;margin:18px 0 6px">What most of it was</h3>';
-  html += '<table class="grid"><thead><tr><th>doing</th><th>times</th>' +
-          '<th>time spent</th><th class="wide-only">share of it</th></tr></thead><tbody>';
-  const most = topOf(life.doneMinutes, 10);
-  const max = most.length ? most[0][1] : 1;
-  for (const [name, minutes] of most) {
-    html += '<tr><td style="width:40%">' + name + '</td>' +
-      '<td class="n">' + fmt(life.doneCount.get(name) || 0) + '</td>' +
-      '<td class="n">' + spanOf(minutes) + '</td>' +
-      '<td class="wide-only"><span class="barcell" style="width:' +
-      (100 * minutes / max).toFixed(1) + '%"></span></td></tr>';
+  if (state.lang === "hr" && e.text.startsWith("raises it — ")) {
+    const hurt = e.text.slice("raises it — ".length).split(" — ")[0];
+    return t("raisedIt").replace(/^\S+\s/, "") + " " + w(hurt) + t("raisedAt");
   }
-  html += "</tbody></table>";
-  if (!life.alive) html += epilogue();
-  return html;
+  return w(e.text);
 }
 
-function epilogue() {
-  const life = state.life;
+function drawYearCard() {
+  const life = state.life, card = $("#yearcard");
+  const age = state.year === null ? Math.floor((life.days.length - 1) / 365) : state.year;
+  const y = tallyYear(age);
+  if (!y.days) { card.innerHTML = '<p class="note">' + t("noYear") + "</p>"; return; }
+  const most = [...y.done.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([n]) => w(n)).join(" · ");
+  const think = [...y.thoughts.entries()].sort((a, b) => b[1] - a[1])[0];
+  let html = '<div><span class="age num">' + age + '</span><span class="stage">' +
+    w(stageAt(age)) + "</span></div>";
+  html += '<p class="mostly">' + t("mostly") + ": " + most + "</p>";
+  if (think) html += '<p class="thought">' + t("thoughtOf") + ": " + w(think[0]) + "</p>";
+  const here = life.events.filter((e) => e.age === age);
+  if (here.length) html += "<ul>" + here.map(eventLine).join("") + "</ul>";
+  card.innerHTML = html;
+}
+
+// ---- act three: what it came to -----------------------------------------
+
+const CAT_COLOUR = {
+  work: "var(--trace)", rest: "color-mix(in srgb, var(--trace) 38%, transparent)",
+  care: "color-mix(in srgb, var(--trace) 62%, transparent)",
+  worry: "var(--loss)", house: "var(--world)",
+  school: "color-mix(in srgb, var(--world) 45%, transparent)",
+  body: "color-mix(in srgb, var(--loss) 45%, transparent)",
+  regret: "color-mix(in srgb, var(--loss) 72%, transparent)",
+  other: "var(--grid)",
+};
+
+function drawAccount() {
+  const life = state.life, box = $("#account");
+  const by = new Map();
+  let total = 0;
+  for (const [name, minutes] of life.doneMinutes) {
+    const cat = CAT_OF[name] || "other";
+    by.set(cat, (by.get(cat) || 0) + minutes);
+    total += minutes;
+  }
+  const order = CAT_ORDER.filter((c) => by.get(c));
+  const lifeMinutes = (life.diedAt[0] || 1) * 365 * 1440;
+
+  let html = "<h3>" + t("whereItWent") + "</h3>";
+  html += '<div class="went">' + order.map((c) =>
+    '<div style="width:' + (100 * by.get(c) / total).toFixed(2) + "%;background:" +
+    CAT_COLOUR[c] + '" title="' + w(c + "_cat") + '"></div>').join("") + "</div>";
+  html += '<div class="wentkey">' + order.map((c) =>
+    '<div class="row"><span class="sw" style="background:' + CAT_COLOUR[c] + '"></span>' +
+    "<span>" + w(c + "_cat") + '</span><span class="yr">' + spanOf(by.get(c)) +
+    "</span></div>").join("") + "</div>";
+
+  html += '<p class="big">' + t("awakeLine").replace("%1", spanOf(total))
+    .replace("%2", String(life.diedAt[0])) + "</p>";
+
+  const figures = [
+    [num(life.totalThoughts), t("thoughts") + ", " + life.thoughtCount.size + " " + t("different")],
+    [num(life.mornings), state.lang === "hr" ? "jutara" : "mornings"],
+    [num(life.insomniaNights), t("nightsAwake")],
+    [num(life.neverTotal), state.lang === "hr" ? "puta je znao bolje" : "things you knew better"],
+    [num(life.questions), t("questions")],
+  ];
+  if (life.worstNight[0]) {
+    figures.push([life.worstNight[0], t("worstLine")
+      .replace("%1", String(life.worstNight[1])).replace("%2", life.worstNight[2])]);
+  }
+  html += '<div class="figures">' + figures.map(([v, k]) =>
+    '<div class="fig"><span class="v">' + v + '</span><span class="k">' + k +
+    "</span></div>").join("") + "</div>";
+
   const left = life.shouldDo.map((d) => d.name);
-  let html = '<div class="epi" style="margin-top:20px;border-top:2px solid var(--ink);padding-top:14px">';
-  html += '<div class="big">Died at ' + life.diedAt[0] + ", at " + life.diedAt[1] +
-    ", having got up " + fmt(life.mornings) + " times.</div>";
-  if (life.cause) html += '<div class="cause">In the year of ' + life.cause + ".</div>";
-  if (left.length) {
-    html += "<div><b style='font-weight:400'>Still meaning to:</b><ul class='items'>" +
-      left.map((n) => "<li>" + n + "</li>").join("") + "</ul></div>";
-  }
+  html += "<h3>" + t("stillMeaning") + " (" + t("meantNote").toLowerCase() + " " +
+    life.rememberedTotal + " " + t("times") + ")</h3>";
+  html += left.length
+    ? "<ul>" + left.map((n) => "<li>" + w(n) + "</li>").join("") + "</ul>"
+    : '<p class="note">' + t("nothingLeft") + "</p>";
   if (life.motherDied !== undefined) {
-    html += "<blockquote>“call your mother” left the list at " + life.motherDied +
-      ", and could not be added again.</blockquote>";
+    html += "<blockquote>„" + w("call your mother") + "” " +
+      (state.lang === "hr"
+        ? "otišlo je s popisa u " + life.motherDied + " i nije se moglo vratiti."
+        : "left the list at " + life.motherDied + ", and could not be added again.") +
+      "</blockquote>";
   }
+
   if (life.worldEvents.length) {
-    html += "<div><b style='font-weight:400'>Meanwhile, outside:</b><ul class='items'>" +
-      life.worldEvents.map((e) => "<li><span class='num' style='color:var(--faint)'>" +
-        e.age + " " + MONTHS[e.month] + "</span> &nbsp;" + e.text + "</li>").join("") + "</ul></div>";
+    html += "<h3>" + t("outside") + "</h3><ul>" + life.worldEvents.map((e) =>
+      '<li><span class="n">' + e.age + " " + months()[e.month] + "</span><span>" +
+      w(e.text) + "</span></li>").join("") + "</ul>";
   }
-  html += "<div>Questions left open at school: " + fmt(life.questions) + ".</div>";
-  html += "</div>";
-  return html;
+
+  const skills = life.skills.map((s) => w(s)).join(" · ");
+  if (skills) html += "<h3>" + t("keptFromSchool") + "</h3><p>" + skills + "</p>";
+
+  html = '<p class="big">' + t("died") + " " + life.diedAt[0] + ", " + t("at") + " " +
+    life.diedAt[1] + ", " + t("gotUp") + " " + num(life.mornings) + " " + t("timesUp") +
+    ".</p>" + (life.cause
+      ? '<p class="note" style="color:var(--loss)">' + t("inTheYearOf") + " " +
+        w(life.cause) + ".</p>" : "") + html;
+  box.innerHTML = html;
 }
 
-function yearView(year) {
-  const life = state.life;
-  const rows = [];
-  for (let m = 0; m < 12; m++) {
-    const from = year * 365 + Math.floor(m * 365 / 12);
-    const to = year * 365 + Math.floor((m + 1) * 365 / 12);
-    const recs = life.days.slice(Math.min(from, life.days.length),
-                                Math.min(to, life.days.length));
-    if (!recs.length) continue;
-    const t = tally(recs);
-    rows.push([m, t]);
-  }
-  if (!rows.length) {
-    const only = life.events.filter((e) => e.age === year);
-    return only.length ? eventList(only)
-                       : "<p style='color:var(--muted)'>Not lived yet.</p>";
-  }
-  const peak = Math.max(...rows.map((r) => r[1].busy / Math.max(1, r[1].days)));
-  let html = '<table class="grid"><thead><tr><th>month</th><th>how full</th><th>mostly</th>' +
-             '<th>knew better</th></tr></thead><tbody>';
-  for (const [m, t] of rows) {
-    const most = topOf(t.done, 2).map((x) => x[0]).join(" · ");
-    const rel = (t.busy / Math.max(1, t.days)) / (peak || 1);
-    html += '<tr class="click" data-month="' + m + '"><td class="n">' + MONTHS[m] +
-      '</td><td style="width:26%"><span class="barcell" style="width:' +
-      (100 * rel).toFixed(1) + '%"></span></td><td>' + most + '</td><td class="n">' +
-      (t.never || "") + "</td></tr>";
-  }
-  html += "</tbody></table>";
-  const events = life.events.filter((e) => e.age === year);
-  if (events.length) html += eventList(events);
-  return html;
+// ---- watching it happen again, if you want to ---------------------------
+
+function replay() {
+  const box = $("#years");
+  const cells = [...box.querySelectorAll(".cell")];
+  box.classList.add("reveal");
+  cells.forEach((c) => c.classList.remove("shown"));
+  let i = 0;
+  const step = () => {
+    if (i >= cells.length) { box.classList.remove("reveal"); return; }
+    cells[i++].classList.add("shown");
+    setTimeout(step, 55);
+  };
+  step();
 }
 
-function eventList(events) {
-  return "<ul class='items' style='margin-top:12px'>" + events.map((e) =>
-    "<li><span class='tag " + (e.kind === "world" ? "world" : e.kind === "loss" ? "loss"
-      : e.kind === "kept" ? "kept" : "") + "'>" + MONTHS[e.month] + "</span> " + e.text +
-    "</li>").join("") + "</ul>";
-}
-
-function monthView(year, month) {
-  const life = state.life;
-  const from = year * 365 + Math.floor(month * 365 / 12);
-  const to = year * 365 + Math.floor((month + 1) * 365 / 12);
-  let html = '<table class="grid"><thead><tr><th>day</th><th>up</th><th>asleep</th>' +
-             '<th>doing</th><th>tries</th></tr></thead><tbody>';
-  let any = false;
-  for (let d = from; d < to; d++) {
-    const r = life.days[d];
-    if (!r) continue;
-    any = true;
-    const names = [];
-    for (let i = 0; i < r.acts.length; i += 3) names.push(life.names[r.acts[i + 1]]);
-    html += '<tr class="click" data-day="' + (d - from) + '"><td class="n">' +
-      (d - from + 1) + '</td><td class="n">' + hhmm(r.wake) + '</td><td class="n">' +
-      hhmm(r.asleep) + "</td><td>" + names.slice(0, 3).join(" · ") + '</td><td class="n">' +
-      (r.attempts || "") + "</td></tr>";
-  }
-  html += "</tbody></table>";
-  return any ? html : "<p style='color:var(--muted)'>Not lived yet.</p>";
-}
-
-function hhmm(m) {
-  m = Math.round(m) % MIN_DAY;
-  return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
-}
-
-function dayView(year, month, day) {
-  const life = state.life;
-  const from = year * 365 + Math.floor(month * 365 / 12);
-  const r = life.days[from + day];
-  if (!r) return "<p style='color:var(--muted)'>Not lived yet.</p>";
-  const total = Math.max(1, r.busy);
-  let band = '<div class="dayband">';
-  const list = [];
-  for (let i = 0; i < r.acts.length; i += 3) {
-    const kind = r.acts[i], name = life.names[r.acts[i + 1]], mins = r.acts[i + 2];
-    band += '<div class="kind' + kind + '" style="width:' + (100 * mins / total).toFixed(2) +
-      '%" title="' + name + '"></div>';
-    list.push([kind, name, mins]);
-  }
-  band += "</div>";
-  const KIND = ["", "had to", "meant to", "knew better"];
-  let html = statBlock([
-    [hhmm(r.wake), "up" + (r.alarm ? ", to an alarm" : ", when it stopped")],
-    [hhmm(r.asleep), "asleep" + (r.insomnia ? ", after three" : "")],
-    [String(r.attempts), "tries to fall asleep"],
-    [String(r.thoughts.length), "thoughts"],
-  ]);
-  html += band;
-  html += '<div class="daylist">' + list.map(([k, n, m]) =>
-    '<div>' + n + ' <span class="num" style="color:var(--faint)">' + m + "′" +
-    (k ? " · " + KIND[k] : "") + "</span></div>").join("") + "</div>";
-  const seen = new Map();
-  for (const t of r.thoughts) {
-    const text = life.thoughtNames[t];
-    seen.set(text, (seen.get(text) || 0) + 1);
-  }
-  html += '<h3 style="font-weight:400;font-size:15px;margin:16px 0 4px">Thought about</h3>';
-  html += '<div class="cloud">' + topOf(seen, 12).map(([t, n]) =>
-    "<span>" + t + (n > 1 ? ' <span class="num" style="color:var(--faint)">×' + n + "</span>" : "") +
-    "</span>").join("") + "</div>";
-  return html;
-}
-
-// ---------------------------------------------------------------- wiring
+// ------------------------------------------------------------------ wiring
 
 function init() {
-  buildSetup();
-  $("#start").addEventListener("click", begin);
-  $("#play").addEventListener("click", () => {
-    state.playing = !state.playing; state.last = performance.now(); setTransport();
-  });
-  $("#toend").addEventListener("click", runToEnd);
+  chrome(); buildSetup();
+  $("#start").addEventListener("click", live);
   $("#again").addEventListener("click", () => {
-    state.life = null; state.playing = false;
-    $("#run").hidden = true; $("#setup").hidden = false;
+    state.seed = Math.floor(Math.random() * 1e6);
+    buildSetup(); live(); window.scrollTo({ top: 0, behavior: "smooth" });
   });
-  for (const btn of $("#speeds").children) {
-    btn.addEventListener("click", () => { state.speed = Number(btn.dataset.speed); setTransport(); });
-  }
-  for (const btn of document.querySelectorAll("#tabs button[data-level]")) {
-    btn.addEventListener("click", () => {
-      state.zoom.level = btn.dataset.level;
-      draw(); paintDetail();
-    });
-  }
-  $("#prev").addEventListener("click", () => stepView(-1));
-  $("#next").addEventListener("click", () => stepView(1));
-  $("#now").addEventListener("click", () => {
-    state.following = true; followNow(); draw(); paint();
+  $("#replay").addEventListener("click", replay);
+  $("#lang").addEventListener("click", () => {
+    state.lang = state.lang === "hr" ? "en" : "hr";
+    chrome(); buildSetup();
+    if (state.life) drawAll();
   });
-  const cv = $("#chart");
-  const inspect = (ev) => {
-    const life = state.life;
-    if (!life) return;
-    const rect = cv.getBoundingClientRect();
-    const frac = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
-    const [d0, d1] = window_();
-    const z = state.zoom;
-    // a click can land on a stretch that has not happened yet; the last day
-    // lived is as far forward as anything can be inspected
-    const reachable = Math.min(d1 - 1, lastLivedDay());
-    if (reachable < d0) return;
-    const day = Math.max(d0, Math.min(Math.floor(d0 + frac * (d1 - d0)), reachable));
-    const at = placeOf(day);
-    state.following = false;
-    if (z.level === "life") z.year = at.year;
-    else if (z.level === "year") z.month = at.month;
-    else z.day = day - monthStart(z.year, z.month);
-    draw(); paintDetail();
-  };
-  cv.addEventListener("click", inspect);
-  cv.addEventListener("dblclick", () => {
-    const z = state.zoom;
-    z.level = z.level === "life" ? "year" : z.level === "year" ? "month" : "day";
-    draw(); paintDetail();
-  });
-  window.addEventListener("resize", () => draw());
-  window.addEventListener("keydown", (e) => {
-    if (!state.life || $("#run").hidden) return;
-    if (e.key === " ") {
-      e.preventDefault(); state.playing = !state.playing;
-      state.last = performance.now(); setTransport();
-    } else if (e.key === "ArrowLeft") { e.preventDefault(); stepView(-1); }
-    else if (e.key === "ArrowRight") { e.preventDefault(); stepView(1); }
-  });
-  setTransport();
 }
 
 init();
