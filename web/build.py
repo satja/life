@@ -46,3 +46,11 @@ out = os.path.join(here, 'life.html')
 with open(out, 'w', encoding='utf-8') as f:
     f.write(page)
 print('%s  %d KB' % (out, len(page) // 1024))
+
+# GitHub Pages serves a branch's /docs folder at the site root, so the same
+# page is written there as index.html
+docs = os.path.join(os.path.dirname(here), 'docs')
+os.makedirs(docs, exist_ok=True)
+with open(os.path.join(docs, 'index.html'), 'w', encoding='utf-8') as f:
+    f.write(page)
+print('%s  (for GitHub Pages)' % os.path.join(docs, 'index.html'))
