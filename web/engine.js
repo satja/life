@@ -123,6 +123,32 @@ const REGRET = {"checking the phone at three in the morning":"time","saying it o
   "replying immediately":"work","looking back too long":"time","having one more":"body",
   "bringing it up again":"love"};
 
+// Every dial the machinery turns on, and what leans on it. Mirrors the
+// tables in world.py: a trait is an entry here, and the entry is read by
+// the loop.
+const DIALS = { sleep: 0.05, restless: 1.0, conscience: 1 / 26000,
+                temptation: 1 / 12, persistence: 0.96, frailty: 1.0 };
+
+const FROM_GENES = {
+  "worry":            { sleep: ["+", -0.018], restless: ["x", 1.35], temptation: ["x", 1.20] },
+  "fear_of_the_dark": { sleep: ["+", -0.010], restless: ["x", 1.15] },
+  "patience":         { sleep: ["+", 0.012], restless: ["x", 0.80], temptation: ["x", 0.75] },
+  "stubbornness":     { persistence: ["+", 0.02], frailty: ["x", 0.90], conscience: ["x", 0.80] },
+  "hope":             { conscience: ["x", 1.60], frailty: ["x", 0.85] },
+  "silence":          { temptation: ["x", 0.80], restless: ["x", 1.10] },
+  "posture":          { frailty: ["x", 1.15] },
+  "a way with people": { conscience: ["x", 1.25] },
+};
+const FROM_UPBRINGING = { temptation: ["x", 1.15], restless: ["x", 1.10] };
+const FROM_HISTORY = {
+  war:      { sleep: ["+", -0.015], restless: ["x", 1.30], temptation: ["x", 1.20] },
+  plague:   { restless: ["x", 1.20], conscience: ["x", 1.40] },
+  money:    { restless: ["x", 1.20], temptation: ["x", 1.15] },
+  nature:   { sleep: ["+", -0.010], restless: ["x", 1.15] },
+  politics: { restless: ["x", 1.10] },
+  progress: { conscience: ["x", 1.10] },
+};
+
 const SEASONS = ["winter","winter","spring","spring","spring","summer",
                  "summer","summer","autumn","autumn","autumn","winter"];
 const MONTHS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
@@ -243,6 +269,7 @@ export class Life {
     this.salience = new Map(); this.scars = []; this.circumstances = [];
     this.pending = []; this.noLonger = new Set(); this.preoccupation = null;
     this.cause = null; this.diedAt = null;
+    this.dials = Object.assign({}, DIALS); this.working = {}; this.dialsAt = {};
 
     this.canDo = []; this.mustDo = []; this.shouldDo = []; this.neverDo = [];
     this.conscious = []; this.subconscious = []; this.byTheme = new Map();
@@ -270,6 +297,7 @@ export class Life {
     this.raiseChildhood();
     this.goToSchool();
     this.timeline = this.unfoldHistory();
+    this.windUp();
     this.schedule = this.buildSchedule();
   }
 
@@ -285,6 +313,39 @@ export class Life {
     if (this.tracing) {
       this.tracing.push([line, (truth ? "True" : "False") + (note ? " · " + note : "")]);
     }
+  }
+
+  // recompute every dial from what was given, what was done, and what is
+  // going on at the moment, keeping the working so it can be read
+  windUp() {
+    const base = Object.assign({}, DIALS, {
+      sleep: this.opts.sleepBase, conscience: this.opts.conscience,
+      temptation: 1 / this.opts.temptation,
+    });
+    this.dials = Object.assign({}, base);
+    this.working = {}; for (const k in base) this.working[k] = [];
+    const lean = (source, table) => {
+      for (const dial in table) {
+        const [how, amount] = table[dial];
+        this.working[dial].push([source, how, amount]);
+        if (how === "+") this.dials[dial] += amount; else this.dials[dial] *= amount;
+      }
+    };
+    for (const trait of Object.keys(this.given).sort()) {
+      if (FROM_GENES[trait]) {
+        lean(trait + " (" + (this.fromWhom[trait] || "?") + ")", FROM_GENES[trait]);
+      }
+    }
+    for (let i = 0; i < this.unresolved.length; i++) {
+      lean("carried from childhood", FROM_UPBRINGING);
+    }
+    for (const c of this.circumstances) {
+      if (FROM_HISTORY[c.kind]) lean(c.text, FROM_HISTORY[c.kind]);
+    }
+    this.dials.sleep = Math.max(0.008, this.dials.sleep);
+    this.dials.persistence = Math.min(0.995, this.dials.persistence);
+    this.dialsAt[this.age] = { dials: Object.assign({}, this.dials),
+                               working: JSON.parse(JSON.stringify(this.working)) };
   }
 
   rnd() { return this.rng(); }
@@ -529,7 +590,8 @@ export class Life {
   takePlace(event) {
     const age = this.age, month = this.rint(12);
     this.circumstances.push({
-      text: event.t, until: age + event.years, risk: (event.risk || 0) * this.opts.lethality,
+      text: event.t, until: age + event.years, kind: event.kind,
+      risk: (event.risk || 0) * this.opts.lethality,
       does: event.does || [], thinks: event.thinks || [],
     });
     this.worldEvents.push({ age, month, text: event.t, kind: event.kind });
@@ -547,7 +609,7 @@ export class Life {
     const age = this.age;
     if (key === "parent") {
       this.circumstances.push({
-        text: "a child", until: age + 18, risk: 0,
+        text: "a child", until: age + 18, risk: 0, kind: "child",
         does: [["carrying someone who is asleep", 60], ["reading the same book aloud", 30],
                ["worrying about someone else", 45]],
         thinks: [["whether they are all right", "love"]],
@@ -575,9 +637,10 @@ export class Life {
   birthday(age) {
     this.circumstances = this.circumstances.filter((c) => c.until > age);
     for (const [start, event] of this.timeline) if (start === age) this.takePlace(event);
+    this.windUp();
     if (age > this.lifespan) { this.die(null); return; }
     for (const c of this.circumstances) {
-      const chance = c.risk * frailty(age);
+      const chance = c.risk * frailty(age) * this.dials.frailty;
       if (chance && this.rnd() < chance) { this.die(c.text); return; }
     }
     this.pending = (this.schedule.get(age) || []).map((e) => [this.rint(12), e[0], e[1]]);
@@ -641,7 +704,7 @@ export class Life {
         this.mustDo.push({ name: this.pick(owed), kind: 1, minutes: this.rrange(20, 90) });
       }
     }
-    this.tempted = this.rint(this.opts.temptation) === 0;
+    this.tempted = this.rnd() < this.dials.temptation;
     this.reminded = false;
   }
 
@@ -669,9 +732,9 @@ export class Life {
         if (at >= 0) { pool.splice(at, 1); break; }
       }
     }
-    this.idle += this.rint(3);
-    this.tempted = this.rint(this.opts.temptation) === 0;
-    if (!this.reminded && this.rnd() < this.opts.conscience) {
+    this.idle += Math.round(this.rint(3) * this.dials.restless);
+    this.tempted = this.rnd() < this.dials.temptation;
+    if (!this.reminded && this.rnd() < this.dials.conscience) {
       this.reminded = true; this.record.remembered++; this.rememberedTotal++;
     }
   }
@@ -743,7 +806,7 @@ export class Life {
     this.tick(this.rrange(1, 5));
     this.sleepAttempts++;
     this.idle += this.rint(2);
-    const chance = this.opts.sleepBase + 0.012 * this.sleepAttempts;
+    const chance = this.dials.sleep + 0.012 * this.sleepAttempts;
     if (this.rnd() < chance) { this.night(); return true; }
     return false;
   }

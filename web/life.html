@@ -147,6 +147,13 @@ button.nm[aria-expanded="true"] { color: var(--accent); }
     <pre class="listing live" id="live"></pre>
     <p class="foot" id="stagenote"></p>
 
+    <h2>
+      <span id="h-clock"></span>
+      <span class="right"><span class="lab" id="clockat"></span></span>
+    </h2>
+    <pre class="account" id="clockwork"></pre>
+    <p class="foot" id="clocknote"></p>
+
     <h2 id="h-account"></h2>
     <pre class="account" id="account"></pre>
 
@@ -169,6 +176,9 @@ const UI = {
     walk: "walk through one day", stop: "stop", atAge: "at",
     walking: "one day, line by line",
     ran: "ran", times: "×", tru: "true",
+    clock: "the clockwork",
+    clockNote: "Nothing here is a label. Each dial is read by the loop above, and what leans on it is what you were given, what was done to you before you could object, and what happens to be going on. Computed by wind_up() in world.py.",
+    base: "base", readBy: "read by",
     account: "what it came to",
     hint: "Nothing here is retyped: every line is read from the file it claims to be. A line greyed out is a line that never ran.",
     died: "died at", of: "of",
@@ -183,13 +193,16 @@ const UI = {
     walk: "prošeći kroz jedan dan", stop: "stani", atAge: "u",
     walking: "jedan dan, redak po redak",
     ran: "izvršeno", times: "×", tru: "istinito",
+    clock: "mehanizam",
+    clockNote: "Ovdje ništa nije samo naziv. Svaku brojku čita petlja iznad, a na nju se naslanja ono što si dobio, ono što ti je učinjeno prije nego si mogao prigovoriti, i ono što se u tom trenutku događa. Računa ih wind_up() u world.py.",
+    base: "temelj", readBy: "čita",
     account: "što je od toga ostalo",
     hint: "Ništa ovdje nije prepisano: svaki redak čita se iz datoteke za koju tvrdi da je. Posivljeni redak nikad se nije izvršio.",
     died: "umro u", of: "od",
   },
 };
 </script>
-<script>const SRC = {"main": "import genes\nimport upbringing\nimport education\nfrom world import dead\nfrom live import wake_up, live, sleep\n\nif __name__ == \"__main__\":\n    while not dead:\n        wake_up()\n        live()\n        sleep()", "live": "import random\nfrom world import *\n\ndef wake_up():\n    while still_sleepy:\n        if must_wake_up:\n            do_whatever_it_takes_to_get_up()\n            return\n        else:\n            pass\n    get_up()\n\ndef sleep():\n    while not lying_down:\n        pass\n    attempts = 0\n    while fall_asleep() == False:\n        think_about_stuff()\n\n        attempts += 1\n        if attempts == 50:\n            get_frustrated()\n        if attempts > 50:\n            continue_to_be_frustrated()\n        if morning:\n            insomnia = True\n\ndef think_about_stuff():\n    thought = random.choice(subconsciousness + consciousness)\n    while have_nothing_to_do:\n        think(thought)\n        if random.randrange(10) > 0:\n            thought = random.choice(related(thought))\n        else:\n            thought = random.choice(subconsciousness + consciousness)\n\ndef live():\n    while len(things_you_can_do) > 0:\n        think_about_stuff()\n\n        if len(things_you_really_must_do) > 0:\n            if random.randrange(2) == 0:\n                thing_to_do = random.choice(things_you_really_must_do)\n                do(thing_to_do)\n\n        if len(things_you_should_do) > 0:\n            if random.randrange(3) == 0:\n                thing_to_do = random.choice(things_you_should_do)\n                do(thing_to_do)\n\n        if len(things_you_should_never_do) > 0:\n            if random.randrange(4) == 0:\n                thing_to_do = random.choice(things_you_should_never_do)\n                do(thing_to_do)\n\n        thing_to_do = random.choice(things_you_can_do)\n        do(thing_to_do)\n        \n        think_about_stuff()", "reveals": {"still_sleepy": [{"file": "world.py", "line": 485, "code": "still_sleepy = Condition(_still_sleepy)"}, {"file": "world.py", "line": 451, "code": "def _still_sleepy():\n    if state.grogginess <= 0:\n        return False\n    state.grogginess -= 1\n    return True"}, {"file": "world.py", "line": 253, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}], "must_wake_up": [{"file": "world.py", "line": 486, "code": "must_wake_up = Condition(_must_wake_up)"}, {"file": "world.py", "line": 458, "code": "def _must_wake_up():\n    age = clock.age\n    if age < 6 or age >= 66 or not state.alive:\n        return False\n    return clock.day % 7 not in (5, 6)"}], "lying_down": [{"file": "world.py", "line": 487, "code": "lying_down = Condition(_lying_down)"}, {"file": "world.py", "line": 465, "code": "def _lying_down():\n    if state.lying:\n        return True\n    state.evening_left -= 1\n    if state.evening_left <= 0:\n        state.lying = True\n        state.idle += random.randrange(2, 9)\n        return True\n    return False"}], "morning": [{"file": "world.py", "line": 488, "code": "morning = Condition(_morning)"}, {"file": "world.py", "line": 476, "code": "def _morning():\n    if 3 <= clock.hour < 7:\n        if not state.insomnia_noted:\n            state.insomnia_noted = True\n            state.insomnia_nights += 1\n        return True\n    return False"}], "have_nothing_to_do": [{"file": "world.py", "line": 489, "code": "have_nothing_to_do = Condition(lambda: state.idle > 0, cost=0)"}, {"file": "world.py", "line": 253, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}], "things_you_can_do": [{"file": "world.py", "line": 332, "code": "things_you_can_do = Pool()"}, {"file": "world.py", "line": 671, "code": "def restock():\n    choices = list(CAN_DO[state.stage])\n    choices += [(s, 45) for s in state.skills_kept]\n    for circumstance in state.circumstances:\n        choices += circumstance['does']\n    choices += SEASON[SEASONS[clock.month]]\n    already = set()\n    distinct = []\n    for name, minutes in choices:\n        if name not in already:\n            already.add(name)\n            distinct.append((name, minutes))\n    state.choices = distinct"}, {"file": "world.py", "line": 603, "code": "def take_place(event):\n    age = clock.age\n    state.circumstances.append(\n        {'text': event.text, 'until': age + event.years, 'risk': event.risk,\n         'does': event.does, 'thinks': event.thinks})\n    month = random.randrange(12)\n    state.world_events.append((age, month, event.text))\n    chronicle.world(age, month, event.text)\n    if event.costs:\n        owe(event.costs)"}], "things_you_really_must_do": [{"file": "world.py", "line": 333, "code": "things_you_really_must_do = Pool()"}], "things_you_should_do": [{"file": "world.py", "line": 334, "code": "things_you_should_do = Reproach()"}, {"file": "world.py", "line": 272, "code": "class Reproach(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.reminded else 0"}], "things_you_should_never_do": [{"file": "world.py", "line": 335, "code": "things_you_should_never_do = Temptations()"}, {"file": "world.py", "line": 267, "code": "class Temptations(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.tempted else 0"}], "consciousness": [{"file": "world.py", "line": 336, "code": "consciousness = Pool()"}, {"file": "world.py", "line": 384, "code": "def refresh_mind():\n    name = stage_at(clock.age)\n    thoughts = list(THOUGHTS[name])\n    for circumstance in state.circumstances:\n        thoughts += circumstance['thinks']\n    age = clock.age\n    if not state.preoccupation or state.preoccupation[1] <= age:\n        state.preoccupation = (random.choice(thoughts),\n                               age + random.randrange(2, 8))\n    thoughts += [state.preoccupation[0]] * 3\n    consciousness[:] = [Thought(t, m) for t, m in thoughts]\n    subconsciousness[:] = [Thought(t, m) for t, m, since in DEEP\n                           if age >= since] + list(state.scars)\n    things_you_should_never_do[:] = [\n        Doing(n, 'never', random.randrange(5, 40))\n        for n in (NEVER_DO if age >= 13 else [])]\n    by_theme.clear()\n    for thought in consciousness + subconsciousness:\n        by_theme.setdefault(thought.theme, []).append(thought)"}], "subconsciousness": [{"file": "world.py", "line": 337, "code": "subconsciousness = Pool()"}], "do": [{"file": "world.py", "line": 415, "code": "def do(thing):\n    clock.tick(thing.minutes)\n    chronicle.did(clock.age, clock.month, thing.name, thing.kind)\n    if thing.kind == 'never':\n        if random.randrange(9) == 0:\n            scar(thing.name)\n    else:\n        if thing.kind == 'should':\n            state.reminded = False\n            state.got_round_to += 1\n        for pool in (things_you_can_do, things_you_really_must_do,\n                     things_you_should_do):\n            if thing in pool:\n                pool.remove(thing)\n                break\n    state.idle += random.randrange(0, 3)\n    state.tempted = random.randrange(12) == 0\n    if not state.reminded:\n        state.reminded = random.random() < RECOVERS"}], "think": [{"file": "world.py", "line": 409, "code": "def think(thought):\n    clock.tick(random.randrange(1, 4))\n    state.idle -= 1\n    chronicle.thought(clock.age, clock.month, thought.text)"}], "related": [{"file": "world.py", "line": 405, "code": "def related(thought):\n    return by_theme.get(thought.theme) or list(consciousness)"}], "fall_asleep": [{"file": "world.py", "line": 502, "code": "def fall_asleep():\n    if not state.alive:\n        night()\n        return True\n    clock.tick(random.randrange(1, 5))\n    state.sleep_attempts += 1\n    state.idle += random.randrange(0, 2)\n    chance = 0.05 + 0.012 * state.sleep_attempts\n    if random.random() < chance:\n        night()\n        return True\n    return False"}, {"file": "world.py", "line": 516, "code": "def night():\n    if state.insomnia_noted and state.sleep_attempts > state.worst_night[0]:\n        state.worst_night = (state.sleep_attempts, clock.age, clock.time())\n    wake = 6 * 60 + random.randrange(0, 150)\n    target = (state.day_index + 1) * MINUTES_PER_DAY + wake\n    clock.minute = max(target, clock.minute + 45)\n    state.grogginess = random.randrange(0, 45)\n    state.lying = False"}], "get_up": [{"file": "world.py", "line": 526, "code": "def get_up():\n    state.grogginess = 0\n    morning_of(full=True)"}], "do_whatever_it_takes_to_get_up": [{"file": "world.py", "line": 531, "code": "def do_whatever_it_takes_to_get_up():\n    clock.tick(random.randrange(5, 25))\n    state.grogginess = 0\n    state.alarms += 1\n    morning_of(full=False)"}], "get_frustrated": [{"file": "world.py", "line": 493, "code": "def get_frustrated():\n    clock.tick(random.randrange(2, 10))\n    state.frustrated += 1"}], "continue_to_be_frustrated": [{"file": "world.py", "line": 498, "code": "def continue_to_be_frustrated():\n    clock.tick(1)"}], "dead": [{"file": "world.py", "line": 490, "code": "dead = Condition(lambda: not state.alive, cost=0)"}], "upbringing": [{"file": "upbringing.py", "line": 69, "code": "def childhood():\n    age = 0\n    while age < 7:\n        watch(parents)\n        imitate(random.choice(parents))\n        hurt = something_small()\n        if hurt:\n            try:\n                cry(hurt)\n            except NotInThisHouse:\n                unresolved.append(hurt)\n        age += 1"}, {"file": "upbringing.py", "line": 82, "code": "def grow_up():\n    global raised\n    childhood()\n    age = 17\n    while len(unresolved) > 0:\n        thing = unresolved.pop()\n        age += 1\n        if age > 79:\n            return\n        if random.randrange(10) > 0:\n            unresolved.insert(0, thing)\n        else:\n            raised = (age, thing)\n            raise Unresolved(thing)"}, {"file": "upbringing.py", "line": 105, "code": "try:\n    grow_up()"}], "education": [{"file": "education.py", "line": 70, "code": "def understand(subject):\n    if subject not in curious_about:\n        raise NotImplementedError(subject)\n    questions.append(\"why \" + subject)\n    while len(questions) > 0:\n        if bell():\n            break\n        question = questions.pop()\n        questions.extend(ask(question))"}, {"file": "education.py", "line": 67, "code": "def bell():\n    return random.randrange(45) == 0"}], "world": [{"file": "world.py", "line": 253, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}, {"file": "world.py", "line": 263, "code": "class Pool(list):\n    pass"}, {"file": "world.py", "line": 267, "code": "class Temptations(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.tempted else 0"}, {"file": "world.py", "line": 272, "code": "class Reproach(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.reminded else 0"}], "genes": [{"file": "genes.py", "line": 5, "code": "class Ancestor:\n    hope = True\n    fear_of_the_dark = True\n    eyes = \"brown\"\n    worry = \"about the winter\"\n    silence = \"the kind you are born into\"\n    posture = \"from carrying things\"\n\nclass Grandmother(Ancestor):\n    stubbornness = True\n    recipe = \"never written down\"\n    worry = \"about money\"\n\nclass Grandfather(Ancestor):\n    silence = \"long\"\n    patience = True\n\nclass Mother(Grandmother, Grandfather):\n    worry = float('inf')\n    eyes = \"green\"\n    everything_else = \"hers\"\n\nclass Father(Grandmother, Grandfather):\n    posture = \"bad\"\n    eyes = \"grey\"\n    silence = \"at the table\"\n\nclass You(Mother, Father):\n    pass"}, {"file": "genes.py", "line": 40, "code": "def inherit(trait):\n    for ancestor in You.__mro__:\n        if trait in vars(ancestor):\n            return copy(vars(ancestor)[trait])\n    return mutate(trait)\n\ndef blame(trait):\n    for ancestor in reversed(You.__mro__):\n        if trait in vars(ancestor):\n            return ancestor\n    return You"}, {"file": "genes.py", "line": 85, "code": "lifespan = 68 + random.randrange(-11, 22)"}], "history": [{"file": "history.py", "line": 4, "code": "class Event:\n    def __init__(self, text, kind, years, weight,\n                 does=(), thinks=(), risk=0.0, costs=None, repeats=False):\n        self.text = text\n        self.kind = kind\n        self.years = years\n        self.weight = weight\n        self.does = list(does)\n        self.thinks = list(thinks)\n        self.risk = risk\n        self.costs = costs\n        self.repeats = repeats"}, {"file": "history.py", "line": 17, "code": "WORLD = [\n    Event(\"the government falls\", 'politics', 1, 10, repeats=True,\n          does=[(\"listening for news\", 40), (\"queueing\", 60)],\n          thinks=[(\"whether it makes any difference\", 'politics')]),\n    Event(\"a new government, much like the last\", 'politics', 2, 9, repeats=True,\n          does=[(\"listening for news\", 30)],\n          thinks=[(\"whether it makes any difference\", 'politics')]),"}, {"file": "history.py", "line": 83, "code": "def unfold(span=101):\n    happened = []\n    spent = set()\n    age = 2\n    while age < span:\n        if random.random() < 0.075:\n            candidates = [e for e in WORLD if e.repeats or e.text not in spent]\n            if not candidates:\n                break\n            event = pick(candidates)\n            happened.append((age, event))\n            spent.add(event.text)\n            age += max(1, event.years)\n        else:\n            age += 1\n    return happened"}]}};</script>
+<script>const SRC = {"main": "import genes\nimport upbringing\nimport education\nfrom world import dead\nfrom live import wake_up, live, sleep\n\nif __name__ == \"__main__\":\n    while not dead:\n        wake_up()\n        live()\n        sleep()", "live": "import random\nfrom world import *\n\ndef wake_up():\n    while still_sleepy:\n        if must_wake_up:\n            do_whatever_it_takes_to_get_up()\n            return\n        else:\n            pass\n    get_up()\n\ndef sleep():\n    while not lying_down:\n        pass\n    attempts = 0\n    while fall_asleep() == False:\n        think_about_stuff()\n\n        attempts += 1\n        if attempts == 50:\n            get_frustrated()\n        if attempts > 50:\n            continue_to_be_frustrated()\n        if morning:\n            insomnia = True\n\ndef think_about_stuff():\n    thought = random.choice(subconsciousness + consciousness)\n    while have_nothing_to_do:\n        think(thought)\n        if random.randrange(10) > 0:\n            thought = random.choice(related(thought))\n        else:\n            thought = random.choice(subconsciousness + consciousness)\n\ndef live():\n    while len(things_you_can_do) > 0:\n        think_about_stuff()\n\n        if len(things_you_really_must_do) > 0:\n            if random.randrange(2) == 0:\n                thing_to_do = random.choice(things_you_really_must_do)\n                do(thing_to_do)\n\n        if len(things_you_should_do) > 0:\n            if random.randrange(3) == 0:\n                thing_to_do = random.choice(things_you_should_do)\n                do(thing_to_do)\n\n        if len(things_you_should_never_do) > 0:\n            if random.randrange(4) == 0:\n                thing_to_do = random.choice(things_you_should_never_do)\n                do(thing_to_do)\n\n        thing_to_do = random.choice(things_you_can_do)\n        do(thing_to_do)\n        \n        think_about_stuff()", "reveals": {"still_sleepy": [{"file": "world.py", "line": 560, "code": "still_sleepy = Condition(_still_sleepy)"}, {"file": "world.py", "line": 526, "code": "def _still_sleepy():\n    if state.grogginess <= 0:\n        return False\n    state.grogginess -= 1\n    return True"}, {"file": "world.py", "line": 325, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}], "must_wake_up": [{"file": "world.py", "line": 561, "code": "must_wake_up = Condition(_must_wake_up)"}, {"file": "world.py", "line": 533, "code": "def _must_wake_up():\n    age = clock.age\n    if age < 6 or age >= 66 or not state.alive:\n        return False\n    return clock.day % 7 not in (5, 6)"}], "lying_down": [{"file": "world.py", "line": 562, "code": "lying_down = Condition(_lying_down)"}, {"file": "world.py", "line": 540, "code": "def _lying_down():\n    if state.lying:\n        return True\n    state.evening_left -= 1\n    if state.evening_left <= 0:\n        state.lying = True\n        state.idle += round(random.randrange(2, 9) * state.dials['restless'])\n        return True\n    return False"}], "morning": [{"file": "world.py", "line": 563, "code": "morning = Condition(_morning)"}, {"file": "world.py", "line": 551, "code": "def _morning():\n    if 3 <= clock.hour < 7:\n        if not state.insomnia_noted:\n            state.insomnia_noted = True\n            state.insomnia_nights += 1\n        return True\n    return False"}], "have_nothing_to_do": [{"file": "world.py", "line": 564, "code": "have_nothing_to_do = Condition(lambda: state.idle > 0, cost=0)"}, {"file": "world.py", "line": 325, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}], "things_you_can_do": [{"file": "world.py", "line": 406, "code": "things_you_can_do = Pool()"}, {"file": "world.py", "line": 748, "code": "def restock():\n    choices = list(CAN_DO[state.stage])\n    choices += [(s, 45) for s in state.skills_kept]\n    for circumstance in state.circumstances:\n        choices += circumstance['does']\n    choices += SEASON[SEASONS[clock.month]]\n    already = set()\n    distinct = []\n    for name, minutes in choices:\n        if name not in already:\n            already.add(name)\n            distinct.append((name, minutes))\n    state.choices = distinct"}, {"file": "world.py", "line": 678, "code": "def take_place(event):\n    age = clock.age\n    state.circumstances.append(\n        {'text': event.text, 'until': age + event.years, 'risk': event.risk,\n         'kind': event.kind, 'does': event.does, 'thinks': event.thinks})\n    month = random.randrange(12)\n    state.world_events.append((age, month, event.text))\n    chronicle.world(age, month, event.text)\n    if event.costs:\n        owe(event.costs)"}], "things_you_really_must_do": [{"file": "world.py", "line": 407, "code": "things_you_really_must_do = Pool()"}], "things_you_should_do": [{"file": "world.py", "line": 408, "code": "things_you_should_do = Reproach()"}, {"file": "world.py", "line": 344, "code": "class Reproach(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.reminded else 0"}], "things_you_should_never_do": [{"file": "world.py", "line": 409, "code": "things_you_should_never_do = Temptations()"}, {"file": "world.py", "line": 339, "code": "class Temptations(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.tempted else 0"}], "consciousness": [{"file": "world.py", "line": 410, "code": "consciousness = Pool()"}, {"file": "world.py", "line": 459, "code": "def refresh_mind():\n    name = stage_at(clock.age)\n    thoughts = list(THOUGHTS[name])\n    for circumstance in state.circumstances:\n        thoughts += circumstance['thinks']\n    age = clock.age\n    if not state.preoccupation or state.preoccupation[1] <= age:\n        state.preoccupation = (random.choice(thoughts),\n                               age + random.randrange(2, 8))\n    thoughts += [state.preoccupation[0]] * 3\n    consciousness[:] = [Thought(t, m) for t, m in thoughts]\n    subconsciousness[:] = [Thought(t, m) for t, m, since in DEEP\n                           if age >= since] + list(state.scars)\n    things_you_should_never_do[:] = [\n        Doing(n, 'never', random.randrange(5, 40))\n        for n in (NEVER_DO if age >= 13 else [])]\n    by_theme.clear()\n    for thought in consciousness + subconsciousness:\n        by_theme.setdefault(thought.theme, []).append(thought)"}], "subconsciousness": [{"file": "world.py", "line": 411, "code": "subconsciousness = Pool()"}], "do": [{"file": "world.py", "line": 490, "code": "def do(thing):\n    clock.tick(thing.minutes)\n    chronicle.did(clock.age, clock.month, thing.name, thing.kind)\n    if thing.kind == 'never':\n        if random.randrange(9) == 0:\n            scar(thing.name)\n    else:\n        if thing.kind == 'should':\n            state.reminded = False\n            state.got_round_to += 1\n        for pool in (things_you_can_do, things_you_really_must_do,\n                     things_you_should_do):\n            if thing in pool:\n                pool.remove(thing)\n                break\n    state.idle += round(random.randrange(0, 3) * state.dials['restless'])\n    state.tempted = random.random() < state.dials['temptation']\n    if not state.reminded:\n        state.reminded = random.random() < state.dials['conscience']"}], "think": [{"file": "world.py", "line": 484, "code": "def think(thought):\n    clock.tick(random.randrange(1, 4))\n    state.idle -= 1\n    chronicle.thought(clock.age, clock.month, thought.text)"}], "related": [{"file": "world.py", "line": 480, "code": "def related(thought):\n    return by_theme.get(thought.theme) or list(consciousness)"}], "fall_asleep": [{"file": "world.py", "line": 577, "code": "def fall_asleep():\n    if not state.alive:\n        night()\n        return True\n    clock.tick(random.randrange(1, 5))\n    state.sleep_attempts += 1\n    state.idle += random.randrange(0, 2)\n    chance = state.dials['sleep'] + 0.012 * state.sleep_attempts\n    if random.random() < chance:\n        night()\n        return True\n    return False"}, {"file": "world.py", "line": 591, "code": "def night():\n    if state.insomnia_noted and state.sleep_attempts > state.worst_night[0]:\n        state.worst_night = (state.sleep_attempts, clock.age, clock.time())\n    wake = 6 * 60 + random.randrange(0, 150)\n    target = (state.day_index + 1) * MINUTES_PER_DAY + wake\n    clock.minute = max(target, clock.minute + 45)\n    state.grogginess = random.randrange(0, 45)\n    state.lying = False"}], "get_up": [{"file": "world.py", "line": 601, "code": "def get_up():\n    state.grogginess = 0\n    morning_of(full=True)"}], "do_whatever_it_takes_to_get_up": [{"file": "world.py", "line": 606, "code": "def do_whatever_it_takes_to_get_up():\n    clock.tick(random.randrange(5, 25))\n    state.grogginess = 0\n    state.alarms += 1\n    morning_of(full=False)"}], "get_frustrated": [{"file": "world.py", "line": 568, "code": "def get_frustrated():\n    clock.tick(random.randrange(2, 10))\n    state.frustrated += 1"}], "continue_to_be_frustrated": [{"file": "world.py", "line": 573, "code": "def continue_to_be_frustrated():\n    clock.tick(1)"}], "dead": [{"file": "world.py", "line": 565, "code": "dead = Condition(lambda: not state.alive, cost=0)"}], "upbringing": [{"file": "upbringing.py", "line": 69, "code": "def childhood():\n    age = 0\n    while age < 7:\n        watch(parents)\n        imitate(random.choice(parents))\n        hurt = something_small()\n        if hurt:\n            try:\n                cry(hurt)\n            except NotInThisHouse:\n                unresolved.append(hurt)\n        age += 1"}, {"file": "upbringing.py", "line": 82, "code": "def grow_up():\n    global raised\n    childhood()\n    age = 17\n    while len(unresolved) > 0:\n        thing = unresolved.pop()\n        age += 1\n        if age > 79:\n            return\n        if random.randrange(10) > 0:\n            unresolved.insert(0, thing)\n        else:\n            raised = (age, thing)\n            raise Unresolved(thing)"}, {"file": "upbringing.py", "line": 105, "code": "try:\n    grow_up()"}], "education": [{"file": "education.py", "line": 70, "code": "def understand(subject):\n    if subject not in curious_about:\n        raise NotImplementedError(subject)\n    questions.append(\"why \" + subject)\n    while len(questions) > 0:\n        if bell():\n            break\n        question = questions.pop()\n        questions.extend(ask(question))"}, {"file": "education.py", "line": 67, "code": "def bell():\n    return random.randrange(45) == 0"}], "wind_up": [{"file": "world.py", "line": 243, "code": "def wind_up():\n    \"\"\"Recompute every dial from what you were given, what was done to you,\n    and what is going on at the moment. Kept as a working, so that the\n    working can be read.\"\"\"\n    working = {name: [] for name in DIALS}\n    state.dials = dict(DIALS)\n\n    def lean(source, table):\n        for dial, (how, amount) in table.items():\n            working[dial].append((source, how, amount))\n            if how == '+':\n                state.dials[dial] += amount\n            else:\n                state.dials[dial] *= amount\n\n    for trait in sorted(genes.given):\n        if trait in FROM_GENES:\n            lean('%s (%s)' % (trait, genes.from_whom.get(trait, '?')),\n                 FROM_GENES[trait])\n    for _ in upbringing.unresolved:\n        lean('carried from childhood', FROM_UPBRINGING)\n    for circumstance in state.circumstances:\n        kind = circumstance.get('kind')\n        if kind in FROM_HISTORY:\n            lean(circumstance['text'], FROM_HISTORY[kind])\n\n    state.dials['sleep'] = max(0.008, state.dials['sleep'])\n    state.dials['persistence'] = min(0.995, state.dials['persistence'])\n    state.working = working"}, {"file": "world.py", "line": 214, "code": "FROM_GENES = {\n    'worry':            {'sleep': ('+', -0.018), 'restless': ('x', 1.35),\n                         'temptation': ('x', 1.20)},\n    'fear_of_the_dark': {'sleep': ('+', -0.010), 'restless': ('x', 1.15)},\n    'patience':         {'sleep': ('+', 0.012), 'restless': ('x', 0.80),\n                         'temptation': ('x', 0.75)},\n    'stubbornness':     {'persistence': ('+', 0.02), 'frailty': ('x', 0.90),\n                         'conscience': ('x', 0.80)},\n    'hope':             {'conscience': ('x', 1.60), 'frailty': ('x', 0.85)},\n    'silence':          {'temptation': ('x', 0.80), 'restless': ('x', 1.10)},\n    'posture':          {'frailty': ('x', 1.15)},\n    'a way with people': {'conscience': ('x', 1.25)},"}], "world": [{"file": "world.py", "line": 325, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}, {"file": "world.py", "line": 335, "code": "class Pool(list):\n    pass"}, {"file": "world.py", "line": 339, "code": "class Temptations(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.tempted else 0"}, {"file": "world.py", "line": 344, "code": "class Reproach(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.reminded else 0"}], "genes": [{"file": "genes.py", "line": 5, "code": "class Ancestor:\n    hope = True\n    fear_of_the_dark = True\n    eyes = \"brown\"\n    worry = \"about the winter\"\n    silence = \"the kind you are born into\"\n    posture = \"from carrying things\"\n\nclass Grandmother(Ancestor):\n    stubbornness = True\n    recipe = \"never written down\"\n    worry = \"about money\"\n\nclass Grandfather(Ancestor):\n    silence = \"long\"\n    patience = True\n\nclass Mother(Grandmother, Grandfather):\n    worry = float('inf')\n    eyes = \"green\"\n    everything_else = \"hers\"\n\nclass Father(Grandmother, Grandfather):\n    posture = \"bad\"\n    eyes = \"grey\"\n    silence = \"at the table\"\n\nclass You(Mother, Father):\n    pass"}, {"file": "genes.py", "line": 40, "code": "def inherit(trait):\n    for ancestor in You.__mro__:\n        if trait in vars(ancestor):\n            return copy(vars(ancestor)[trait])\n    return mutate(trait)\n\ndef blame(trait):\n    for ancestor in reversed(You.__mro__):\n        if trait in vars(ancestor):\n            return ancestor\n    return You"}, {"file": "genes.py", "line": 85, "code": "lifespan = 68 + random.randrange(-11, 22)"}], "history": [{"file": "history.py", "line": 4, "code": "class Event:\n    def __init__(self, text, kind, years, weight,\n                 does=(), thinks=(), risk=0.0, costs=None, repeats=False):\n        self.text = text\n        self.kind = kind\n        self.years = years\n        self.weight = weight\n        self.does = list(does)\n        self.thinks = list(thinks)\n        self.risk = risk\n        self.costs = costs\n        self.repeats = repeats"}, {"file": "history.py", "line": 17, "code": "WORLD = [\n    Event(\"the government falls\", 'politics', 1, 10, repeats=True,\n          does=[(\"listening for news\", 40), (\"queueing\", 60)],\n          thinks=[(\"whether it makes any difference\", 'politics')]),\n    Event(\"a new government, much like the last\", 'politics', 2, 9, repeats=True,\n          does=[(\"listening for news\", 30)],\n          thinks=[(\"whether it makes any difference\", 'politics')]),"}, {"file": "history.py", "line": 83, "code": "def unfold(span=101):\n    happened = []\n    spent = set()\n    age = 2\n    while age < span:\n        if random.random() < 0.075:\n            candidates = [e for e in WORLD if e.repeats or e.text not in spent]\n            if not candidates:\n                break\n            event = pick(candidates)\n            happened.append((age, event))\n            spent.add(event.text)\n            age += max(1, event.years)\n        else:\n            age += 1\n    return happened"}]}};</script>
 <script>// A life, ported from the Python in this repository.
 // live.py's loops are reproduced faithfully: checking a condition costs a
 // minute, which is what makes them terminate.
@@ -315,6 +328,32 @@ const REGRET = {"checking the phone at three in the morning":"time","saying it o
   "replying immediately":"work","looking back too long":"time","having one more":"body",
   "bringing it up again":"love"};
 
+// Every dial the machinery turns on, and what leans on it. Mirrors the
+// tables in world.py: a trait is an entry here, and the entry is read by
+// the loop.
+const DIALS = { sleep: 0.05, restless: 1.0, conscience: 1 / 26000,
+                temptation: 1 / 12, persistence: 0.96, frailty: 1.0 };
+
+const FROM_GENES = {
+  "worry":            { sleep: ["+", -0.018], restless: ["x", 1.35], temptation: ["x", 1.20] },
+  "fear_of_the_dark": { sleep: ["+", -0.010], restless: ["x", 1.15] },
+  "patience":         { sleep: ["+", 0.012], restless: ["x", 0.80], temptation: ["x", 0.75] },
+  "stubbornness":     { persistence: ["+", 0.02], frailty: ["x", 0.90], conscience: ["x", 0.80] },
+  "hope":             { conscience: ["x", 1.60], frailty: ["x", 0.85] },
+  "silence":          { temptation: ["x", 0.80], restless: ["x", 1.10] },
+  "posture":          { frailty: ["x", 1.15] },
+  "a way with people": { conscience: ["x", 1.25] },
+};
+const FROM_UPBRINGING = { temptation: ["x", 1.15], restless: ["x", 1.10] };
+const FROM_HISTORY = {
+  war:      { sleep: ["+", -0.015], restless: ["x", 1.30], temptation: ["x", 1.20] },
+  plague:   { restless: ["x", 1.20], conscience: ["x", 1.40] },
+  money:    { restless: ["x", 1.20], temptation: ["x", 1.15] },
+  nature:   { sleep: ["+", -0.010], restless: ["x", 1.15] },
+  politics: { restless: ["x", 1.10] },
+  progress: { conscience: ["x", 1.10] },
+};
+
 const SEASONS = ["winter","winter","spring","spring","spring","summer",
                  "summer","summer","autumn","autumn","autumn","winter"];
 const MONTHS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
@@ -435,6 +474,7 @@ class Life {
     this.salience = new Map(); this.scars = []; this.circumstances = [];
     this.pending = []; this.noLonger = new Set(); this.preoccupation = null;
     this.cause = null; this.diedAt = null;
+    this.dials = Object.assign({}, DIALS); this.working = {}; this.dialsAt = {};
 
     this.canDo = []; this.mustDo = []; this.shouldDo = []; this.neverDo = [];
     this.conscious = []; this.subconscious = []; this.byTheme = new Map();
@@ -462,6 +502,7 @@ class Life {
     this.raiseChildhood();
     this.goToSchool();
     this.timeline = this.unfoldHistory();
+    this.windUp();
     this.schedule = this.buildSchedule();
   }
 
@@ -477,6 +518,39 @@ class Life {
     if (this.tracing) {
       this.tracing.push([line, (truth ? "True" : "False") + (note ? " · " + note : "")]);
     }
+  }
+
+  // recompute every dial from what was given, what was done, and what is
+  // going on at the moment, keeping the working so it can be read
+  windUp() {
+    const base = Object.assign({}, DIALS, {
+      sleep: this.opts.sleepBase, conscience: this.opts.conscience,
+      temptation: 1 / this.opts.temptation,
+    });
+    this.dials = Object.assign({}, base);
+    this.working = {}; for (const k in base) this.working[k] = [];
+    const lean = (source, table) => {
+      for (const dial in table) {
+        const [how, amount] = table[dial];
+        this.working[dial].push([source, how, amount]);
+        if (how === "+") this.dials[dial] += amount; else this.dials[dial] *= amount;
+      }
+    };
+    for (const trait of Object.keys(this.given).sort()) {
+      if (FROM_GENES[trait]) {
+        lean(trait + " (" + (this.fromWhom[trait] || "?") + ")", FROM_GENES[trait]);
+      }
+    }
+    for (let i = 0; i < this.unresolved.length; i++) {
+      lean("carried from childhood", FROM_UPBRINGING);
+    }
+    for (const c of this.circumstances) {
+      if (FROM_HISTORY[c.kind]) lean(c.text, FROM_HISTORY[c.kind]);
+    }
+    this.dials.sleep = Math.max(0.008, this.dials.sleep);
+    this.dials.persistence = Math.min(0.995, this.dials.persistence);
+    this.dialsAt[this.age] = { dials: Object.assign({}, this.dials),
+                               working: JSON.parse(JSON.stringify(this.working)) };
   }
 
   rnd() { return this.rng(); }
@@ -721,7 +795,8 @@ class Life {
   takePlace(event) {
     const age = this.age, month = this.rint(12);
     this.circumstances.push({
-      text: event.t, until: age + event.years, risk: (event.risk || 0) * this.opts.lethality,
+      text: event.t, until: age + event.years, kind: event.kind,
+      risk: (event.risk || 0) * this.opts.lethality,
       does: event.does || [], thinks: event.thinks || [],
     });
     this.worldEvents.push({ age, month, text: event.t, kind: event.kind });
@@ -739,7 +814,7 @@ class Life {
     const age = this.age;
     if (key === "parent") {
       this.circumstances.push({
-        text: "a child", until: age + 18, risk: 0,
+        text: "a child", until: age + 18, risk: 0, kind: "child",
         does: [["carrying someone who is asleep", 60], ["reading the same book aloud", 30],
                ["worrying about someone else", 45]],
         thinks: [["whether they are all right", "love"]],
@@ -767,9 +842,10 @@ class Life {
   birthday(age) {
     this.circumstances = this.circumstances.filter((c) => c.until > age);
     for (const [start, event] of this.timeline) if (start === age) this.takePlace(event);
+    this.windUp();
     if (age > this.lifespan) { this.die(null); return; }
     for (const c of this.circumstances) {
-      const chance = c.risk * frailty(age);
+      const chance = c.risk * frailty(age) * this.dials.frailty;
       if (chance && this.rnd() < chance) { this.die(c.text); return; }
     }
     this.pending = (this.schedule.get(age) || []).map((e) => [this.rint(12), e[0], e[1]]);
@@ -833,7 +909,7 @@ class Life {
         this.mustDo.push({ name: this.pick(owed), kind: 1, minutes: this.rrange(20, 90) });
       }
     }
-    this.tempted = this.rint(this.opts.temptation) === 0;
+    this.tempted = this.rnd() < this.dials.temptation;
     this.reminded = false;
   }
 
@@ -861,9 +937,9 @@ class Life {
         if (at >= 0) { pool.splice(at, 1); break; }
       }
     }
-    this.idle += this.rint(3);
-    this.tempted = this.rint(this.opts.temptation) === 0;
-    if (!this.reminded && this.rnd() < this.opts.conscience) {
+    this.idle += Math.round(this.rint(3) * this.dials.restless);
+    this.tempted = this.rnd() < this.dials.temptation;
+    if (!this.reminded && this.rnd() < this.dials.conscience) {
       this.reminded = true; this.record.remembered++; this.rememberedTotal++;
     }
   }
@@ -935,7 +1011,7 @@ class Life {
     this.tick(this.rrange(1, 5));
     this.sleepAttempts++;
     this.idle += this.rint(2);
-    const chance = this.opts.sleepBase + 0.012 * this.sleepAttempts;
+    const chance = this.dials.sleep + 0.012 * this.sleepAttempts;
     if (this.rnd() < chance) { this.night(); return true; }
     return false;
   }
@@ -1189,6 +1265,7 @@ function run() {
   $("#run").textContent = t("again");
   draw();
   $("#account").textContent = account();
+  $("#clockwork").textContent = clockwork();
 }
 
 // ---- one day, line by line ----------------------------------------------
@@ -1225,6 +1302,47 @@ function tick() {
     row.scrollIntoView({ block: "nearest" });
   }
   walk.timer = setTimeout(tick, 70);
+}
+
+// ---- the clockwork: every dial, and what leans on it --------------------
+
+const READS = {
+  sleep: "fall_asleep()          live.py:17",
+  restless: "have_nothing_to_do     live.py:30",
+  conscience: "things_you_should_do   live.py:46",
+  temptation: "things_you_should_never_do  live.py:51",
+  persistence: "what you keep doing    world.py:drift",
+  frailty: "what the world does    world.py:birthday",
+};
+const SHOW = { sleep: 4, restless: 3, conscience: 6, temptation: 4,
+               persistence: 3, frailty: 3 };
+
+function clockwork() {
+  const life = state.life;
+  const want = Math.max(0, Math.min(life.diedAt[0], Number($("#walkage").value) || 0));
+  let at = want;
+  while (at >= 0 && !life.dialsAt[at]) at--;
+  if (at < 0) return "";
+  const { dials, working } = life.dialsAt[at];
+  $("#clockat").textContent = t("atAge") + " " + at;
+
+  const out = [];
+  for (const dial of Object.keys(dials)) {
+    const dp = SHOW[dial] || 3;
+    const base = dial === "conscience" ? 1 / 26000
+      : dial === "temptation" ? 1 / 12 : DIALS[dial];
+    out.push(dial.padEnd(13) + String(base.toFixed(dp)).padStart(9) + "   " + t("base"));
+    for (const [source, how, amount] of working[dial] || []) {
+      const shown = how === "+" ? (amount > 0 ? "+" : "") + amount.toFixed(dp)
+                                : "x" + amount.toFixed(2);
+      out.push(" ".repeat(13) + shown.padStart(9) + "   " + source);
+    }
+    out.push(" ".repeat(13) + "-".repeat(9));
+    out.push(" ".repeat(13) + dials[dial].toFixed(dp).padStart(9) + "   " +
+             t("readBy") + " " + READS[dial]);
+    out.push("");
+  }
+  return out.join("\n").trimEnd();
 }
 
 // ---------------------------------------------------------------- the account
@@ -1293,6 +1411,8 @@ function chrome() {
   $("#h-stage").textContent = t("stage");
   $("#stagenote").textContent = t("stageNote");
   $("#h-account").textContent = t("account");
+  $("#h-clock").textContent = t("clock");
+  $("#clocknote").textContent = t("clockNote");
   $("#hint").textContent = t("hint");
   $("#l-seed").textContent = t("seed");
   $("#l-atage").textContent = t("atAge");
@@ -1311,10 +1431,14 @@ function init() {
   });
   $("#seed").addEventListener("input", () => (state.seed = Number($("#seed").value) || 0));
   $("#walk").addEventListener("click", () => (state.walk ? stopWalk() : startWalk()));
+  $("#walkage").addEventListener("input", () => {
+    if (state.life) $("#clockwork").textContent = clockwork();
+  });
   $("#lang").addEventListener("click", () => {
     state.lang = state.lang === "hr" ? "en" : "hr";
     chrome();
-    if (state.life) { draw(); $("#account").textContent = account(); }
+    if (state.life) { draw(); $("#account").textContent = account();
+                      $("#clockwork").textContent = clockwork(); }
   });
 }
 

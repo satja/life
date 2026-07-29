@@ -139,6 +139,17 @@ grandmother about money, the mother about everything — so "inherit()" stops at
 the nearest and "blame()" reaches the furthest, and they disagree. That is what
 the diamond was for.
 
+Q: What do the traits actually do?
+
+A: They turn the dials the loop reads. "wind_up()" in world.py rebuilds six
+numbers out of what you were given, what was done to you before you could
+object, and what happens to be going on: worry takes 0.018 off the chance of
+falling asleep and multiplies idle thinking by 1.35, patience gives some of it
+back, hope multiplies the chance of the list coming into view by 1.6,
+stubbornness slows how fast what you do drifts back. A war leans on the same
+numbers while it lasts. Nothing is a label; every entry is read by a line of
+live.py, and the web version prints the whole working.
+
 Q: Where does the world get into the loop?
 
 A: Through "things_you_can_do". "restock()" adds every active circumstance's

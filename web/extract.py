@@ -79,6 +79,7 @@ REVEALS = {
     'upbringing': [('upbringing.py', 'def childhood'), ('upbringing.py', 'def grow_up'),
                    ('upbringing.py', 'try:')],
     'education': [('education.py', 'def understand'), ('education.py', 'def bell')],
+    'wind_up': [('world.py', 'def wind_up'), ('world.py', 'FROM_GENES = ')],
     'world': [('world.py', 'class Condition'), ('world.py', 'class Pool'),
               ('world.py', 'class Temptations'), ('world.py', 'class Reproach')],
 }

@@ -99,6 +99,7 @@ function run() {
   $("#run").textContent = t("again");
   draw();
   $("#account").textContent = account();
+  $("#clockwork").textContent = clockwork();
 }
 
 // ---- one day, line by line ----------------------------------------------
@@ -135,6 +136,47 @@ function tick() {
     row.scrollIntoView({ block: "nearest" });
   }
   walk.timer = setTimeout(tick, 70);
+}
+
+// ---- the clockwork: every dial, and what leans on it --------------------
+
+const READS = {
+  sleep: "fall_asleep()          live.py:17",
+  restless: "have_nothing_to_do     live.py:30",
+  conscience: "things_you_should_do   live.py:46",
+  temptation: "things_you_should_never_do  live.py:51",
+  persistence: "what you keep doing    world.py:drift",
+  frailty: "what the world does    world.py:birthday",
+};
+const SHOW = { sleep: 4, restless: 3, conscience: 6, temptation: 4,
+               persistence: 3, frailty: 3 };
+
+function clockwork() {
+  const life = state.life;
+  const want = Math.max(0, Math.min(life.diedAt[0], Number($("#walkage").value) || 0));
+  let at = want;
+  while (at >= 0 && !life.dialsAt[at]) at--;
+  if (at < 0) return "";
+  const { dials, working } = life.dialsAt[at];
+  $("#clockat").textContent = t("atAge") + " " + at;
+
+  const out = [];
+  for (const dial of Object.keys(dials)) {
+    const dp = SHOW[dial] || 3;
+    const base = dial === "conscience" ? 1 / 26000
+      : dial === "temptation" ? 1 / 12 : DIALS[dial];
+    out.push(dial.padEnd(13) + String(base.toFixed(dp)).padStart(9) + "   " + t("base"));
+    for (const [source, how, amount] of working[dial] || []) {
+      const shown = how === "+" ? (amount > 0 ? "+" : "") + amount.toFixed(dp)
+                                : "x" + amount.toFixed(2);
+      out.push(" ".repeat(13) + shown.padStart(9) + "   " + source);
+    }
+    out.push(" ".repeat(13) + "-".repeat(9));
+    out.push(" ".repeat(13) + dials[dial].toFixed(dp).padStart(9) + "   " +
+             t("readBy") + " " + READS[dial]);
+    out.push("");
+  }
+  return out.join("\n").trimEnd();
 }
 
 // ---------------------------------------------------------------- the account
@@ -203,6 +245,8 @@ function chrome() {
   $("#h-stage").textContent = t("stage");
   $("#stagenote").textContent = t("stageNote");
   $("#h-account").textContent = t("account");
+  $("#h-clock").textContent = t("clock");
+  $("#clocknote").textContent = t("clockNote");
   $("#hint").textContent = t("hint");
   $("#l-seed").textContent = t("seed");
   $("#l-atage").textContent = t("atAge");
@@ -221,10 +265,14 @@ function init() {
   });
   $("#seed").addEventListener("input", () => (state.seed = Number($("#seed").value) || 0));
   $("#walk").addEventListener("click", () => (state.walk ? stopWalk() : startWalk()));
+  $("#walkage").addEventListener("input", () => {
+    if (state.life) $("#clockwork").textContent = clockwork();
+  });
   $("#lang").addEventListener("click", () => {
     state.lang = state.lang === "hr" ? "en" : "hr";
     chrome();
-    if (state.life) { draw(); $("#account").textContent = account(); }
+    if (state.life) { draw(); $("#account").textContent = account();
+                      $("#clockwork").textContent = clockwork(); }
   });
 }
 

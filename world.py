@@ -199,6 +199,78 @@ REGRET = {
     "bringing it up again": 'love',
 }
 
+# Every dial the machinery turns on, and what leans on it. A trait is not a
+# label: it is an entry in this table, and the entry is read by the loop.
+DIALS = {
+    'sleep':        0.05,        # fall_asleep(): the chance, before attempts
+    'restless':     1.0,         # how much idle thinking a thing leaves behind
+    'conscience':   1 / 26000.0, # the chance the list comes into view
+    'temptation':   1 / 12.0,    # the chance the never-do list has a length
+    'persistence':  0.96,        # how slowly what you do drifts back
+    'frailty':      1.0,         # how hard the world lands on you
+}
+
+# what you were given, and what it does. ('+', n) shifts, ('x', n) scales.
+FROM_GENES = {
+    'worry':            {'sleep': ('+', -0.018), 'restless': ('x', 1.35),
+                         'temptation': ('x', 1.20)},
+    'fear_of_the_dark': {'sleep': ('+', -0.010), 'restless': ('x', 1.15)},
+    'patience':         {'sleep': ('+', 0.012), 'restless': ('x', 0.80),
+                         'temptation': ('x', 0.75)},
+    'stubbornness':     {'persistence': ('+', 0.02), 'frailty': ('x', 0.90),
+                         'conscience': ('x', 0.80)},
+    'hope':             {'conscience': ('x', 1.60), 'frailty': ('x', 0.85)},
+    'silence':          {'temptation': ('x', 0.80), 'restless': ('x', 1.10)},
+    'posture':          {'frailty': ('x', 1.15)},
+    'a way with people': {'conscience': ('x', 1.25)},
+}
+
+# what was done to you before you could object
+FROM_UPBRINGING = {'temptation': ('x', 1.15), 'restless': ('x', 1.10)}
+
+# and what the century does while it is going on
+FROM_HISTORY = {
+    'war':      {'sleep': ('+', -0.015), 'restless': ('x', 1.30),
+                 'temptation': ('x', 1.20)},
+    'plague':   {'restless': ('x', 1.20), 'conscience': ('x', 1.40)},
+    'money':    {'restless': ('x', 1.20), 'temptation': ('x', 1.15)},
+    'nature':   {'sleep': ('+', -0.010), 'restless': ('x', 1.15)},
+    'politics': {'restless': ('x', 1.10)},
+    'progress': {'conscience': ('x', 1.10)},
+}
+
+
+def wind_up():
+    """Recompute every dial from what you were given, what was done to you,
+    and what is going on at the moment. Kept as a working, so that the
+    working can be read."""
+    working = {name: [] for name in DIALS}
+    state.dials = dict(DIALS)
+
+    def lean(source, table):
+        for dial, (how, amount) in table.items():
+            working[dial].append((source, how, amount))
+            if how == '+':
+                state.dials[dial] += amount
+            else:
+                state.dials[dial] *= amount
+
+    for trait in sorted(genes.given):
+        if trait in FROM_GENES:
+            lean('%s (%s)' % (trait, genes.from_whom.get(trait, '?')),
+                 FROM_GENES[trait])
+    for _ in upbringing.unresolved:
+        lean('carried from childhood', FROM_UPBRINGING)
+    for circumstance in state.circumstances:
+        kind = circumstance.get('kind')
+        if kind in FROM_HISTORY:
+            lean(circumstance['text'], FROM_HISTORY[kind])
+
+    state.dials['sleep'] = max(0.008, state.dials['sleep'])
+    state.dials['persistence'] = min(0.995, state.dials['persistence'])
+    state.working = working
+
+
 RECOVERS = 1 / 26000.0
 
 
@@ -323,6 +395,8 @@ class State:
         self.cause = None
         self.pending = []
         self.preoccupation = None
+        self.dials = dict(DIALS)
+        self.working = {}
         self.died_at = None
 
 
@@ -368,7 +442,8 @@ def drift():
     for name in salience:
         anchor = math.log(BASE.get(name, 1.0))
         here = math.log(salience[name])
-        moved = anchor + 0.96 * (here - anchor) + random.gauss(0, 0.14)
+        moved = anchor + state.dials['persistence'] * (here - anchor) \
+            + random.gauss(0, 0.14)
         salience[name] = min(4.0, max(0.15, math.exp(moved)))
 
 
@@ -427,10 +502,10 @@ def do(thing):
             if thing in pool:
                 pool.remove(thing)
                 break
-    state.idle += random.randrange(0, 3)
-    state.tempted = random.randrange(12) == 0
+    state.idle += round(random.randrange(0, 3) * state.dials['restless'])
+    state.tempted = random.random() < state.dials['temptation']
     if not state.reminded:
-        state.reminded = random.random() < RECOVERS
+        state.reminded = random.random() < state.dials['conscience']
 
 
 def remember(text, theme):
@@ -468,7 +543,7 @@ def _lying_down():
     state.evening_left -= 1
     if state.evening_left <= 0:
         state.lying = True
-        state.idle += random.randrange(2, 9)
+        state.idle += round(random.randrange(2, 9) * state.dials['restless'])
         return True
     return False
 
@@ -506,7 +581,7 @@ def fall_asleep():
     clock.tick(random.randrange(1, 5))
     state.sleep_attempts += 1
     state.idle += random.randrange(0, 2)
-    chance = 0.05 + 0.012 * state.sleep_attempts
+    chance = state.dials['sleep'] + 0.012 * state.sleep_attempts
     if random.random() < chance:
         night()
         return True
@@ -572,7 +647,7 @@ def morning_of(full):
         if owed:
             things_you_really_must_do.append(
                 Doing(random.choice(owed), 'must', random.randrange(20, 90)))
-    state.tempted = random.randrange(12) == 0
+    state.tempted = random.random() < state.dials['temptation']
     state.reminded = False
 
 
@@ -604,7 +679,7 @@ def take_place(event):
     age = clock.age
     state.circumstances.append(
         {'text': event.text, 'until': age + event.years, 'risk': event.risk,
-         'does': event.does, 'thinks': event.thinks})
+         'kind': event.kind, 'does': event.does, 'thinks': event.thinks})
     month = random.randrange(12)
     state.world_events.append((age, month, event.text))
     chronicle.world(age, month, event.text)
@@ -626,6 +701,7 @@ def take_effect(key):
     if key == 'parent':
         state.circumstances.append(
             {'text': 'a child', 'until': age + 18, 'risk': 0.0,
+             'kind': 'child',
              'does': [("carrying someone who is asleep", 60),
                       ("reading the same book aloud", 30),
                       ("worrying about someone else", 45)],
@@ -644,11 +720,12 @@ def birthday(age):
     state.circumstances = [c for c in state.circumstances if c['until'] > age]
     for event in history.starting(age):
         take_place(event)
+    wind_up()
     if age > genes.lifespan:
         die(age, None)
         return
     for circumstance in state.circumstances:
-        chance = circumstance['risk'] * frailty(age)
+        chance = circumstance['risk'] * frailty(age) * state.dials['frailty']
         if chance and random.random() < chance:
             die(age, circumstance['text'])
             return
