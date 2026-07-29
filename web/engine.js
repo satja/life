@@ -4,6 +4,12 @@
 
 const MIN_DAY = 1440, DAYS_YEAR = 365;
 
+// the lines of live.py that are instrumented; one of these with no count
+// never ran, which is worth seeing
+const TRACED = [5, 6, 7, 8, 10, 11, 14, 15, 16, 17, 18, 20, 21, 22, 23, 24, 25, 26,
+                29, 30, 31, 32, 33, 35, 38, 39, 41, 42, 43, 44, 46, 47, 48, 49,
+                51, 52, 53, 54, 56, 57, 59];
+
 function mulberry32(a) {
   return function () {
     a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -249,6 +255,12 @@ export class Life {
     this.thoughtCount = new Map(); this.themeCount = new Map();
     this.deepCount = 0; this.deepTexts = new Set();
 
+    // how often each line of live.py ran, and how often it was true
+    this.hits = new Array(64).fill(0);
+    this.trues = new Array(64).fill(0);
+    this.conds = new Set();
+    this.tracing = null;
+
     this.days = [];            // one record per day lived
     this.events = [];          // {age, month, text, kind}
     this.worldEvents = [];
@@ -259,6 +271,20 @@ export class Life {
     this.goToSchool();
     this.timeline = this.unfoldHistory();
     this.schedule = this.buildSchedule();
+  }
+
+  hit(line, note) {
+    this.hits[line]++;
+    if (this.tracing) this.tracing.push([line, note === undefined ? "" : note]);
+  }
+
+  hitIf(line, truth, note) {
+    this.hits[line]++;
+    this.conds.add(line);
+    if (truth) this.trues[line]++;
+    if (this.tracing) {
+      this.tracing.push([line, (truth ? "True" : "False") + (note ? " · " + note : "")]);
+    }
   }
 
   rnd() { return this.rng(); }
@@ -657,10 +683,18 @@ export class Life {
     const all = this.subconscious.concat(this.conscious);
     if (!all.length) return;
     let thought = this.pick(all);
+    this.hit(29, thought.text);
     let guard = 0;
-    while (this.idle > 0 && guard++ < 400) {
+    for (;;) {
+      const idle = this.idle > 0;
+      this.hitIf(30, idle, idle ? "" : "something to do");
+      if (!idle || guard++ >= 400) break;
+      this.hit(31, thought.text);
       this.think(thought);
-      thought = this.rint(10) > 0 ? this.pick(this.related(thought)) : this.pick(all);
+      const near = this.rint(10) > 0;
+      this.hitIf(32, near);
+      if (near) { thought = this.pick(this.related(thought)); this.hit(33, thought.text); }
+      else { thought = this.pick(all); this.hit(35, thought.text); }
     }
   }
 
@@ -721,40 +755,99 @@ export class Life {
 
   wakeUp() {
     let guard = 0;
-    while (this.stillSleepy() && guard++ < 600) {
-      if (this.mustWakeUp()) { this.doWhateverItTakes(); return; }
+    for (;;) {
+      const sleepy = this.stillSleepy();
+      this.hitIf(5, sleepy, sleepy ? "grogginess " + this.grogginess : "");
+      if (!sleepy || guard++ >= 600) break;
+      const must = this.mustWakeUp();
+      this.hitIf(6, must);
+      if (must) {
+        this.hit(7); this.doWhateverItTakes();
+        this.hit(8, "to an alarm, at " + this.clockTime());
+        return;
+      }
+      this.hit(10);
     }
     this.getUp();
+    this.hit(11, this.canDo.length + " things you can do today");
   }
 
   liveADay() {
     let guard = 0;
-    while (this.canDo.length > 0 && guard++ < 200) {
-      this.thinkAboutStuff();
-      if (this.mustDo.length > 0 && this.rint(2) === 0) this.doThing(this.pick(this.mustDo));
-      if (this.reminded && this.shouldDo.length > 0 && this.rint(3) === 0) {
-        this.doThing(this.pick(this.shouldDo));
+    for (;;) {
+      const more = this.canDo.length > 0;
+      this.hitIf(38, more, more ? this.canDo.length + " left" : "the day is spent");
+      if (!more || guard++ >= 200) break;
+      this.hit(39); this.thinkAboutStuff();
+
+      const must = this.mustDo.length > 0;
+      this.hitIf(41, must, must ? this.mustDo.length : "");
+      if (must) {
+        const now = this.rint(2) === 0;
+        this.hitIf(42, now);
+        if (now) {
+          const thing = this.pick(this.mustDo);
+          this.hit(43, thing.name); this.hit(44, thing.minutes + " min");
+          this.doThing(thing);
+        }
       }
-      if (this.tempted && this.neverDo.length > 0 && this.rint(4) === 0) {
-        this.doThing(this.pick(this.neverDo));
+
+      const should = this.reminded && this.shouldDo.length > 0;
+      this.hitIf(46, should, should ? "in view" : "len() is 0");
+      if (should) {
+        const now = this.rint(3) === 0;
+        this.hitIf(47, now);
+        if (now) {
+          const thing = this.pick(this.shouldDo);
+          this.hit(48, thing.name); this.hit(49, thing.minutes + " min");
+          this.doThing(thing);
+        }
       }
+
+      const never = this.tempted && this.neverDo.length > 0;
+      this.hitIf(51, never, never ? "tempted" : "len() is 0");
+      if (never) {
+        const now = this.rint(4) === 0;
+        this.hitIf(52, now);
+        if (now) {
+          const thing = this.pick(this.neverDo);
+          this.hit(53, thing.name); this.hit(54, thing.minutes + " min");
+          this.doThing(thing);
+        }
+      }
+
       if (!this.canDo.length) break;
-      this.doThing(this.pick(this.canDo));
-      this.thinkAboutStuff();
+      const thing = this.pick(this.canDo);
+      this.hit(56, thing.name); this.hit(57, thing.minutes + " min");
+      this.doThing(thing);
+      this.hit(59); this.thinkAboutStuff();
     }
   }
 
   sleepNow() {
     let guard = 0;
-    while (!this.lyingDown() && guard++ < 400) { /* waiting to be able to */ }
+    for (;;) {
+      const down = this.lyingDown();
+      this.hitIf(14, !down, down ? "lying down at " + this.clockTime() : "");
+      if (down || guard++ >= 400) break;
+      this.hit(15);
+    }
     let attempts = 0;
+    this.hit(16, "0");
     guard = 0;
-    while (this.fallAsleep() === false && guard++ < 300) {
-      this.thinkAboutStuff();
-      attempts++;
-      if (attempts === 50) this.tick(this.rrange(2, 10));
-      if (attempts > 50) this.tick(1);
-      this.isMorning();
+    for (;;) {
+      const asleep = this.fallAsleep();
+      this.hitIf(17, !asleep, asleep ? "asleep at " + this.clockTime() : "not yet");
+      if (asleep || guard++ >= 300) break;
+      this.hit(18); this.thinkAboutStuff();
+      attempts++; this.hit(20, String(attempts));
+      this.hitIf(21, attempts === 50);
+      if (attempts === 50) { this.hit(22); this.tick(this.rrange(2, 10)); }
+      this.hitIf(23, attempts > 50);
+      if (attempts > 50) { this.hit(24); this.tick(1); }
+      const dawn = this.isMorning();
+      this.hitIf(25, dawn, dawn ? "still awake at " + this.clockTime() : "");
+      if (dawn) this.hit(26, "True");
     }
   }
 
@@ -773,6 +866,15 @@ export class Life {
     else { this.record.asleep = this.minute % MIN_DAY; }
     this.days.push(this.record);
     return true;
+  }
+
+  traceOneDay(age) {
+    const twin = new Life(this.opts);
+    let guard = 0;
+    while (twin.alive && twin.age < age && guard++ < 200) twin.stepYear();
+    twin.tracing = [];
+    twin.step();
+    return twin.tracing;
   }
 
   stepYear() {

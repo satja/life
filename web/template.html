@@ -1,54 +1,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Život — a life</title>
+<title>life.py</title>
 <style>/*CSS*/</style>
 
 <div class="wrap">
-  <header class="mast">
-    <h1 id="title">Život</h1>
-    <span class="sub" id="sub"></span>
-    <span class="right">
-      <span class="lab" id="seedout"></span>
-      <button class="ghost" id="lang" type="button">english</button>
-    </span>
+  <header>
+    <h1>life.py</h1>
+    <button class="ghost" id="lang" type="button">hrvatski</button>
   </header>
 
-  <section id="setup">
-    <p class="intro" id="intro"></p>
-    <div class="knobs" id="knobs"></div>
-    <div class="begin">
-      <button class="go" id="start" type="button">Proživi jedan</button>
-    </div>
-  </section>
+  <p class="blurb" id="blurb"></p>
 
-  <section id="run" hidden>
+  <h2 id="h-entry"></h2>
+  <pre class="listing" id="main"></pre>
+  <p class="foot" id="entrynote"></p>
 
-    <h2 class="act"><span id="h-given"></span></h2>
-    <div class="panel given">
-      <div class="tree" id="tree"></div>
-      <div class="inherit" id="inherit"></div>
-      <p class="allot" id="allot"></p>
-      <p class="note" id="blamenote"></p>
-    </div>
+  <div class="controls">
+    <button class="go" id="run" type="button"></button>
+    <span class="field">
+      <label class="lab" for="seed" id="l-seed"></label>
+      <input id="seed" type="number" inputmode="numeric">
+      <button class="ghost" id="roll" type="button"></button>
+    </span>
+  </div>
 
-    <h2 class="act">
-      <span id="h-life"></span>
-      <button class="ghost small" id="replay" type="button"></button>
+  <div id="out" hidden>
+    <h2>
+      <span id="h-stage"></span>
+      <span class="right">
+        <button class="ghost" id="walk" type="button"></button>
+        <span class="field">
+          <label class="lab" for="walkage" id="l-atage"></label>
+          <input id="walkage" type="number" inputmode="numeric" value="34">
+        </span>
+      </span>
     </h2>
-    <div class="panel">
-      <div class="years" id="years"></div>
-      <p class="note lab" id="gridnote"></p>
-      <div class="yearcard" id="yearcard"></div>
-    </div>
+    <pre class="listing live" id="live"></pre>
+    <p class="foot" id="stagenote"></p>
 
-    <h2 class="act"><span id="h-account"></span></h2>
-    <div class="panel account" id="account"></div>
+    <h2 id="h-account"></h2>
+    <pre class="account" id="account"></pre>
 
-    <div class="begin end">
-      <button class="go" id="again" type="button">Još jedan</button>
-    </div>
-  </section>
+    <p class="foot" id="hint"></p>
+  </div>
 </div>
 
 <script>/*LANG*/</script>
+<script>/*SOURCE*/</script>
 <script>/*ENGINE*/</script>
 <script>/*APP*/</script>

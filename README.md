@@ -17,22 +17,32 @@ For one row per year instead, which is shorter and shows the shape better:
 
     $ LIFE_DETAIL=year python3 main.py
 
-There is also a web version in "web/". It runs the same model in a browser —
-a whole life at once — and tells it in three parts: what you were given,
-drawn as the family it came down through; the life itself, a square a year;
-and the account, which includes where the time actually went. It is bilingual,
-Croatian and English, and picks by the browser's language.
+There is also a web version in "web/", and its subject is this file. It shows
+"live.py" and runs it, and puts in the margin how often each line ran and how
+often it was true — so the thing the poem is about is stated by the poem:
 
-The model stays in English inside "web/engine.js". "web/lang.js" is a display
-layer over it — every string the model can put on screen, and nothing else —
-so changing language cannot change a life. The Python in the root of this
-repository is unchanged, and stays in English: it is the original.
+    if len(things_you_should_do) > 0:         229,240x   true 22
+        if random.randrange(3) == 0:               22x   true  9
+            do(thing_to_do)                         9x
+
+    if len(things_you_should_never_do) > 0:   229,240x   true 16,888
+        if random.randrange(4) == 0:           16,888x   true 4,149
+            do(thing_to_do)                     4,149x
+
+Click any name and its definition unfolds where it stands, read out of the
+file it lives in. A line with no count never ran, which is worth seeing: two
+of them never do. There is also a walk through a single day, line by line,
+with the values in the margin.
+
+Nothing on the page is retyped. "web/extract.py" reads the real modules at
+build time, so the listing and the source cannot drift apart. The commentary
+is Croatian and English; the program and everything it says stay in the
+language it was written in.
 
 Build with "python3 web/build.py", which writes "web/life.html" and
 "docs/index.html". GitHub Pages serves the /docs folder at
-https://life.blogaritam.com/ — the page is one file and loads nothing from
-anywhere, so any static host will do. "docs/CNAME" holds the custom domain
-and is not touched by the build.
+https://life.blogaritam.com/ — one file, loading nothing from anywhere.
+"docs/CNAME" holds the custom domain and is not touched by the build.
 
 Feel free to contribute.
 

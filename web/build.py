@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Assemble the single self-contained page the artifact host wants."""
 
+import json
 import os
 import re
+
+import extract
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,9 +30,12 @@ RESERVED = {'top', 'self', 'parent', 'window', 'document', 'location', 'name',
             'status', 'length', 'closed', 'frames', 'history', 'origin'}
 
 lang = read('lang.js')
+source = 'const SRC = ' + json.dumps(extract.build()) + ';'
 app = read('app.js')
 clash = (declared(engine) & declared(app)) | (declared(engine) & declared(lang)) \
         | (declared(app) & declared(lang))
+if 'SRC' in declared(engine) | declared(app) | declared(lang):
+    raise SystemExit('SRC is the embedded source; nothing else may declare it')
 if clash:
     raise SystemExit('both scripts declare %s at top level, which collides in one page'
                      % ', '.join(sorted(clash)))
@@ -42,6 +48,7 @@ if taken:
 page = read('template.html')
 page = page.replace('/*CSS*/', read('style.css'))
 page = page.replace('/*LANG*/', lang)
+page = page.replace('/*SOURCE*/', source)
 page = page.replace('/*ENGINE*/', engine)
 page = page.replace('/*APP*/', app)
 
