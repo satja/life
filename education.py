@@ -1,53 +1,110 @@
+import fate
 import random
+
+SUBJECTS = {
+    'arithmetic': ["7 x 8", "long division", "the order of operations"],
+    'geography': ["the capital of Peru", "the longest river", "oxbow lakes"],
+    'history': ["a date", "another date", "why it was inevitable"],
+    'biology': ["the parts of a flower", "mitosis", "what the pancreas does"],
+    'the other language': ["irregular verbs", "the word for window"],
+    'chemistry': ["the periodic table, partly", "why it goes bang"],
+    'physics': ["f = ma", "the thing about the pulley"],
+    'literature': ["what the poet meant", "the year he died"],
+}
+
+WORTH_KEEPING = [
+    "long division",
+    "the other language, badly",
+    "how to look busy",
+    "the word for window",
+    "how to sit through things",
+]
 
 memory = {}
 questions = []
+skills = []
+curious_about = random.sample(sorted(SUBJECTS), 2)
+grades = []
+not_understood = []
+whys = 0
 
 def memorize(fact):
-    memory[fact] = until_friday
+    memory[fact] = "until Friday"
     return fact
 
 def forget(fact):
-    while remembered(fact):
-        pass
-    del memory[fact]
+    memory.pop(fact, None)
 
 def study(subject):
-    while exam_is_far_away:
+    days_left = random.randrange(2, 30)
+    while days_left > 1:
         do_something_else()
-    for fact in subject:
+        days_left -= 1
+    for fact in SUBJECTS[subject]:
         memorize(fact)
-    hours_of_sleep = 0
+    for fact in SUBJECTS[subject]:
+        if random.randrange(3) > 0:
+            forget(fact)
+
+def do_something_else():
+    return random.choice(["the phone", "the ceiling", "a nap"])
 
 def exam(subject):
-    for question in subject:
-        answer = memory.get(question, random.choice(offered_answers))
-        write_down(answer)
-    for fact in subject:
+    right = 0
+    for question in SUBJECTS[subject]:
+        answer = memory.get(question, random.choice(["b", "c", "b"]))
+        if answer == "until Friday":
+            right += 1
+    for fact in SUBJECTS[subject]:
         forget(fact)
+    grade = round(1 + 4 * right / len(SUBJECTS[subject]))
+    grades.append(grade)
     return grade
 
+def ask(question):
+    return ["why " + question for _ in range(random.randrange(2, 4))]
+
+def bell():
+    return random.randrange(45) == 0
+
 def understand(subject):
-    if subject not in what_you_are_curious_about:
-        raise NotImplementedError
-    questions.append(why(subject))
+    if subject not in curious_about:
+        raise NotImplementedError(subject)
+    questions.append("why " + subject)
     while len(questions) > 0:
+        if bell():
+            break
         question = questions.pop()
         questions.extend(ask(question))
 
 def curiosity():
+    asked = 0
     while True:
-        answer = teacher(ask("why"))
-        if answer == "because":
+        asked += 1
+        if random.randrange(6) == 0:
             break
+        if asked > 500:
+            break
+    return asked
 
 def graduate():
-    while credits < enough:
-        study(random.choice(subjects))
-    return certificate_stating_that(you_can_be_taught)
+    for skill in WORTH_KEEPING:
+        if random.randrange(3) > 0:
+            skills.append(skill)
+    return "a certificate stating that you can be taught"
 
-def real_education():
-    while alive:
-        mistake = make_a_mistake()
-        learn_the_hard_way(mistake)
-        make_a_mistake()
+for year in range(12):
+    for subject in random.sample(sorted(SUBJECTS), 3):
+        study(subject)
+        exam(subject)
+    if random.randrange(3) == 0:
+        try:
+            understand(random.choice(sorted(SUBJECTS)))
+        except NotImplementedError as it:
+            not_understood.append(str(it))
+    if random.randrange(4) == 0:
+        understand(random.choice(curious_about))
+
+whys = curiosity()
+diploma = graduate()
+average = sum(grades) / len(grades)

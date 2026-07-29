@@ -1,4 +1,5 @@
 import random
+from world import *
 
 def wake_up():
     while still_sleepy:

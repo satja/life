@@ -1,12 +1,14 @@
+import fate
 import random
 from copy import copy
 
 class Ancestor:
-    fear_of_the_dark = True
     hope = True
+    fear_of_the_dark = True
+    eyes = "brown"
 
 class Grandmother(Ancestor):
-    stubbornness = 0.8
+    stubbornness = True
     recipe = "never written down"
 
 class Grandfather(Ancestor):
@@ -14,12 +16,20 @@ class Grandfather(Ancestor):
 
 class Mother(Grandmother, Grandfather):
     worry = float('inf')
+    eyes = "green"
+    everything_else = "hers"
 
 class Father(Grandmother, Grandfather):
     posture = "bad"
+    eyes = "grey"
 
 class You(Mother, Father):
     pass
+
+TRAITS = ['hope', 'fear_of_the_dark', 'stubbornness', 'worry', 'posture',
+          'silence', 'recipe', 'eyes', 'patience', 'a way with people']
+
+new = []
 
 def inherit(trait):
     for ancestor in You.__mro__:
@@ -34,15 +44,22 @@ def blame(trait):
     return You
 
 def mutate(trait):
-    if random.randrange(1000000) == 0:
-        return something_nobody_has_had_before()
+    if random.randrange(300) == 0:
+        new.append(trait)
+        return "yours"
     return None
+
+def dominant(trait):
+    return random.randrange(3) > 0
+
+def under_pressure():
+    return random.randrange(2) == 0
 
 def express(trait):
     if dominant(trait):
         return inherit(trait)
-    while not under_pressure:
-        pass
+    if not under_pressure():
+        return None
     return inherit(trait)
 
 def eyes():
@@ -54,3 +71,13 @@ def everything_else():
 def descendants():
     while True:
         yield type('You', (You,), {})
+
+given = {trait: express(trait) for trait in TRAITS}
+given = {trait: value for trait, value in given.items() if value is not None}
+from_whom = {trait: blame(trait).__name__ for trait in given}
+
+lifespan = 68 + random.randrange(-11, 22)
+if 'stubbornness' in given:
+    lifespan += 4
+if 'worry' in given:
+    lifespan -= 2
