@@ -1,4 +1,5 @@
 import atexit
+import math
 import random
 import textwrap
 
@@ -6,6 +7,7 @@ import fate
 import genes
 import upbringing
 import education
+import history
 from trajectory import chronicle
 
 __all__ = [
@@ -20,8 +22,8 @@ __all__ = [
 MINUTES_PER_DAY = 24 * 60
 DAYS_PER_YEAR = 365
 
-STAGES = [(65, 'old'), (35, 'middle'), (20, 'young'), (13, 'teenager'),
-          (3, 'child'), (0, 'infant')]
+STAGES = [(76, 'late'), (65, 'old'), (50, 'later'), (35, 'middle'),
+          (20, 'young'), (13, 'teenager'), (3, 'child'), (0, 'infant')]
 
 CAN_DO = {
     'infant': [("sleeping", 120), ("being carried", 40), ("crying", 20),
@@ -49,6 +51,17 @@ CAN_DO = {
                ("answering messages", 55), ("carrying something heavy", 30),
                ("cancelling", 10), ("being needed", 120),
                ("seeing fewer friends", 90), ("sleeping badly", 60)],
+    'later': [("working, still", 430), ("looking after someone", 130),
+              ("going to funerals", 180), ("fixing the same thing again", 70),
+              ("walking for the sake of it", 55),
+              ("reading the news too closely", 60),
+              ("having the same argument", 35), ("sleeping badly", 60),
+              ("putting something aside", 20),
+              ("standing in the doorway of a room", 15)],
+    'late': [("sitting", 130), ("being visited", 90), ("waiting", 150),
+             ("sleeping in the afternoon", 95), ("telling the story again", 35),
+             ("not recognising the street", 40),
+             ("looking at photographs", 45), ("going to the doctor", 110)],
     'old': [("walking slowly", 60), ("reading the same page twice", 50),
             ("watering the plants", 25), ("watching the news", 90),
             ("waiting for the phone", 120), ("telling the story again", 35),
@@ -63,7 +76,10 @@ MUST_DO = {
               "renewing the documents"],
     'middle': ["going to work", "paying the bill", "taking the bins out",
                "answering the message", "getting it repaired"],
+    'later': ["going to work", "paying the bill", "taking the pills",
+              "answering the message", "getting it repaired"],
     'old': ["taking the pills", "going to the check-up", "paying the bill"],
+    'late': ["taking the pills", "going to the check-up"],
 }
 
 NEVER_DO = [
@@ -97,10 +113,12 @@ SHOULD_DO = [
 
 THOUGHTS = {
     'infant': [("the ceiling", 'home'), ("that face again", 'love'),
-               ("hunger", 'body'), ("warm", 'body')],
+               ("hunger", 'body'), ("warm", 'body'),
+               ("the sound of the door", 'home'), ("being put down", 'home')],
     'child': [("what is under the bed", 'fear'), ("why the sky", 'time'),
               ("Saturday", 'time'), ("the smell of the hallway", 'home'),
-              ("whether they saw", 'shame')],
+              ("whether they saw", 'shame'), ("what they said about you", 'shame'),
+              ("being allowed to stay out", 'time')],
     'teenager': [("what you said in the corridor", 'shame'),
                  ("whether they meant it", 'love'), ("the same song", 'love'),
                  ("getting out of here", 'time'), ("your own face", 'body'),
@@ -117,6 +135,15 @@ THOUGHTS = {
                ("what you said in 2009", 'shame'),
                ("whether they are all right", 'love'),
                ("the smell of the hallway", 'home')],
+    'later': [("who is left", 'death'), ("the noise the knee makes", 'body'),
+              ("the bill due on the eleventh", 'money'),
+              ("whether they are all right", 'love'),
+              ("what it used to cost", 'money'),
+              ("it is August already", 'time'),
+              ("what you said in 2009", 'shame')],
+    'late': [("who is left", 'death'), ("the smell of the hallway", 'home'),
+             ("whether they will call", 'love'), ("the stairs", 'body'),
+             ("being the last one collected", 'shame')],
     'old': [("everyone in this photograph is older now", 'death'),
             ("the smell of the hallway", 'home'),
             ("whether they will call", 'love'),
@@ -125,12 +152,12 @@ THOUGHTS = {
 }
 
 DEEP = [
-    ("the light in a hospital corridor", 'death'),
-    ("a door you cannot find in a house you know", 'home'),
-    ("being the last one collected", 'shame'),
-    ("the stairs in the dark", 'fear'),
-    ("your own name, said wrong", 'shame'),
-    ("water, further out than you thought", 'fear'),
+    ("the stairs in the dark", 'fear', 0),
+    ("being the last one collected", 'shame', 0),
+    ("water, further out than you thought", 'fear', 0),
+    ("a door you cannot find in a house you know", 'home', 16),
+    ("your own name, said wrong", 'shame', 16),
+    ("the light in a hospital corridor", 'death', 27),
 ]
 
 RECOVERS = 1 / 26000.0
@@ -241,6 +268,13 @@ class State:
         self.frustrated = 0
         self.got_round_to = 0
         self.scars = []
+        self.circumstances = []
+        self.choices = []
+        self.world_events = []
+        self.no_longer_possible = set()
+        self.year_seen = -1
+        self.cause = None
+        self.preoccupation = None
         self.died_at = None
 
 
@@ -263,12 +297,58 @@ def stage_at(age):
     return 'infant'
 
 
+BASE = {
+    "moving out": 0.18, "falling in love": 0.25, "quitting something": 0.3,
+    "starting something": 0.45, "going somewhere cheap": 0.4,
+    "going to funerals": 0.35, "breaking something": 0.6,
+    "slamming a door": 0.7, "not recognising the street": 0.4,
+    "looking for work": 0.6, "going to look at it": 0.25,
+    "boarding up the windows": 0.5, "sleeping in the car": 0.5,
+    "carrying things upstairs": 0.5, "drying it out": 0.4,
+    "leaving for a while": 0.25, "going to the doctor": 0.7,
+    "working": 2.0, "working, still": 2.0, "sleeping": 1.6, "eating": 1.6,
+    "watching the news": 1.3, "sitting": 1.5, "waiting": 1.3,
+    "queueing": 1.2, "staying indoors": 1.4,
+}
+
+salience = {}
+
+
+def drift():
+    for name, _ in state.choices:
+        salience.setdefault(name, BASE.get(name, 1.0))
+    for name in salience:
+        anchor = math.log(BASE.get(name, 1.0))
+        here = math.log(salience[name])
+        moved = anchor + 0.7 * (here - anchor) + random.gauss(0, 0.4)
+        salience[name] = min(4.0, max(0.15, math.exp(moved)))
+
+
+def weighted_pick(choices, wanted):
+    scored = []
+    for index, (name, minutes) in enumerate(choices):
+        weight = salience.get(name, 1.0)
+        scored.append((random.random() ** (1.0 / weight), index, name, minutes))
+    scored.sort(reverse=True)
+    return [(name, minutes) for _, _, name, minutes in scored[:wanted]]
+
+
 def refresh_mind():
     name = stage_at(clock.age)
-    consciousness[:] = [Thought(t, m) for t, m in THOUGHTS[name]]
-    subconsciousness[:] = [Thought(t, m) for t, m in DEEP] + list(state.scars)
+    thoughts = list(THOUGHTS[name])
+    for circumstance in state.circumstances:
+        thoughts += circumstance['thinks']
+    age = clock.age
+    if not state.preoccupation or state.preoccupation[1] <= age:
+        state.preoccupation = (random.choice(thoughts),
+                               age + random.randrange(2, 8))
+    thoughts += [state.preoccupation[0]] * 3
+    consciousness[:] = [Thought(t, m) for t, m in thoughts]
+    subconsciousness[:] = [Thought(t, m) for t, m, since in DEEP
+                           if age >= since] + list(state.scars)
     things_you_should_never_do[:] = [
-        Doing(n, 'never', random.randrange(5, 40)) for n in NEVER_DO]
+        Doing(n, 'never', random.randrange(5, 40))
+        for n in (NEVER_DO if age >= 13 else [])]
     by_theme.clear()
     for thought in consciousness + subconsciousness:
         by_theme.setdefault(thought.theme, []).append(thought)
@@ -305,11 +385,19 @@ def do(thing):
         state.reminded = random.random() < RECOVERS
 
 
-def scar(name):
-    thought = Thought(name + ", again", 'shame')
+def remember(text, theme):
+    if len(state.scars) >= 8:
+        return
+    if any(old.text == text for old in state.scars):
+        return
+    thought = Thought(text, theme)
     state.scars.append(thought)
     subconsciousness.append(thought)
-    by_theme.setdefault('shame', []).append(thought)
+    by_theme.setdefault(theme, []).append(thought)
+
+
+def scar(name):
+    remember(name + ", again", 'shame')
 
 
 def _still_sleepy():
@@ -419,33 +507,111 @@ def morning_of(full):
     state.evening_left = random.randrange(30, 150)
 
     age = clock.age
-    name = stage_at(age)
-    if name != state.stage or not consciousness:
-        state.stage = name
-        refresh_mind()
-    if age > genes.lifespan:
-        state.alive = False
-        state.died_at = (age, clock.time())
-        chronicle.year(age)
-        chronicle.event(age, 'does not get up')
+    if age != state.year_seen:
+        state.year_seen = age
+        birthday(age)
+    if not state.alive:
         things_you_can_do[:] = []
         return
-    milestones(age)
 
     energy = energy_at(age) - (0 if full else 1)
-    choices = list(CAN_DO[name])
-    if name in ('young', 'middle', 'old') and education.skills:
-        choices += [(s, 45) for s in education.skills]
-    random.shuffle(choices)
-    things_you_can_do[:] = [Doing(n, 'can', m)
-                            for n, m in choices[:max(1, energy)]]
+    things_you_can_do[:] = [
+        Doing(n, 'can', m)
+        for n, m in weighted_pick(state.choices, max(1, energy))]
 
     if len(things_you_really_must_do) < 9 and random.randrange(2) == 0:
-        obligation = random.choice(MUST_DO[name])
+        obligation = random.choice(MUST_DO[state.stage])
         things_you_really_must_do.append(
             Doing(obligation, 'must', random.randrange(20, 90)))
     state.tempted = random.randrange(12) == 0
     state.reminded = False
+
+
+def frailty(age):
+    if age < 5:
+        return 1.6
+    if age < 15:
+        return 0.5
+    if age < 45:
+        return 0.8
+    if age < 65:
+        return 1.4
+    if age < 80:
+        return 2.5
+    return 4.0
+
+
+def die(age, cause):
+    state.alive = False
+    state.died_at = (age, clock.time())
+    state.cause = cause
+    chronicle.year(age)
+    chronicle.event(age, 'does not get up')
+    things_you_can_do[:] = []
+
+
+def take_place(event):
+    age = clock.age
+    state.circumstances.append(
+        {'text': event.text, 'until': age + event.years, 'risk': event.risk,
+         'does': event.does, 'thinks': event.thinks})
+    state.world_events.append((age, event.text))
+    chronicle.world(age, event.text)
+    if event.costs:
+        owe(event.costs)
+
+
+def owe(name):
+    if name in state.no_longer_possible:
+        return
+    if name in [d.name for d in things_you_should_do]:
+        return
+    things_you_should_do.append(
+        Doing(name, 'should', random.randrange(20, 120)))
+
+
+def take_effect(key):
+    age = clock.age
+    if key == 'parent':
+        state.circumstances.append(
+            {'text': 'a child', 'until': age + 18, 'risk': 0.0,
+             'does': [("carrying someone who is asleep", 60),
+                      ("reading the same book aloud", 30),
+                      ("worrying about someone else", 45)],
+             'thinks': [("whether they are all right", 'love')]})
+    elif key == 'father':
+        remember("the silence at the table", 'death')
+    elif key == 'mother':
+        remember("the hallway, empty", 'death')
+        state.no_longer_possible.add("call your mother")
+        for item in list(things_you_should_do):
+            if item.name == "call your mother":
+                things_you_should_do.remove(item)
+
+
+def birthday(age):
+    state.circumstances = [c for c in state.circumstances if c['until'] > age]
+    for event in history.starting(age):
+        take_place(event)
+    if age > genes.lifespan:
+        die(age, None)
+        return
+    for circumstance in state.circumstances:
+        chance = circumstance['risk'] * frailty(age)
+        if chance and random.random() < chance:
+            die(age, circumstance['text'])
+            return
+    milestones(age)
+    state.stage = stage_at(age)
+    state.choices = list(CAN_DO[state.stage])
+    if 20 <= age < 52 and education.skills:
+        keeping = (52 - age) / 32.0
+        state.choices += [(s, 45) for s in education.skills
+                          if random.random() < keeping]
+    for circumstance in state.circumstances:
+        state.choices += circumstance['does']
+    refresh_mind()
+    drift()
 
 
 seen = set()
@@ -459,14 +625,17 @@ def once(age, text):
 
 def milestones(age):
     if age in schedule:
-        for text in schedule.pop(age):
+        for text, effect in schedule.pop(age):
             once(age, text)
-    if age < 5 or random.randrange(700) > 0:
+            if effect:
+                take_effect(effect)
+    if age < 5 or random.randrange(4) > 0:
         return
     if list.__len__(things_you_should_do) >= 9:
         return
     on_the_list = [d.name for d in things_you_should_do]
-    remaining = [s for s in SHOULD_DO if s not in on_the_list]
+    remaining = [s for s in SHOULD_DO
+                 if s not in on_the_list and s not in state.no_longer_possible]
     if remaining:
         things_you_should_do.append(
             Doing(random.choice(remaining), 'should', random.randrange(20, 120)))
@@ -475,8 +644,8 @@ def milestones(age):
 def build_schedule():
     plan = {}
 
-    def add(age, text):
-        plan.setdefault(age, []).append(text)
+    def add(age, text, effect=None):
+        plan.setdefault(age, []).append((text, effect))
 
     add(1, 'says a word, on purpose')
     add(6, 'starts school')
@@ -486,9 +655,14 @@ def build_schedule():
     add(random.randrange(19, 26), 'first job')
     add(random.randrange(20, 29), 'moves out for good')
     if random.randrange(3) > 0:
-        add(random.randrange(26, 39), 'becomes a parent, and promises not to')
+        add(random.randrange(26, 39),
+            'becomes a parent, and promises not to', 'parent')
     if random.randrange(2) == 0:
         add(random.randrange(30, 55), 'stops speaking to someone')
+    buries_father = random.randrange(37, 72)
+    add(buries_father, 'your father dies', 'father')
+    add(min(96, buries_father + random.randrange(0, 15)),
+        'your mother dies', 'mother')
     add(66, 'stops going to work')
     if upbringing.raised:
         age, thing = upbringing.raised
@@ -519,6 +693,8 @@ def epilogue():
     age, time_of_death = state.died_at or (clock.age, clock.time())
     closing = ['died at %d, at %s, having got up %s times.'
                % (age, time_of_death, '{:,}'.format(state.mornings))]
+    if state.cause:
+        closing += wrap('           ', 'in the year of %s.' % state.cause)
     closing.append('')
     closing.append('  things done              %11s' % '{:,}'.format(chronicle.total_done))
     closing.append('  thoughts thought         %11s   (%d of them different)'
@@ -535,8 +711,9 @@ def epilogue():
     never = chronicle.done
     never_total = sum(never[n] for n in NEVER_DO)
     favourite = max(NEVER_DO, key=lambda n: never[n])
-    closing.append('  things you knew better   %11s   (mostly: %s)'
-                   % ('{:,}'.format(never_total), favourite))
+    closing.append('  things you knew better   %11s'
+                   % '{:,}'.format(never_total))
+    closing += wrap('      mostly: ', favourite)
     closing.append('')
 
     left = [d.name for d in things_you_should_do]
@@ -551,6 +728,12 @@ def epilogue():
     owed = [d.name for d in things_you_really_must_do]
     if owed:
         closing += wrap('outstanding: ', ', '.join(sorted(set(owed))) + '.')
+    if state.world_events:
+        closing.append('meanwhile, outside:')
+        for when, text in state.world_events:
+            closing.append('    %3d   %s' % (when, text))
+        closing.append('')
+
     closing.append('questions left open at school: %d'
                    % len(education.questions))
     if education.not_understood:

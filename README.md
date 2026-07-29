@@ -25,6 +25,8 @@ Feel free to contribute.
 
 "education.py" — what was done instead.
 
+"history.py" — what was going on at the time, which was not about you.
+
 "world.py" — everything live.py assumes and does not define.
 
 "live.py" — the main loop.
@@ -47,6 +49,16 @@ are objects rather than values:
 - "things_you_should_do" has a length of zero unless you happen to remember it,
   which over a lifetime is about eight times.
 - "dead" is a condition, so "main.py" does not have to set it.
+
+What you can do on a given day is drawn from the pool by weight, and the
+weights wander from year to year and pull slowly back towards where they
+started. This is why a stretch of years has a character, and why it passes.
+
+"history.py" runs on its own schedule and does not consult you. Most of it
+you only read about. Some of it changes what there is to do for a few years —
+a factory closes and you are looking for work, the river comes up and you are
+carrying things upstairs. A little of it can kill you, more easily when you
+are very young or very old. About one life in ten ends this way.
 
 "genes", "upbringing" and "education" do their work at import time, before the
 loop starts. This is not a workaround.
@@ -90,6 +102,15 @@ pointing at the same object.
 Q: I ran it and the list at the end was still long.
 
 A: Yes.
+
+Q: Why is "call your mother" not on the list any more?
+
+A: Check the year your mother died. It is removed then, and it cannot be
+added again.
+
+Q: The war is not about anywhere.
+
+A: No.
 
 Q: Can I contribute?
 

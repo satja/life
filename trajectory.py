@@ -1,10 +1,10 @@
 import textwrap
 from collections import Counter
 
-WIDTH = 74
+WIDTH = 76
 BAR = 12
 
-def fit(names, room=WIDTH - BAR - 9):
+def fit(names, room=WIDTH - BAR - 7):
     chosen = []
     for name in names:
         if chosen and len(' · '.join(chosen + [name])) > room:
@@ -17,6 +17,7 @@ class Chronicle:
     def __init__(self):
         self.years = {}
         self.events = {}
+        self.world_events = {}
         self.thoughts = Counter()
         self.done = Counter()
         self.total_done = 0
@@ -45,6 +46,16 @@ class Chronicle:
     def event(self, age, text):
         self.events.setdefault(age, []).append(text)
 
+    def world(self, age, text):
+        self.world_events.setdefault(age, []).append(text)
+
+    def under(self, mark, text):
+        lines = textwrap.wrap(text, WIDTH - BAR - 7) or ['']
+        out = ['       %s%s %s' % (' ' * BAR, mark, lines[0])]
+        for extra in lines[1:]:
+            out.append('       %s  %s' % (' ' * BAR, extra))
+        return out
+
     def render(self, epilogue):
         out = []
         rule = '  ' + '─' * WIDTH
@@ -58,17 +69,21 @@ class Chronicle:
         out.append(rule)
         if self.years:
             peak = max(year['n'] for year in self.years.values()) or 1
+            preoccupation = None
             for age in sorted(self.years):
                 year = self.years[age]
                 filled = round(BAR * year['n'] / peak)
                 bar = '█' * filled + '·' * (BAR - filled)
                 most = fit(name for name, _ in year['done'].most_common(3))
                 out.append('  %3d  %s  %s' % (age, bar, most))
+                for text in self.world_events.get(age, []):
+                    out += self.under('~', text)
                 for text in self.events.get(age, []):
-                    lines = textwrap.wrap(text, WIDTH - BAR - 9) or ['']
-                    out.append('       %s└ %s' % (' ' * BAR, lines[0]))
-                    for extra in lines[1:]:
-                        out.append('       %s  %s' % (' ' * BAR, extra))
+                    out += self.under('└', text)
+                top = year['thoughts'].most_common(1)
+                if top and top[0][0] != preoccupation:
+                    preoccupation = top[0][0]
+                    out += self.under('·', 'thinking mostly about: ' + preoccupation)
         out.append(rule)
         out.append('')
         for line in epilogue['closing']:
