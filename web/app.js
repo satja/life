@@ -155,10 +155,11 @@ function placeOf(absolute) {
 function absoluteDay(z) { return monthStart(z.year, z.month) + z.day; }
 
 function followNow() {
-  const z = state.zoom, life = state.life;
-  const here = placeOf(lastLivedDay());
-  if (z.level === "life" || z.level === "year") z.year = life.age;
-  else { z.year = here.year; z.month = here.month; z.day = here.day; }
+  // the clock reaches the next year on the morning of the death, before any
+  // of it is lived, so the last recorded day is what can actually be shown
+  const z = state.zoom, here = placeOf(lastLivedDay());
+  z.year = here.year;
+  if (z.level === "month" || z.level === "day") { z.month = here.month; z.day = here.day; }
 }
 
 function stepView(delta) {
@@ -530,7 +531,11 @@ function yearView(year) {
     const t = tally(recs);
     rows.push([m, t]);
   }
-  if (!rows.length) return "<p style='color:var(--muted)'>Not lived yet.</p>";
+  if (!rows.length) {
+    const only = life.events.filter((e) => e.age === year);
+    return only.length ? eventList(only)
+                       : "<p style='color:var(--muted)'>Not lived yet.</p>";
+  }
   const peak = Math.max(...rows.map((r) => r[1].busy / Math.max(1, r[1].days)));
   let html = '<table class="grid"><thead><tr><th>month</th><th>how full</th><th>mostly</th>' +
              '<th>knew better</th></tr></thead><tbody>';
@@ -544,13 +549,15 @@ function yearView(year) {
   }
   html += "</tbody></table>";
   const events = life.events.filter((e) => e.age === year);
-  if (events.length) {
-    html += "<ul class='items' style='margin-top:12px'>" + events.map((e) =>
-      "<li><span class='tag " + (e.kind === "world" ? "world" : e.kind === "loss" ? "loss"
-        : e.kind === "kept" ? "kept" : "") + "'>" + MONTHS[e.month] + "</span> " + e.text +
-      "</li>").join("") + "</ul>";
-  }
+  if (events.length) html += eventList(events);
   return html;
+}
+
+function eventList(events) {
+  return "<ul class='items' style='margin-top:12px'>" + events.map((e) =>
+    "<li><span class='tag " + (e.kind === "world" ? "world" : e.kind === "loss" ? "loss"
+      : e.kind === "kept" ? "kept" : "") + "'>" + MONTHS[e.month] + "</span> " + e.text +
+    "</li>").join("") + "</ul>";
 }
 
 function monthView(year, month) {
@@ -652,12 +659,17 @@ function init() {
     const rect = cv.getBoundingClientRect();
     const frac = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
     const [d0, d1] = window_();
-    const day = Math.floor(d0 + frac * (d1 - d0));
     const z = state.zoom;
+    // a click can land on a stretch that has not happened yet; the last day
+    // lived is as far forward as anything can be inspected
+    const reachable = Math.min(d1 - 1, lastLivedDay());
+    if (reachable < d0) return;
+    const day = Math.max(d0, Math.min(Math.floor(d0 + frac * (d1 - d0)), reachable));
+    const at = placeOf(day);
     state.following = false;
-    if (z.level === "life") { z.year = Math.max(0, Math.floor(day / 365)); }
-    else if (z.level === "year") { z.month = Math.min(11, Math.floor((day - z.year * 365) * 12 / 365)); }
-    else { z.day = Math.max(0, day - d0); }
+    if (z.level === "life") z.year = at.year;
+    else if (z.level === "year") z.month = at.month;
+    else z.day = day - monthStart(z.year, z.month);
     draw(); paintDetail();
   };
   cv.addEventListener("click", inspect);

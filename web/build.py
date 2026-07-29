@@ -47,12 +47,19 @@ with open(out, 'w', encoding='utf-8') as f:
     f.write(page)
 print('%s  %d KB' % (out, len(page) // 1024))
 
-# GitHub Pages serves a branch's /docs folder at the site root, so the same
-# page is written there as index.html
-# only index.html is written here; docs/CNAME, which carries the custom
-# domain, is left alone
+# life.html is a fragment, because the artifact host supplies the document
+# around it. Anything serving the file directly needs the whole document,
+# above all the viewport meta: without it a phone lays the page out at
+# 980px and shows a cropped slice of it.
+cut = page.index('</style>') + len('</style>')
+full = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
+        + page[:cut] + '\n</head>\n<body>\n' + page[cut:] + '\n</body>\n</html>\n')
+
+# GitHub Pages serves a branch's /docs folder at the site root. Only
+# index.html is written here; docs/CNAME, which carries the custom domain,
+# is left alone.
 docs = os.path.join(os.path.dirname(here), 'docs')
 os.makedirs(docs, exist_ok=True)
 with open(os.path.join(docs, 'index.html'), 'w', encoding='utf-8') as f:
-    f.write(page)
-print('%s  (for GitHub Pages)' % os.path.join(docs, 'index.html'))
+    f.write(full)
+print('%s  (for GitHub Pages, a whole document)' % os.path.join(docs, 'index.html'))

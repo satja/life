@@ -203,3 +203,13 @@ blockquote { margin: 0; padding-left: 14px; border-left: 2px solid var(--rule);
   .readout .age { font-size: 24px; }
   .daylist { columns: 1; }
 }
+@media (max-width: 560px) {
+  .wrap { padding: 16px 12px 44px; }
+  .only-wide { display: none; }
+  .tabs button { padding: 11px 9px; }
+  .tabs button.step { padding: 11px 10px; }
+  .legend { gap: 3px 14px; padding: 8px 12px; }
+  .legend span { font-size: 9.5px; }
+  .gauge { min-height: 0; }
+  canvas { height: 150px; }
+}
