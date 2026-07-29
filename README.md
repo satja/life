@@ -17,6 +17,11 @@ For one row per year instead, which is shorter and shows the shape better:
 
     $ LIFE_DETAIL=year python3 main.py
 
+There is also a web version in "web/", which runs the same model in a browser
+at one year per second, with settings for the century you were born into and
+for how often you remember the list. Build it with "python3 web/build.py" and
+open "web/life.html".
+
 Feel free to contribute.
 
 
