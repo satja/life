@@ -323,17 +323,21 @@ export class Life {
 
   // genes: multiple inheritance, resolved in the usual order
   inherit() {
+    // the same attributes genes.py puts on the same classes, so that the
+    // order Python resolves them in is the order resolved here
     const MRO = [
       ["You", {}],
       ["Mother", { worry: 1, eyes: "green", everything_else: "hers" }],
-      ["Father", { posture: "bad", eyes: "grey" }],
-      ["Grandmother", { stubbornness: 1, recipe: "never written down" }],
-      ["Grandfather", { silence: "long" }],
-      ["Ancestor", { hope: 1, fear_of_the_dark: 1, eyes: "brown" }],
+      ["Father", { posture: "bad", eyes: "grey", silence: "at the table" }],
+      ["Grandmother", { stubbornness: 1, recipe: "never written down", worry: "about money" }],
+      ["Grandfather", { silence: "long", patience: 1 }],
+      ["Ancestor", { hope: 1, fear_of_the_dark: 1, eyes: "brown",
+                     worry: "about the winter", silence: "the kind you are born into",
+                     posture: "from carrying things" }],
     ];
     const traits = ["hope","fear_of_the_dark","stubbornness","worry","posture","silence",
                     "recipe","eyes","patience","a way with people"];
-    this.given = {}; this.fromWhom = {};
+    this.given = {}; this.fromWhom = {}; this.inheritedFrom = {};
     for (const trait of traits) {
       const dominant = this.rint(3) > 0;
       if (!dominant && this.rint(2) !== 0) continue;
@@ -341,6 +345,11 @@ export class Life {
         if (trait in MRO[i][1]) { this.given[trait] = true; break; }
       }
       if (!(trait in this.given)) continue;
+      // inherit() walks the order forwards and stops at the nearest;
+      // blame() walks it backwards and reaches the furthest
+      for (let i = 0; i < MRO.length; i++) {
+        if (trait in MRO[i][1]) { this.inheritedFrom[trait] = MRO[i][0]; break; }
+      }
       for (let i = MRO.length - 1; i >= 0; i--) {
         if (trait in MRO[i][1]) { this.fromWhom[trait] = MRO[i][0]; break; }
       }

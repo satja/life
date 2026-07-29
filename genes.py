@@ -6,13 +6,18 @@ class Ancestor:
     hope = True
     fear_of_the_dark = True
     eyes = "brown"
+    worry = "about the winter"
+    silence = "the kind you are born into"
+    posture = "from carrying things"
 
 class Grandmother(Ancestor):
     stubbornness = True
     recipe = "never written down"
+    worry = "about money"
 
 class Grandfather(Ancestor):
     silence = "long"
+    patience = True
 
 class Mother(Grandmother, Grandfather):
     worry = float('inf')
@@ -22,6 +27,7 @@ class Mother(Grandmother, Grandfather):
 class Father(Grandmother, Grandfather):
     posture = "bad"
     eyes = "grey"
+    silence = "at the table"
 
 class You(Mother, Father):
     pass

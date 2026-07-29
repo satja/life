@@ -48,7 +48,10 @@ function counts(no) {
   return ran + '  <span class="t">' + t("tru") + " " + fmt(life.trues[no]) + "</span>";
 }
 
-function drawLive() {
+// both listings are redrawn together, because a name clicked in main.py
+// belongs to a module and a name clicked in live.py belongs to world.py
+function draw() {
+  listing($("#main"), SRC.main, null);
   listing($("#live"), SRC.live, state.life ? counts : null);
   for (const name of state.open) insert(name);
 }
@@ -57,7 +60,7 @@ function drawLive() {
 
 function toggle(name) {
   if (state.open.has(name)) { state.open.delete(name); } else { state.open.add(name); }
-  drawLive();
+  draw();
   const opened = $('.reveal[data-for="' + name + '"]');
   if (opened) opened.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
@@ -65,7 +68,7 @@ function toggle(name) {
 function insert(name) {
   const blocks = SRC.reveals[name];
   if (!blocks) return;
-  const rows = [...document.querySelectorAll("#live .ln")];
+  const rows = [...document.querySelectorAll(".listing .ln")];
   const host = rows.find((r) => r.querySelector('button.nm[data-name="' + name + '"]'));
   if (!host) return;
   for (const b of host.querySelectorAll('button.nm[data-name="' + name + '"]')) {
@@ -94,7 +97,7 @@ function run() {
   stopWalk();
   $("#out").hidden = false;
   $("#run").textContent = t("again");
-  drawLive();
+  draw();
   $("#account").textContent = account();
 }
 
@@ -105,7 +108,7 @@ function stopWalk() {
   $("#walk").setAttribute("aria-pressed", "false");
   $("#walk").textContent = t("walk");
   for (const r of document.querySelectorAll("#live .ln.here")) r.classList.remove("here");
-  if (state.life) drawLive();
+  if (state.life) draw();
 }
 
 function startWalk() {
@@ -141,9 +144,11 @@ function account() {
   const out = [];
   const pad = (v, k) => String(v).padStart(11) + "   " + k;
 
-  out.push("inherited");
-  for (const [trait, who] of Object.entries(life.fromWhom)) {
-    out.push("    " + trait.padEnd(22) + "from " + who);
+  out.push("inherited" + " ".repeat(17) + "inherit()      blame()");
+  for (const [trait, blamed] of Object.entries(life.fromWhom)) {
+    const near = life.inheritedFrom[trait] || blamed;
+    out.push("    " + trait.padEnd(22) + near.padEnd(15) + blamed +
+             (near === blamed ? "" : "   <- resolved by the order"));
   }
   out.push("");
   out.push("died at " + life.diedAt[0] + ", at " + life.diedAt[1] +
@@ -209,8 +214,7 @@ function chrome() {
 function init() {
   $("#seed").value = state.seed;
   chrome();
-  listing($("#main"), SRC.main, null);
-  drawLive();
+  draw();
   $("#run").addEventListener("click", run);
   $("#roll").addEventListener("click", () => {
     state.seed = Math.floor(Math.random() * 1e6); $("#seed").value = state.seed;
@@ -220,7 +224,7 @@ function init() {
   $("#lang").addEventListener("click", () => {
     state.lang = state.lang === "hr" ? "en" : "hr";
     chrome();
-    if (state.life) { drawLive(); $("#account").textContent = account(); }
+    if (state.life) { draw(); $("#account").textContent = account(); }
   });
 }
 

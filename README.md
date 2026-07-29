@@ -131,6 +131,21 @@ Q: "grow_up()" doesn't terminate.
 
 A: It does, eventually, on someone. Check the year it happens.
 
+Q: The mother always gives you the worry.
+
+A: She did. Only she defined it, so there was nothing for the order to decide.
+Three of them define it now — the ancestor worries about the winter, the
+grandmother about money, the mother about everything — so "inherit()" stops at
+the nearest and "blame()" reaches the furthest, and they disagree. That is what
+the diamond was for.
+
+Q: Where does the world get into the loop?
+
+A: Through "things_you_can_do". "restock()" adds every active circumstance's
+own activities to the pool that "live()" draws from, and "take_place()" is what
+turns a war into a circumstance. Click the name in the web version and the
+three of them unfold in order.
+
 Q: Why does "inherit()" use a shallow copy?
 
 A: Because a deep one was never available. You and your mother are still
