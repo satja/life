@@ -20,7 +20,7 @@ def sleep():
         attempts += 1
         if attempts == 50:
             get_frustrated()
-        if attemtps > 50:
+        if attempts > 50:
             continue_to_be_frustrated()
         if morning:
             insomnia = True

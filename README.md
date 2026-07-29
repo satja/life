@@ -70,12 +70,11 @@ Q: The code doesn't work.
 
 A: It does now. This is not obviously an improvement.
 
-Q: There is a typo in live.py, in the part about not falling asleep.
+Q: There was a typo in live.py, in the part about not falling asleep.
 
-A: Yes. It has been there since the first commit, and it still runs, because
-"attemtps" is defined: it is the number of attempts as counted by the world,
-rather than the number you were counting. It is always the same number. It is
-the most accurate line in the file.
+A: There was. It survived from the first commit in 2021 until it was fixed.
+The line now counts the attempts you were counting, which is what it always
+meant. It cost the file its most accurate line.
 
 Q: "main.py" never sets "dead" to True.
 

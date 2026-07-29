@@ -12,7 +12,7 @@ from trajectory import chronicle
 
 __all__ = [
     'still_sleepy', 'must_wake_up', 'do_whatever_it_takes_to_get_up', 'get_up',
-    'lying_down', 'fall_asleep', 'get_frustrated', 'attemtps',
+    'lying_down', 'fall_asleep', 'get_frustrated',
     'continue_to_be_frustrated', 'morning', 'have_nothing_to_do',
     'subconsciousness', 'consciousness', 'related', 'think', 'do',
     'things_you_can_do', 'things_you_really_must_do', 'things_you_should_do',
@@ -442,17 +442,6 @@ have_nothing_to_do = Condition(lambda: state.idle > 0, cost=0)
 dead = Condition(lambda: not state.alive, cost=0)
 
 
-class Attemtps:
-    def __gt__(self, other):
-        return state.sleep_attempts > other
-
-    def __repr__(self):
-        return str(state.sleep_attempts)
-
-
-attemtps = Attemtps()
-
-
 def get_frustrated():
     clock.tick(random.randrange(2, 10))
     state.frustrated += 1
@@ -610,6 +599,13 @@ def birthday(age):
                           if random.random() < keeping]
     for circumstance in state.circumstances:
         state.choices += circumstance['does']
+    already = set()
+    distinct = []
+    for name, minutes in state.choices:
+        if name not in already:
+            already.add(name)
+            distinct.append((name, minutes))
+    state.choices = distinct
     refresh_mind()
     drift()
 
@@ -674,7 +670,7 @@ schedule = build_schedule()
 
 
 def wrap(prefix, text):
-    lines = textwrap.wrap(text, 70 - len(prefix))
+    lines = textwrap.wrap(text, 70 - len(prefix)) or ['']
     out = [prefix + lines[0]]
     out += [' ' * len(prefix) + line for line in lines[1:]]
     return out
@@ -713,7 +709,8 @@ def epilogue():
     favourite = max(NEVER_DO, key=lambda n: never[n])
     closing.append('  things you knew better   %11s'
                    % '{:,}'.format(never_total))
-    closing += wrap('      mostly: ', favourite)
+    if never_total:
+        closing += wrap('      mostly: ', favourite)
     closing.append('')
 
     left = [d.name for d in things_you_should_do]
@@ -725,24 +722,24 @@ def epilogue():
         closing.append('nothing left on the list. this is rarer than it sounds.')
     closing.append('')
 
-    owed = [d.name for d in things_you_really_must_do]
-    if owed:
-        closing += wrap('outstanding: ', ', '.join(sorted(set(owed))) + '.')
     if state.world_events:
         closing.append('meanwhile, outside:')
         for when, text in state.world_events:
             closing.append('    %3d   %s' % (when, text))
         closing.append('')
 
-    closing.append('questions left open at school: %d'
-                   % len(education.questions))
-    if education.not_understood:
-        closing += wrap('never understood: ',
-                        ', '.join(sorted(set(education.not_understood))) + '.')
+    if age >= 18:
+        closing.append('questions left open at school: %d'
+                       % len(education.questions))
+        if education.not_understood:
+            closing += wrap('never understood: ',
+                            ', '.join(sorted(set(education.not_understood))) + '.')
+    elif age >= 6:
+        closing.append('still at school.')
     if upbringing.unresolved:
         closing.append('carried from childhood, the whole way: %d'
                        % len(upbringing.unresolved))
-    if upbringing.raised:
+    if upbringing.raised and upbringing.raised[0] <= age:
         when, thing = upbringing.raised
         closing += wrap('let out once: ',
                         'at %d, at someone who had nothing to do with it — %s.'
