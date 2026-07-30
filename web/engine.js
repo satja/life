@@ -597,14 +597,17 @@ export class Life {
   }
 
   takePlace(event) {
+    // a circumstance arrives at a birthday but is dated to a month, and the
+    // month has to be a day you actually lived, or it cannot be zoomed into
     const age = this.age, month = this.rint(12);
+    const day = age * DAYS_YEAR + Math.floor(month * DAYS_YEAR / 12) + this.rint(27);
     this.circumstances.push({
       text: event.t, until: age + event.years, kind: event.kind,
       risk: (event.risk || 0) * this.opts.lethality,
       does: event.does || [], thinks: event.thinks || [],
     });
     this.worldEvents.push({ age, month, text: event.t, kind: event.kind });
-    this.events.push({ age, month, day: this.day, text: event.t, kind: "world" });
+    this.events.push({ age, month, day, text: event.t, kind: "world" });
     if (event.costs) this.owe(event.costs);
   }
 
@@ -718,8 +721,14 @@ export class Life {
   }
 
   doThing(thing) {
+    // where the day was when this began, and how far the day's thinking had
+    // got — so a thing done can be placed in the day and carry the thoughts
+    // that led up to it
+    const began = this.minute % MIN_DAY;
+    const thoughtsSoFar = this.record.thoughts.length;
     this.tick(thing.minutes);
-    this.record.acts.push(thing.kind, this.nameId(thing.name), thing.minutes);
+    this.record.acts.push(thing.kind, this.nameId(thing.name), thing.minutes,
+                          began, thoughtsSoFar);
     this.record.busy += thing.minutes;
     this.totalDone++;
     this.doneCount.set(thing.name, (this.doneCount.get(thing.name) || 0) + 1);

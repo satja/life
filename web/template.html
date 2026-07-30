@@ -5,14 +5,11 @@
 <div class="wrap">
   <header>
     <h1>life.py</h1>
+    <span class="seedline lab" id="seedout"></span>
     <button class="ghost" id="lang" type="button">hrvatski</button>
   </header>
 
   <p class="blurb" id="blurb"></p>
-
-  <h2 id="h-entry"></h2>
-  <pre class="listing" id="main"></pre>
-  <p class="foot" id="entrynote"></p>
 
   <div class="controls">
     <button class="go" id="run" type="button"></button>
@@ -23,32 +20,9 @@
     </span>
   </div>
 
-  <div id="out" hidden>
-    <h2>
-      <span id="h-stage"></span>
-      <span class="right">
-        <button class="ghost" id="walk" type="button"></button>
-        <span class="field">
-          <label class="lab" for="walkage" id="l-atage"></label>
-          <input id="walkage" type="number" inputmode="numeric" value="34">
-        </span>
-      </span>
-    </h2>
-    <pre class="listing live" id="live"></pre>
-    <p class="foot" id="stagenote"></p>
+  <div class="tree" id="tree"></div>
 
-    <h2>
-      <span id="h-clock"></span>
-      <span class="right"><span class="lab" id="clockat"></span></span>
-    </h2>
-    <pre class="account" id="clockwork"></pre>
-    <p class="foot" id="clocknote"></p>
-
-    <h2 id="h-account"></h2>
-    <pre class="account" id="account"></pre>
-
-    <p class="foot" id="hint"></p>
-  </div>
+  <p class="foot" id="hint"></p>
 </div>
 
 <script>/*LANG*/</script>

@@ -17,22 +17,39 @@ For one row per year instead, which is shorter and shows the shape better:
 
     $ LIFE_DETAIL=year python3 main.py
 
-There is also a web version in "web/", and its subject is this file. It shows
-"live.py" and runs it, and puts in the margin how often each line ran and how
-often it was true — so the thing the poem is about is stated by the poem:
+There is also a web version in "web/". It is one row, drawn at every scale.
+A life is a tree, and you see only what happened in it:
+
+    43   the factory closes                                    middle
+      jan  the factory closes                                    402 h
+        1 jan  the factory closes                          07:24-21:09
+          19:10  looking for work                               180 min
+                 whether this is the job
+                     31      think(thought)                    686,989x
+      ... 25 more
+
+Open a year and you get its months, a month and you get its days, a day and
+you get the things you did, a thing and you get the thoughts you had on the
+way to it, a thought and you get the line of "live.py" that thought it. The
+rule is the same at every depth: the children something happened in are
+shown, the rest are counted.
+
+"live.py" is a branch of the same tree, and unfolds the same way. A line
+contains the definitions of the names on it, and those are lines, which
+contain definitions. The margin says how often each line ran and how often
+it was true, so the thing the poem is about is stated by the poem:
 
     if len(things_you_should_do) > 0:         229,240x   true 22
         if random.randrange(3) == 0:               22x   true  9
             do(thing_to_do)                         9x
 
-    if len(things_you_should_never_do) > 0:   229,240x   true 16,888
-        if random.randrange(4) == 0:           16,888x   true 4,149
-            do(thing_to_do)                     4,149x
-
-Click any name and its definition unfolds where it stands, read out of the
-file it lives in. A line with no count never ran, which is worth seeing: two
-of them never do. There is also a walk through a single day, line by line,
-with the values in the margin.
+A line with no count never ran, which is worth seeing: two of them never do.
+The lines that read a dial contain it: line 17 contains "sleep", which
+contains what it was between one thing happening and the next, which
+contains the working — the base, then what leans on it, then the value and
+the line that reads it, which is line 17. The account at the end goes the
+other way: a trait contains the dials it turns, and a dial contains the line
+of "live.py" that turns out to be reading it.
 
 Nothing on the page is retyped. "web/extract.py" reads the real modules at
 build time, so the listing and the source cannot drift apart. The commentary

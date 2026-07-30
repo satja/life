@@ -5,36 +5,55 @@
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A description of a life in Python. Its loops end only because checking a condition costs a minute. Below is the source, and what happened when it ran.",
-    entry: "the program",
-    entryNote: "Three of these do their work at import time, before the loop starts. This is not a workaround.",
+    blurb: "A life is a tree. You see only what happened; open a year and you get its " +
+      "months, a month and you get its days, a day and you get the things you did, a " +
+      "thing and you get the thoughts you had on the way to it, a thought and you get " +
+      "the line of live.py that thought it.",
     run: "run one life", again: "run another", seed: "seed", roll: "roll",
-    stage: "the loop", stageNote: "Click any name to see what it is. The margin counts how often each line ran, and how often it was true.",
-    walk: "walk through one day", stop: "stop", atAge: "at",
-    walking: "one day, line by line",
-    ran: "ran", times: "×", tru: "true",
-    clock: "the clockwork",
-    clockNote: "Nothing here is a label. Each dial is read by the loop above, and what leans on it is what you were given, what was done to you before you could object, and what happens to be going on. Computed by wind_up() in world.py.",
+    hint: "The rule is the same at every depth: the children something happened in are " +
+      "shown, the rest are counted. Nothing here is retyped — every line of Python is " +
+      "read out of the file it claims to be, and a line greyed out never ran.",
+
+    lines: "lines", aLife: "a life", years: "years", account: "what it came to",
+    more: "… % more", mostly: "mostly", tru: "true", isA: "what it is",
     base: "base", readBy: "read by",
-    account: "what it came to",
-    hint: "Nothing here is retyped: every line is read from the file it claims to be. A line greyed out is a line that never ran.",
-    died: "died at", of: "of",
+    stillAwake: "still awake", attempts: "% attempts",
+
+    inOrder: "the bases, in that order",
+    died: "died at", inTheYearOf: "in the year of",
+    mornings: "mornings", thingsDone: "things done", thoughts: "thoughts",
+    different: "of them different", knewBetter: "things it knew better than to do",
+    gotRoundTo: "things it got round to", nightsAwake: "nights still awake at three",
+    questions: "questions left open at school",
+    meaningTo: "still meaning to", nothingLeft: "nothing left on the list",
+    leftTheList: "\"call your mother\" left the list, and could not be added again",
+    outside: "meanwhile, outside",
   },
   hr: {
     lang: "english",
-    blurb: "Opis života u Pythonu. Petlje završavaju samo zato što provjera uvjeta troši minutu. Ispod je izvorni kod i ono što se dogodilo kad se pokrenuo.",
-    entry: "program",
-    entryNote: "Tri se od ovih izvrše pri uvozu, prije nego petlja krene. To nije zaobilaženje.",
+    blurb: "Život je stablo. Vidi se samo ono što se dogodilo; otvoriš godinu i dobiješ " +
+      "njezine mjesece, mjesec i dobiješ dane, dan i dobiješ ono što si radio, radnju i " +
+      "dobiješ misli koje su joj prethodile, misao i dobiješ redak iz live.py koji ju je " +
+      "pomislio.",
     run: "pokreni jedan život", again: "pokreni još jedan", seed: "sjeme", roll: "baci",
-    stage: "petlja", stageNote: "Klikni bilo koje ime da vidiš što je. Na margini piše koliko je puta redak izvršen i koliko je puta bio istinit.",
-    walk: "prošeći kroz jedan dan", stop: "stani", atAge: "u",
-    walking: "jedan dan, redak po redak",
-    ran: "izvršeno", times: "×", tru: "istinito",
-    clock: "mehanizam",
-    clockNote: "Ovdje ništa nije samo naziv. Svaku brojku čita petlja iznad, a na nju se naslanja ono što si dobio, ono što ti je učinjeno prije nego si mogao prigovoriti, i ono što se u tom trenutku događa. Računa ih wind_up() u world.py.",
-    base: "temelj", readBy: "čita",
+    hint: "Pravilo je na svakoj dubini isto: prikazuje se ono u čemu se nešto dogodilo, " +
+      "ostalo se prebroji. Ništa ovdje nije prepisano — svaki se redak Pythona čita iz " +
+      "datoteke za koju tvrdi da je, a posivljeni se redak nikad nije izvršio.",
+
+    lines: "redaka", aLife: "jedan život", years: "godina",
     account: "što je od toga ostalo",
-    hint: "Ništa ovdje nije prepisano: svaki redak čita se iz datoteke za koju tvrdi da je. Posivljeni redak nikad se nije izvršio.",
-    died: "umro u", of: "od",
+    more: "… još %", mostly: "uglavnom", tru: "istinito", isA: "što je to",
+    base: "temelj", readBy: "čita",
+    stillAwake: "još budan", attempts: "% pokušaja",
+
+    inOrder: "baze, tim redom",
+    died: "umro u", inTheYearOf: "u godini u kojoj je bilo:",
+    mornings: "jutara", thingsDone: "obavljenih stvari", thoughts: "misli",
+    different: "različitih", knewBetter: "stvari za koje je znao da ih ne treba raditi",
+    gotRoundTo: "stvari kojih se dohvatio", nightsAwake: "noći budan u tri",
+    questions: "pitanja ostalih bez odgovora",
+    meaningTo: "još uvijek namjerava", nothingLeft: "na popisu nije ostalo ništa",
+    leftTheList: "\"call your mother\" otišlo je s popisa i više se nije moglo vratiti",
+    outside: "u međuvremenu, vani",
   },
 };
