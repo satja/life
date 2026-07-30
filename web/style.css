@@ -42,12 +42,26 @@ h1 { font-size: 19px; font-weight: 400; margin: 0; letter-spacing: .02em; }
 .foot { color: var(--faint); font-size: 12px; max-width: 74ch; margin: 22px 0 0; }
 
 .controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-            margin: 22px 0 26px; }
-.field { display: inline-flex; align-items: baseline; gap: 7px; }
-input { font-family: var(--mono); font-size: 13px; width: 8ch; background: transparent;
-        color: var(--ink); border: 0; border-bottom: 1px solid var(--hair);
-        padding: 3px 2px; }
-input:focus { border-bottom-color: var(--accent); outline: none; }
+            margin: 0 0 26px; }
+input { font-family: var(--mono); font-size: 12.5px; width: 9ch; background: transparent;
+        color: var(--ink); border: 1px solid var(--hair); padding: 4px 6px; }
+input:focus { border-color: var(--accent); outline: none; }
+
+/* ---- the conditions, set before anything runs ---- */
+.knobs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+         gap: 20px 28px; margin: 26px 0 24px; align-items: start; }
+.knob h3 { font: inherit; font-size: 10.5px; letter-spacing: .12em;
+           text-transform: uppercase; color: var(--faint); margin: 0 0 5px; }
+.knob .why { color: var(--muted); font-size: 11.5px; line-height: 1.5;
+             margin: 0 0 9px; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.seg button { font-family: var(--mono); font-size: 11.5px; background: transparent;
+              color: var(--muted); border: 1px solid var(--hair); padding: 4px 9px;
+              cursor: pointer; }
+.seg button:hover { color: var(--ink); border-color: var(--ink); }
+.seg button[aria-pressed="true"] { color: var(--paper); background: var(--accent);
+                                   border-color: var(--accent); }
+.seg button[aria-pressed="true"]:hover { color: var(--paper); }
 button.go { font-family: var(--mono); font-size: 12px; letter-spacing: .1em;
   text-transform: uppercase; background: var(--ink); color: var(--paper);
   border: 0; padding: 10px 20px; cursor: pointer; }
@@ -93,20 +107,10 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .node.quiet > .what { color: var(--muted); }
 .node.thought > .what { color: var(--muted); font-style: italic; }
 .node.more > .what { color: var(--faint); }
-.node.code > .what { white-space: pre; overflow-x: auto; min-width: 0;
-                     text-overflow: clip; }
 .node.dead > .what { color: var(--faint); }
-.node.src > .what { color: var(--accent); }
 .node.head { border-bottom-color: var(--ink); padding-top: 10px; padding-bottom: 6px; }
 .node.head > .what { font-size: 15px; letter-spacing: .02em; }
 .node.head > .mark { color: var(--ink); }
-
-.node .n { color: var(--accent); }
-.node .t { color: var(--warm); }
-.node .kw { color: var(--muted); }
-.node .st { color: var(--warm); }
-.node .cm { color: var(--faint); }
-.node.dead .n, .node.dead .kw, .node.dead .st { color: var(--faint); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 620px) {

@@ -48,12 +48,26 @@ h1 { font-size: 19px; font-weight: 400; margin: 0; letter-spacing: .02em; }
 .foot { color: var(--faint); font-size: 12px; max-width: 74ch; margin: 22px 0 0; }
 
 .controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-            margin: 22px 0 26px; }
-.field { display: inline-flex; align-items: baseline; gap: 7px; }
-input { font-family: var(--mono); font-size: 13px; width: 8ch; background: transparent;
-        color: var(--ink); border: 0; border-bottom: 1px solid var(--hair);
-        padding: 3px 2px; }
-input:focus { border-bottom-color: var(--accent); outline: none; }
+            margin: 0 0 26px; }
+input { font-family: var(--mono); font-size: 12.5px; width: 9ch; background: transparent;
+        color: var(--ink); border: 1px solid var(--hair); padding: 4px 6px; }
+input:focus { border-color: var(--accent); outline: none; }
+
+/* ---- the conditions, set before anything runs ---- */
+.knobs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+         gap: 20px 28px; margin: 26px 0 24px; align-items: start; }
+.knob h3 { font: inherit; font-size: 10.5px; letter-spacing: .12em;
+           text-transform: uppercase; color: var(--faint); margin: 0 0 5px; }
+.knob .why { color: var(--muted); font-size: 11.5px; line-height: 1.5;
+             margin: 0 0 9px; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.seg button { font-family: var(--mono); font-size: 11.5px; background: transparent;
+              color: var(--muted); border: 1px solid var(--hair); padding: 4px 9px;
+              cursor: pointer; }
+.seg button:hover { color: var(--ink); border-color: var(--ink); }
+.seg button[aria-pressed="true"] { color: var(--paper); background: var(--accent);
+                                   border-color: var(--accent); }
+.seg button[aria-pressed="true"]:hover { color: var(--paper); }
 button.go { font-family: var(--mono); font-size: 12px; letter-spacing: .1em;
   text-transform: uppercase; background: var(--ink); color: var(--paper);
   border: 0; padding: 10px 20px; cursor: pointer; }
@@ -99,20 +113,10 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .node.quiet > .what { color: var(--muted); }
 .node.thought > .what { color: var(--muted); font-style: italic; }
 .node.more > .what { color: var(--faint); }
-.node.code > .what { white-space: pre; overflow-x: auto; min-width: 0;
-                     text-overflow: clip; }
 .node.dead > .what { color: var(--faint); }
-.node.src > .what { color: var(--accent); }
 .node.head { border-bottom-color: var(--ink); padding-top: 10px; padding-bottom: 6px; }
 .node.head > .what { font-size: 15px; letter-spacing: .02em; }
 .node.head > .mark { color: var(--ink); }
-
-.node .n { color: var(--accent); }
-.node .t { color: var(--warm); }
-.node .kw { color: var(--muted); }
-.node .st { color: var(--warm); }
-.node .cm { color: var(--faint); }
-.node.dead .n, .node.dead .kw, .node.dead .st { color: var(--faint); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 620px) {
@@ -136,13 +140,10 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 
   <p class="blurb" id="blurb"></p>
 
+  <div class="knobs" id="knobs"></div>
+
   <div class="controls">
     <button class="go" id="run" type="button"></button>
-    <span class="field">
-      <label class="lab" for="seed" id="l-seed"></label>
-      <input id="seed" type="number" inputmode="numeric">
-      <button class="ghost" id="roll" type="button"></button>
-    </span>
   </div>
 
   <div class="tree" id="tree"></div>
@@ -150,26 +151,48 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
   <p class="foot" id="hint"></p>
 </div>
 
-<script>// Only the commentary is translated. Everything the program says — its
-// source, and the values it produces — stays in the language it was
-// written in, which is Python.
+<script>// Only the commentary is translated. Everything the program says — the names
+// in it, and the values it produces — stays in the language it was written
+// in, which is Python.
 
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a tree. You see only what happened; open a year and you get its " +
-      "months, a month and you get its days, a day and you get the things you did, a " +
-      "thing and you get the thoughts you had on the way to it, a thought and you get " +
-      "the line of live.py that thought it.",
+    blurb: "A life is a tree. Set the conditions, run one, and you see only what " +
+      "happened in it; open a year and you get its months, a month and you get its " +
+      "days, a day and you get the things you did, a thing and you get the thoughts " +
+      "you had on the way to it. A year also holds the six numbers the loop was " +
+      "reading while it passed.",
     run: "run one life", again: "run another", seed: "seed", roll: "roll",
-    hint: "The rule is the same at every depth: the children something happened in are " +
-      "shown, the rest are counted. Nothing here is retyped — every line of Python is " +
-      "read out of the file it claims to be, and a line greyed out never ran.",
+    hint: "The rule is the same at every depth: the children something happened in " +
+      "are shown, the rest are counted. The six numbers are computed by wind_up() in " +
+      "world.py out of what you were given, what was done to you before you could " +
+      "object, and what happens to be going on — and beside each one is the line of " +
+      "live.py that reads it.",
 
-    lines: "lines", aLife: "a life", years: "years", account: "what it came to",
-    more: "… % more", mostly: "mostly", tru: "true", isA: "what it is",
-    base: "base", readBy: "read by",
-    stillAwake: "still awake", attempts: "% attempts",
+    century: "the century",
+    centuryWhy: "How much happens that is not about you. Governments, borders, money, " +
+      "weather, war. A little of it can kill you.",
+    centurySet: ["quiet", "ordinary", "turbulent", "catastrophic"],
+    conscience: "conscience",
+    conscienceWhy: "How often the list of things you meant to do is visible to you at " +
+      "all. At ordinary, about eight moments in a lifetime.",
+    conscienceSet: ["rarely", "ordinary", "often", "constantly"],
+    temptation: "temptation",
+    temptationWhy: "How often the things you know better than to do have a length " +
+      "greater than zero.",
+    temptationSet: ["seldom", "ordinary", "often", "constantly"],
+    sleep: "sleep",
+    sleepWhy: "How readily you fall asleep once you are lying down. The rest of the " +
+      "night is spent thinking.",
+    sleepSet: ["badly", "ordinarily", "easily"],
+    seedWhy: "The same seed and the same settings give the same life, exactly, every time.",
+
+    aLife: "a life", years: "years", account: "what it came to",
+    more: "… % more", mostly: "mostly",
+    theDials: "what the loop was reading", base: "base", readBy: "read at",
+    asFar: "as far as it is allowed to go",
+    stillAwake: "still awake", asleep: "asleep", attempts: "% attempts",
 
     inOrder: "the bases, in that order",
     died: "died at", inTheYearOf: "in the year of",
@@ -183,20 +206,38 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stablo. Vidi se samo ono što se dogodilo; otvoriš godinu i dobiješ " +
-      "njezine mjesece, mjesec i dobiješ dane, dan i dobiješ ono što si radio, radnju i " +
-      "dobiješ misli koje su joj prethodile, misao i dobiješ redak iz live.py koji ju je " +
-      "pomislio.",
+    blurb: "Život je stablo. Postavi uvjete, pokreni jedan, i vidiš samo ono što se u " +
+      "njemu dogodilo; otvoriš godinu i dobiješ njezine mjesece, mjesec i dobiješ dane, " +
+      "dan i dobiješ ono što si radio, radnju i dobiješ misli koje su joj prethodile. " +
+      "Godina drži i šest brojeva koje je petlja čitala dok je prolazila.",
     run: "pokreni jedan život", again: "pokreni još jedan", seed: "sjeme", roll: "baci",
     hint: "Pravilo je na svakoj dubini isto: prikazuje se ono u čemu se nešto dogodilo, " +
-      "ostalo se prebroji. Ništa ovdje nije prepisano — svaki se redak Pythona čita iz " +
-      "datoteke za koju tvrdi da je, a posivljeni se redak nikad nije izvršio.",
+      "ostalo se prebroji. Šest brojeva računa wind_up() u world.py iz onoga što si " +
+      "dobio, onoga što ti je učinjeno prije nego si mogao prigovoriti, i onoga što se " +
+      "u tom trenutku događa — a uz svaki piše redak iz live.py koji ga čita.",
 
-    lines: "redaka", aLife: "jedan život", years: "godina",
-    account: "što je od toga ostalo",
-    more: "… još %", mostly: "uglavnom", tru: "istinito", isA: "što je to",
-    base: "temelj", readBy: "čita",
-    stillAwake: "još budan", attempts: "% pokušaja",
+    century: "stoljeće",
+    centuryWhy: "Koliko se toga događa što nije o tebi. Vlade, granice, novac, vrijeme, " +
+      "rat. Ponešto od toga te može ubiti.",
+    centurySet: ["tiho", "obično", "burno", "katastrofalno"],
+    conscience: "savjest",
+    conscienceWhy: "Koliko ti je često popis onoga što si namjeravao uopće vidljiv. Na " +
+      "obično, otprilike osam trenutaka u životu.",
+    conscienceSet: ["rijetko", "obično", "često", "stalno"],
+    temptation: "napast",
+    temptationWhy: "Koliko često stvari za koje znaš da ih ne bi trebao imaju duljinu " +
+      "veću od nule.",
+    temptationSet: ["rijetko", "obično", "često", "stalno"],
+    sleep: "san",
+    sleepWhy: "Koliko lako zaspiš kad već ležiš. Ostatak noći potrošen je na misli.",
+    sleepSet: ["loše", "obično", "lako"],
+    seedWhy: "Isto sjeme i iste postavke daju točno isti život, svaki put.",
+
+    aLife: "jedan život", years: "godina", account: "što je od toga ostalo",
+    more: "… još %", mostly: "uglavnom",
+    theDials: "što je petlja čitala", base: "temelj", readBy: "čita se u",
+    asFar: "dalje ne smije",
+    stillAwake: "još budan", asleep: "usnuo", attempts: "% pokušaja",
 
     inOrder: "baze, tim redom",
     died: "umro u", inTheYearOf: "u godini u kojoj je bilo:",
@@ -210,7 +251,6 @@ const UI = {
   },
 };
 </script>
-<script>const SRC = {"main": "import genes\nimport upbringing\nimport education\nfrom world import dead\nfrom live import wake_up, live, sleep\n\nif __name__ == \"__main__\":\n    while not dead:\n        wake_up()\n        live()\n        sleep()", "live": "import random\nfrom world import *\n\ndef wake_up():\n    while still_sleepy:\n        if must_wake_up:\n            do_whatever_it_takes_to_get_up()\n            return\n        else:\n            pass\n    get_up()\n\ndef sleep():\n    while not lying_down:\n        pass\n    attempts = 0\n    while fall_asleep() == False:\n        think_about_stuff()\n\n        attempts += 1\n        if attempts == 50:\n            get_frustrated()\n        if attempts > 50:\n            continue_to_be_frustrated()\n        if morning:\n            insomnia = True\n\ndef think_about_stuff():\n    thought = random.choice(subconsciousness + consciousness)\n    while have_nothing_to_do:\n        think(thought)\n        if random.randrange(10) > 0:\n            thought = random.choice(related(thought))\n        else:\n            thought = random.choice(subconsciousness + consciousness)\n\ndef live():\n    while len(things_you_can_do) > 0:\n        think_about_stuff()\n\n        if len(things_you_really_must_do) > 0:\n            if random.randrange(2) == 0:\n                thing_to_do = random.choice(things_you_really_must_do)\n                do(thing_to_do)\n\n        if len(things_you_should_do) > 0:\n            if random.randrange(3) == 0:\n                thing_to_do = random.choice(things_you_should_do)\n                do(thing_to_do)\n\n        if len(things_you_should_never_do) > 0:\n            if random.randrange(4) == 0:\n                thing_to_do = random.choice(things_you_should_never_do)\n                do(thing_to_do)\n\n        thing_to_do = random.choice(things_you_can_do)\n        do(thing_to_do)\n        \n        think_about_stuff()", "reveals": {"still_sleepy": [{"file": "world.py", "line": 560, "code": "still_sleepy = Condition(_still_sleepy)"}, {"file": "world.py", "line": 526, "code": "def _still_sleepy():\n    if state.grogginess <= 0:\n        return False\n    state.grogginess -= 1\n    return True"}, {"file": "world.py", "line": 325, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}], "must_wake_up": [{"file": "world.py", "line": 561, "code": "must_wake_up = Condition(_must_wake_up)"}, {"file": "world.py", "line": 533, "code": "def _must_wake_up():\n    age = clock.age\n    if age < 6 or age >= 66 or not state.alive:\n        return False\n    return clock.day % 7 not in (5, 6)"}], "lying_down": [{"file": "world.py", "line": 562, "code": "lying_down = Condition(_lying_down)"}, {"file": "world.py", "line": 540, "code": "def _lying_down():\n    if state.lying:\n        return True\n    state.evening_left -= 1\n    if state.evening_left <= 0:\n        state.lying = True\n        state.idle += round(random.randrange(2, 9) * state.dials['restless'])\n        return True\n    return False"}], "morning": [{"file": "world.py", "line": 563, "code": "morning = Condition(_morning)"}, {"file": "world.py", "line": 551, "code": "def _morning():\n    if 3 <= clock.hour < 7:\n        if not state.insomnia_noted:\n            state.insomnia_noted = True\n            state.insomnia_nights += 1\n        return True\n    return False"}], "have_nothing_to_do": [{"file": "world.py", "line": 564, "code": "have_nothing_to_do = Condition(lambda: state.idle > 0, cost=0)"}, {"file": "world.py", "line": 325, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}], "things_you_can_do": [{"file": "world.py", "line": 406, "code": "things_you_can_do = Pool()"}, {"file": "world.py", "line": 748, "code": "def restock():\n    choices = list(CAN_DO[state.stage])\n    choices += [(s, 45) for s in state.skills_kept]\n    for circumstance in state.circumstances:\n        choices += circumstance['does']\n    choices += SEASON[SEASONS[clock.month]]\n    already = set()\n    distinct = []\n    for name, minutes in choices:\n        if name not in already:\n            already.add(name)\n            distinct.append((name, minutes))\n    state.choices = distinct"}, {"file": "world.py", "line": 678, "code": "def take_place(event):\n    age = clock.age\n    state.circumstances.append(\n        {'text': event.text, 'until': age + event.years, 'risk': event.risk,\n         'kind': event.kind, 'does': event.does, 'thinks': event.thinks})\n    month = random.randrange(12)\n    state.world_events.append((age, month, event.text))\n    chronicle.world(age, month, event.text)\n    if event.costs:\n        owe(event.costs)"}], "things_you_really_must_do": [{"file": "world.py", "line": 407, "code": "things_you_really_must_do = Pool()"}], "things_you_should_do": [{"file": "world.py", "line": 408, "code": "things_you_should_do = Reproach()"}, {"file": "world.py", "line": 344, "code": "class Reproach(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.reminded else 0"}], "things_you_should_never_do": [{"file": "world.py", "line": 409, "code": "things_you_should_never_do = Temptations()"}, {"file": "world.py", "line": 339, "code": "class Temptations(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.tempted else 0"}], "consciousness": [{"file": "world.py", "line": 410, "code": "consciousness = Pool()"}, {"file": "world.py", "line": 459, "code": "def refresh_mind():\n    name = stage_at(clock.age)\n    thoughts = list(THOUGHTS[name])\n    for circumstance in state.circumstances:\n        thoughts += circumstance['thinks']\n    age = clock.age\n    if not state.preoccupation or state.preoccupation[1] <= age:\n        state.preoccupation = (random.choice(thoughts),\n                               age + random.randrange(2, 8))\n    thoughts += [state.preoccupation[0]] * 3\n    consciousness[:] = [Thought(t, m) for t, m in thoughts]\n    subconsciousness[:] = [Thought(t, m) for t, m, since in DEEP\n                           if age >= since] + list(state.scars)\n    things_you_should_never_do[:] = [\n        Doing(n, 'never', random.randrange(5, 40))\n        for n in (NEVER_DO if age >= 13 else [])]\n    by_theme.clear()\n    for thought in consciousness + subconsciousness:\n        by_theme.setdefault(thought.theme, []).append(thought)"}], "subconsciousness": [{"file": "world.py", "line": 411, "code": "subconsciousness = Pool()"}], "do": [{"file": "world.py", "line": 490, "code": "def do(thing):\n    clock.tick(thing.minutes)\n    chronicle.did(clock.age, clock.month, thing.name, thing.kind)\n    if thing.kind == 'never':\n        if random.randrange(9) == 0:\n            scar(thing.name)\n    else:\n        if thing.kind == 'should':\n            state.reminded = False\n            state.got_round_to += 1\n        for pool in (things_you_can_do, things_you_really_must_do,\n                     things_you_should_do):\n            if thing in pool:\n                pool.remove(thing)\n                break\n    state.idle += round(random.randrange(0, 3) * state.dials['restless'])\n    state.tempted = random.random() < state.dials['temptation']\n    if not state.reminded:\n        state.reminded = random.random() < state.dials['conscience']"}], "think": [{"file": "world.py", "line": 484, "code": "def think(thought):\n    clock.tick(random.randrange(1, 4))\n    state.idle -= 1\n    chronicle.thought(clock.age, clock.month, thought.text)"}], "related": [{"file": "world.py", "line": 480, "code": "def related(thought):\n    return by_theme.get(thought.theme) or list(consciousness)"}], "fall_asleep": [{"file": "world.py", "line": 577, "code": "def fall_asleep():\n    if not state.alive:\n        night()\n        return True\n    clock.tick(random.randrange(1, 5))\n    state.sleep_attempts += 1\n    state.idle += random.randrange(0, 2)\n    chance = state.dials['sleep'] + 0.012 * state.sleep_attempts\n    if random.random() < chance:\n        night()\n        return True\n    return False"}, {"file": "world.py", "line": 591, "code": "def night():\n    if state.insomnia_noted and state.sleep_attempts > state.worst_night[0]:\n        state.worst_night = (state.sleep_attempts, clock.age, clock.time())\n    wake = 6 * 60 + random.randrange(0, 150)\n    target = (state.day_index + 1) * MINUTES_PER_DAY + wake\n    clock.minute = max(target, clock.minute + 45)\n    state.grogginess = random.randrange(0, 45)\n    state.lying = False"}], "get_up": [{"file": "world.py", "line": 601, "code": "def get_up():\n    state.grogginess = 0\n    morning_of(full=True)"}], "do_whatever_it_takes_to_get_up": [{"file": "world.py", "line": 606, "code": "def do_whatever_it_takes_to_get_up():\n    clock.tick(random.randrange(5, 25))\n    state.grogginess = 0\n    state.alarms += 1\n    morning_of(full=False)"}], "get_frustrated": [{"file": "world.py", "line": 568, "code": "def get_frustrated():\n    clock.tick(random.randrange(2, 10))\n    state.frustrated += 1"}], "continue_to_be_frustrated": [{"file": "world.py", "line": 573, "code": "def continue_to_be_frustrated():\n    clock.tick(1)"}], "dead": [{"file": "world.py", "line": 565, "code": "dead = Condition(lambda: not state.alive, cost=0)"}], "upbringing": [{"file": "upbringing.py", "line": 69, "code": "def childhood():\n    age = 0\n    while age < 7:\n        watch(parents)\n        imitate(random.choice(parents))\n        hurt = something_small()\n        if hurt:\n            try:\n                cry(hurt)\n            except NotInThisHouse:\n                unresolved.append(hurt)\n        age += 1"}, {"file": "upbringing.py", "line": 82, "code": "def grow_up():\n    global raised\n    childhood()\n    age = 17\n    while len(unresolved) > 0:\n        thing = unresolved.pop()\n        age += 1\n        if age > 79:\n            return\n        if random.randrange(10) > 0:\n            unresolved.insert(0, thing)\n        else:\n            raised = (age, thing)\n            raise Unresolved(thing)"}, {"file": "upbringing.py", "line": 105, "code": "try:\n    grow_up()"}], "education": [{"file": "education.py", "line": 70, "code": "def understand(subject):\n    if subject not in curious_about:\n        raise NotImplementedError(subject)\n    questions.append(\"why \" + subject)\n    while len(questions) > 0:\n        if bell():\n            break\n        question = questions.pop()\n        questions.extend(ask(question))"}, {"file": "education.py", "line": 67, "code": "def bell():\n    return random.randrange(45) == 0"}], "wind_up": [{"file": "world.py", "line": 243, "code": "def wind_up():\n    \"\"\"Recompute every dial from what you were given, what was done to you,\n    and what is going on at the moment. Kept as a working, so that the\n    working can be read.\"\"\"\n    working = {name: [] for name in DIALS}\n    state.dials = dict(DIALS)\n\n    def lean(source, table):\n        for dial, (how, amount) in table.items():\n            working[dial].append((source, how, amount))\n            if how == '+':\n                state.dials[dial] += amount\n            else:\n                state.dials[dial] *= amount\n\n    for trait in sorted(genes.given):\n        if trait in FROM_GENES:\n            lean('%s (%s)' % (trait, genes.from_whom.get(trait, '?')),\n                 FROM_GENES[trait])\n    for _ in upbringing.unresolved:\n        lean('carried from childhood', FROM_UPBRINGING)\n    for circumstance in state.circumstances:\n        kind = circumstance.get('kind')\n        if kind in FROM_HISTORY:\n            lean(circumstance['text'], FROM_HISTORY[kind])\n\n    state.dials['sleep'] = max(0.008, state.dials['sleep'])\n    state.dials['persistence'] = min(0.995, state.dials['persistence'])\n    state.working = working"}, {"file": "world.py", "line": 214, "code": "FROM_GENES = {\n    'worry':            {'sleep': ('+', -0.018), 'restless': ('x', 1.35),\n                         'temptation': ('x', 1.20)},\n    'fear_of_the_dark': {'sleep': ('+', -0.010), 'restless': ('x', 1.15)},\n    'patience':         {'sleep': ('+', 0.012), 'restless': ('x', 0.80),\n                         'temptation': ('x', 0.75)},\n    'stubbornness':     {'persistence': ('+', 0.02), 'frailty': ('x', 0.90),\n                         'conscience': ('x', 0.80)},\n    'hope':             {'conscience': ('x', 1.60), 'frailty': ('x', 0.85)},\n    'silence':          {'temptation': ('x', 0.80), 'restless': ('x', 1.10)},\n    'posture':          {'frailty': ('x', 1.15)},\n    'a way with people': {'conscience': ('x', 1.25)},"}], "world": [{"file": "world.py", "line": 325, "code": "class Condition:\n    def __init__(self, test, cost=1):\n        self.test = test\n        self.cost = cost\n\n    def __bool__(self):\n        clock.tick(self.cost)\n        return bool(self.test())"}, {"file": "world.py", "line": 335, "code": "class Pool(list):\n    pass"}, {"file": "world.py", "line": 339, "code": "class Temptations(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.tempted else 0"}, {"file": "world.py", "line": 344, "code": "class Reproach(Pool):\n    def __len__(self):\n        return Pool.__len__(self) if state.reminded else 0"}], "genes": [{"file": "genes.py", "line": 5, "code": "class Ancestor:\n    hope = True\n    fear_of_the_dark = True\n    eyes = \"brown\"\n    worry = \"about the winter\"\n    silence = \"the kind you are born into\"\n    posture = \"from carrying things\"\n\nclass Grandmother(Ancestor):\n    stubbornness = True\n    recipe = \"never written down\"\n    worry = \"about money\"\n\nclass Grandfather(Ancestor):\n    silence = \"long\"\n    patience = True\n\nclass Mother(Grandmother, Grandfather):\n    worry = float('inf')\n    eyes = \"green\"\n    everything_else = \"hers\"\n    patience = \"with everyone but you\"\n\nclass Father(Grandmother, Grandfather):\n    worry = \"about what people think\"\n    posture = \"bad\"\n    eyes = \"grey\"\n    silence = \"at the table\"\n    stubbornness = \"the quiet kind\"\n\n# which of them you take after is the order of the bases, and the order is\n# not something you were asked about\nbases = (Mother, Father) if random.randrange(2) == 0 else (Father, Mother)\nYou = type('You', bases, {})\ntake_after = bases[0].__name__"}, {"file": "genes.py", "line": 46, "code": "def inherit(trait):\n    for ancestor in You.__mro__:\n        if trait in vars(ancestor):\n            return copy(vars(ancestor)[trait])\n    return mutate(trait)\n\ndef blame(trait):\n    for ancestor in reversed(You.__mro__):\n        if trait in vars(ancestor):\n            return ancestor\n    return You"}, {"file": "genes.py", "line": 91, "code": "lifespan = 68 + random.randrange(-11, 22)"}], "history": [{"file": "history.py", "line": 4, "code": "class Event:\n    def __init__(self, text, kind, years, weight,\n                 does=(), thinks=(), risk=0.0, costs=None, repeats=False):\n        self.text = text\n        self.kind = kind\n        self.years = years\n        self.weight = weight\n        self.does = list(does)\n        self.thinks = list(thinks)\n        self.risk = risk\n        self.costs = costs\n        self.repeats = repeats"}, {"file": "history.py", "line": 17, "code": "WORLD = [\n    Event(\"the government falls\", 'politics', 1, 10, repeats=True,\n          does=[(\"listening for news\", 40), (\"queueing\", 60)],\n          thinks=[(\"whether it makes any difference\", 'politics')]),\n    Event(\"a new government, much like the last\", 'politics', 2, 9, repeats=True,\n          does=[(\"listening for news\", 30)],\n          thinks=[(\"whether it makes any difference\", 'politics')]),"}, {"file": "history.py", "line": 83, "code": "def unfold(span=101):\n    happened = []\n    spent = set()\n    age = 2\n    while age < span:\n        if random.random() < 0.075:\n            candidates = [e for e in WORLD if e.repeats or e.text not in spent]\n            if not candidates:\n                break\n            event = pick(candidates)\n            happened.append((age, event))\n            spent.add(event.text)\n            age += max(1, event.years)\n        else:\n            age += 1\n    return happened"}]}};</script>
 <script>// A life, ported from the Python in this repository.
 // live.py's loops are reproduced faithfully: checking a condition costs a
 // minute, which is what makes them terminate.
@@ -1191,23 +1231,33 @@ class Life {
 
 </script>
 <script>// One row, at every scale. A life is a tree: years contain months contain
-// days contain the things you did contain the thoughts you had on the way,
-// and a thought contains the line of live.py that thought it. The program
-// is the same tree read the other way: a line contains the definitions of
-// the names on it, and those are lines too.
+// days contain the things you did contain the thoughts you had on the way.
+// A year also contains the six numbers the loop was reading that year, and
+// each of those contains its working — what you were given, what was done to
+// you, and what happened to be going on.
 //
 // Nothing here knows how deep it is. Every level uses the same rule:
-// show the children that carry an event, and count the rest.
+// show the children something happened in, and count the rest.
 
 const $ = (s, r) => (r || document).querySelector(s);
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const fmt = (n) => n.toLocaleString("en-US");
 
+// what the knobs are set to, in the units the engine wants
+const PRESETS = {
+  century: [{ turbulence: 0.030, lethality: 0.4 }, { turbulence: 0.075, lethality: 1.0 },
+            { turbulence: 0.130, lethality: 1.8 }, { turbulence: 0.200, lethality: 3.0 }],
+  conscience: [1 / 60000, 1 / 26000, 1 / 8000, 1 / 1500],
+  temptation: [30, 12, 6, 3],
+  sleep: [0.02, 0.05, 0.12],
+};
+
 const state = {
   life: null, years: null,
   lang: (navigator.language || "en").startsWith("hr") ? "hr" : "en",
   seed: Math.floor(Math.random() * 1e6),
-  open: new Set(["prog"]),   // which rows are unfolded
+  set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
+  open: new Set(),           // which rows are unfolded
   more: new Set(),           // which "… n more" rows have been asked for
   nodes: new Map(),          // what is on screen, so a click can be answered
 };
@@ -1215,37 +1265,11 @@ const t = (k) => UI[state.lang][k];
 
 const CAP = 12;              // more children than this and the quiet ones fold away
 
-// ------------------------------------------------------------------ source
-
-const KEYWORDS = "def|while|if|else|elif|return|import|from|pass|True|False|None|" +
-  "not|in|and|or|len|random|class|for|try|except|raise|yield|global|__name__|__all__";
-const NAMES = Object.keys(SRC.reveals).sort((a, b) => b.length - a.length);
-
-// one pass, because a second pass would find its own markup: `class` is a
-// keyword and every span it had just written has one
-const TOKEN = new RegExp("('[^']*')|(#.*$)|\\b(" + NAMES.join("|") + ")\\b|\\b(" +
-                         KEYWORDS + ")\\b", "g");
-
-function colour(line) {
-  return esc(line).replace(TOKEN, (m, st, cm, nm, kw) =>
-    '<span class="' + (st ? "st" : cm ? "cm" : nm ? "n" : "kw") + '">' + m + "</span>");
-}
-
-function namesIn(line, except) {
-  const found = [];
-  for (const name of NAMES) {
-    if (name === except) continue;
-    if (new RegExp("\\b" + name + "\\b").test(line)) found.push(name);
-  }
-  return found;
-}
-
-// which line of live.py reads which dial, and which dial each line reads
-const DIAL_ON = { 17: "sleep", 30: "restless", 46: "conscience", 51: "temptation" };
+// which line of live.py reads which dial. The lines are not shown any more,
+// but a number is worth less if you cannot say where it is read.
 const READS_AT = { sleep: 17, restless: 30, conscience: 46, temptation: 51 };
 const SHOW = { sleep: 4, restless: 3, conscience: 6, temptation: 4,
                persistence: 3, frailty: 3 };
-const LIVE_LINES = SRC.live.split("\n");
 
 // ------------------------------------------------------------------ the life
 
@@ -1279,8 +1303,8 @@ function indexLife(life) {
       if (!mo) continue;
       for (const [k, v] of mo.mins) y.mins.set(k, (y.mins.get(k) || 0) + v);
     }
+    y.months = y.months.filter(Boolean);
   }
-  for (const y of years) y.months = y.months.filter(Boolean);
   const lastDay = life.days.length ? life.days[life.days.length - 1].dayOfLife : 0;
   for (const e of life.events) {
     const rec = byDay.get(Math.min(e.day, lastDay));
@@ -1307,134 +1331,60 @@ function hours(mins) {
   return fmt(Math.round(total / 60)) + " h";
 }
 
+function dayLabel(rec) {
+  const mins = new Map(), names = state.life.names;
+  for (let i = 0; i < rec.acts.length; i += 5) {
+    const name = names[rec.acts[i + 1]];
+    mins.set(name, (mins.get(name) || 0) + rec.acts[i + 2]);
+  }
+  return mostly(mins);
+}
+
 // ------------------------------------------------------------------ nodes
 
 function node(id, kind, o) { return Object.assign({ id: id, kind: kind }, o); }
 
 function roots() {
   const life = state.life;
-  const out = [node("prog", "file", {
-    cls: "head", what: "live.py", leaf: false,
-    tail: LIVE_LINES.length + " " + t("lines"),
-  })];
-  if (!life) return out;
-  out.push(node("life", "life", {
-    cls: "head", what: t("aLife"), leaf: false,
-    tail: life.diedAt[0] + " " + t("years"),
-  }));
-  out.push(node("acct", "acct", { cls: "head", what: t("account"), leaf: false }));
-  return out;
+  if (!life) return [];
+  return [
+    node("life", "life", { cls: "head", what: t("aLife"), leaf: false,
+                           tail: life.diedAt[0] + " " + t("years") }),
+    node("acct", "acct", { cls: "head", what: t("account"), leaf: false }),
+  ];
 }
 
-function lineNode(no, prefix) {
-  const life = state.life, src = LIVE_LINES[no - 1];
-  const kids = namesIn(src).length + (DIAL_ON[no] && life ? 1 : 0);
-  let tail = "";
-  if (life && life.hits[no]) {
-    tail = '<span class="n">' + fmt(life.hits[no]) + "×</span>";
-    if (life.conds.has(no)) {
-      tail += ' <span class="t">' + t("tru") + " " + fmt(life.trues[no]) + "</span>";
-    }
-  }
-  return node(prefix + "/l" + no, "line", {
-    cls: "code" + (life && TRACED.includes(no) && !life.hits[no] ? " dead" : ""),
-    when: String(no), html: colour(src) || "&nbsp;", tail: tail, no: no,
-    leaf: !kids, notable: true,
-  });
-}
-
-function nameNode(name, prefix) {
-  return node(prefix + "/n:" + name, "name",
-              { cls: "src", what: name, name: name, tail: t("isA"), leaf: false });
-}
-
-// a definition unfolds as rows, because rows are what everything is here
-function codeRows(name, prefix) {
-  const out = [];
-  SRC.reveals[name].forEach((b, bi) => {
-    b.code.split("\n").forEach((line, i) => {
-      out.push(node(prefix + "/c" + bi + "." + i, "code", {
-        cls: "code", html: colour(line) || "&nbsp;",
-        tail: i === 0 ? b.file + ":" + b.line : "", src: line, owner: name,
-        leaf: !namesIn(line, name).length, notable: true,
-      }));
-    });
-  });
-  return out;
-}
-
-// a dial does not have a value; it has a value until something happens
-function dialSpans(dial) {
-  const life = state.life, out = [];
-  for (const age of Object.keys(life.dialsAt).map(Number).sort((a, b) => a - b)) {
-    const at = life.dialsAt[age], key = JSON.stringify(at.working[dial]);
-    const last = out[out.length - 1];
-    if (last && last.key === key) { last.to = age; continue; }
-    out.push({ from: age, to: age, key: key,
-               working: at.working[dial], value: at.dials[dial] });
-  }
-  return out;
-}
-
+// where a dial starts before anything has leaned on it, which is what the
+// knobs above set
 function baseOf(dial) {
-  return dial === "conscience" ? 1 / 26000 : dial === "temptation" ? 1 / 12 : DIALS[dial];
+  const o = state.life.opts;
+  return dial === "conscience" ? o.conscience
+       : dial === "temptation" ? 1 / o.temptation
+       : dial === "sleep" ? o.sleepBase : DIALS[dial];
 }
 
-// what leans on a dial came from somewhere, and somewhere is a module
-function leansFrom(source) {
-  return source.indexOf(" (") > 0 ? "genes"
-       : source === "carried from childhood" ? "upbringing" : "history";
+// the dials as they stood in a given year, which is where they are turned
+function dialsAt(age) {
+  const life = state.life;
+  let at = age;
+  while (at >= 0 && !life.dialsAt[at]) at--;
+  return at < 0 ? null : life.dialsAt[at];
+}
+
+function thoughtNodes(rec, from, to, prefix) {
+  const out = [];
+  for (let i = from; i < to; i++) {
+    out.push(node(prefix + "/t" + i, "thought", {
+      cls: "thought", what: state.life.thoughtNames[rec.thoughts[i]],
+      leaf: true, notable: true,
+    }));
+  }
+  return out;
 }
 
 function childrenOf(n) {
   const life = state.life;
   switch (n.kind) {
-    // ---- the program
-    case "file":
-      return LIVE_LINES.map(function (_, i) { return lineNode(i + 1, "prog"); });
-    case "line": {
-      const out = namesIn(LIVE_LINES[n.no - 1]).map((name) => nameNode(name, n.id));
-      if (DIAL_ON[n.no] && life) {
-        out.push(node(n.id + "/dial", "dial", {
-          cls: "ev world", what: DIAL_ON[n.no], dial: DIAL_ON[n.no],
-          tail: "world.py:wind_up", leaf: false, notable: true,
-        }));
-      }
-      return out;
-    }
-    case "name": return codeRows(n.name, n.id);
-    case "code": return namesIn(n.src, n.owner).map((name) => nameNode(name, n.id));
-    case "dial":
-      return dialSpans(n.dial).map((s, i) => node(n.id + "/s" + i, "span", {
-        when: s.from === s.to ? String(s.from) : s.from + "–" + s.to,
-        what: n.dial + " = " + s.value.toFixed(SHOW[n.dial]),
-        cls: "ev", span: s, dial: n.dial, leaf: false, notable: true,
-      }));
-    case "span": {
-      const dp = SHOW[n.dial], out = [];
-      out.push(node(n.id + "/base", "leafrow", {
-        when: baseOf(n.dial).toFixed(dp), what: t("base"), cls: "quiet", leaf: true,
-      }));
-      n.span.working.forEach(function (w, i) {
-        const how = w[1], amount = w[2];
-        out.push(node(n.id + "/w" + i, "lean", {
-          when: how === "+" ? (amount > 0 ? "+" : "") + amount.toFixed(dp)
-                            : "×" + amount.toFixed(2),
-          what: w[0], from: leansFrom(w[0]), leaf: false, notable: true,
-        }));
-      });
-      const at = READS_AT[n.dial];
-      out.push(node(n.id + "/read", "read", {
-        when: n.span.value.toFixed(dp), cls: "ev kept",
-        what: t("readBy") + " " + (at ? "live.py:" + at : "world.py"),
-        at: at, leaf: false, notable: true,
-      }));
-      return out;
-    }
-    case "lean": return [nameNode(n.from, n.id)];
-    case "read": return n.at ? [lineNode(n.at, n.id)] : [nameNode("wind_up", n.id)];
-
-    // ---- the life
     case "life":
       return state.years.map(function (y) {
         const ev = y.events.length ? said(y.events)
@@ -1444,8 +1394,9 @@ function childrenOf(n) {
           tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
         });
       });
-    case "year":
-      return n.y.months.map(function (mo) {
+
+    case "year": {
+      const out = n.y.months.map(function (mo) {
         const ev = mo.events.length ? said(mo.events)
                                     : { what: mostly(mo.mins), cls: "quiet" };
         return node(n.id + "/m" + mo.m, "month", {
@@ -1453,6 +1404,14 @@ function childrenOf(n) {
           tail: hours(mo.mins), notable: mo.events.length > 0, leaf: !mo.days.length,
         });
       });
+      // twelve months and the six numbers the loop read while they passed
+      out.push(node(n.id + "/dials", "dials", {
+        what: t("theDials"), cls: "ev world", tail: "world.py:wind_up",
+        age: n.y.age, leaf: false, notable: true,
+      }));
+      return out;
+    }
+
     case "month":
       return n.mo.days.map(function (rec) {
         const ev = rec.events.length ? said(rec.events)
@@ -1462,9 +1421,10 @@ function childrenOf(n) {
           when: dom + " " + MONTHS[rec.month], what: ev.what, cls: ev.cls, rec: rec,
           tail: clock(rec.wake) + "–" + clock(rec.asleep),
           notable: rec.events.length > 0 || rec.insomnia,
-          leaf: !rec.acts.length && !rec.insomnia,
+          leaf: !rec.acts.length && !rec.thoughts.length,
         });
       });
+
     case "day": {
       const rec = n.rec, out = [];
       let seen = 0;
@@ -1478,30 +1438,71 @@ function childrenOf(n) {
         }));
         seen = upTo;
       }
-      if (rec.insomnia) {
+      // whatever was still being thought after the last thing done belongs to
+      // the night, which is where the loop spends what it cannot spend awake
+      if (rec.thoughts.length > seen) {
         out.push(node(n.id + "/night", "night", {
-          when: clock(rec.asleep), cls: "ev loss", rec: rec,
-          what: t("stillAwake"), tail: t("attempts").replace("%", fmt(rec.attempts)),
-          leaf: false, notable: true,
+          when: clock(rec.asleep), rec: rec, at: seen,
+          cls: rec.insomnia ? "ev loss" : "quiet",
+          what: rec.insomnia ? t("stillAwake") : t("asleep"),
+          tail: rec.attempts ? t("attempts").replace("%", fmt(rec.attempts)) : "",
+          leaf: false, notable: rec.insomnia,
         }));
       }
       return out;
     }
+
     case "act": return thoughtNodes(n.rec, n.at, n.upTo, n.id);
-    case "night":
-      return [16, 17, 18, 20, 21, 22, 23, 24, 25, 26].map((no) => lineNode(no, n.id));
-    case "thought": return [lineNode(31, n.id)];
+    case "night": return thoughtNodes(n.rec, n.at, n.rec.thoughts.length, n.id);
+
+    case "dials": {
+      const at = dialsAt(n.age);
+      if (!at) return [];
+      return Object.keys(at.dials).map((dial) => node(n.id + "/" + dial, "dial", {
+        what: dial + " = " + at.dials[dial].toFixed(SHOW[dial]),
+        tail: t("readBy") + " " + (READS_AT[dial] ? "live.py:" + READS_AT[dial]
+                                                  : "world.py"),
+        working: at.working[dial] || [], value: at.dials[dial], dial: dial,
+        cls: "ev", leaf: false, notable: true,
+      }));
+    }
+    case "dial": {
+      const dp = SHOW[n.dial];
+      let sum = baseOf(n.dial);
+      const out = [node(n.id + "/base", "leafrow", {
+        when: sum.toFixed(dp), what: t("base"), cls: "quiet", leaf: true,
+      })];
+      n.working.forEach(function (w, i) {
+        const how = w[1], amount = w[2];
+        sum = how === "+" ? sum + amount : sum * amount;
+        out.push(node(n.id + "/w" + i, "leafrow", {
+          when: how === "+" ? (amount > 0 ? "+" : "") + amount.toFixed(dp)
+                            : "×" + amount.toFixed(2),
+          what: w[0], cls: "", leaf: true,
+        }));
+      });
+      // the working does not always get the last word; two of the dials are
+      // held at a limit, and it is worth saying so where it happens
+      if (Math.abs(sum - n.value) > Math.pow(10, -dp) / 2) {
+        out.push(node(n.id + "/held", "leafrow", {
+          when: n.value.toFixed(dp), what: t("asFar"), cls: "ev world", leaf: true,
+        }));
+      }
+      return out;
+    }
 
     // ---- what it came to
     case "acct": return account();
     case "trait":
       return Object.keys(FROM_GENES[n.trait] || {}).map(function (dial) {
         const how = FROM_GENES[n.trait][dial][0], amount = FROM_GENES[n.trait][dial][1];
-        return node(n.id + "/" + dial, "read", {
+        return node(n.id + "/" + dial, "leafrow", {
           when: how === "+" ? (amount > 0 ? "+" : "") + amount.toFixed(SHOW[dial])
                             : "×" + amount.toFixed(2),
-          what: dial + " — " + (READS_AT[dial] ? "live.py:" + READS_AT[dial] : "world.py"),
-          at: READS_AT[dial], cls: "ev", leaf: false, notable: true,
+          what: dial, cls: "ev",
+          tail: t("readBy") + " " + (READS_AT[dial] ? "live.py:" + READS_AT[dial]
+                                                    : "world.py"),
+          leaf: true, notable: true,
         });
       });
     case "list":
@@ -1517,26 +1518,6 @@ function childrenOf(n) {
     }
     default: return [];
   }
-}
-
-function dayLabel(rec) {
-  const mins = new Map(), names = state.life.names;
-  for (let i = 0; i < rec.acts.length; i += 5) {
-    const name = names[rec.acts[i + 1]];
-    mins.set(name, (mins.get(name) || 0) + rec.acts[i + 2]);
-  }
-  return mostly(mins);
-}
-
-function thoughtNodes(rec, from, to, prefix) {
-  const out = [];
-  for (let i = from; i < to; i++) {
-    out.push(node(prefix + "/t" + i, "thought", {
-      cls: "thought", what: state.life.thoughtNames[rec.thoughts[i]],
-      leaf: false, notable: true,
-    }));
-  }
-  return out;
 }
 
 // ------------------------------------------------------------------ account
@@ -1608,10 +1589,10 @@ function account() {
 // all; otherwise show the ones something happened in, and count the rest
 function shown(n) {
   const kids = n.kids || childrenOf(n);
-  if (kids.length <= CAP || state.more.has(n.id)) return kids;
+  if (n.kind === "year" || kids.length <= CAP || state.more.has(n.id)) return kids;
   const worth = kids.filter((k) => k.notable);
   // if nothing happened in any of them there is nothing to fold away, and a
-  // stretch of years in which nothing happened is still the thing you asked for
+  // stretch in which nothing happened is still the thing you asked for
   if (!worth.length || worth.length === kids.length) return kids;
   return worth.concat([node(n.id + "/+", "more", {
     what: t("more").replace("%", fmt(kids.length - worth.length)), cls: "more",
@@ -1625,8 +1606,8 @@ function row(n, depth, open) {
     esc(n.id) + '" type="button">' +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
     '<span class="when">' + esc(n.when || "") + "</span>" +
-    '<span class="what">' + (n.html || esc(n.what || "")) + "</span>" +
-    '<span class="tail">' + (n.tail || "") + "</span></button>";
+    '<span class="what">' + esc(n.what || "") + "</span>" +
+    '<span class="tail">' + esc(n.tail || "") + "</span></button>";
 }
 
 function emit(out, nodes, depth) {
@@ -1654,22 +1635,80 @@ function clicked(id) {
   draw();
 }
 
+// ------------------------------------------------------------------ the knobs
+
+function segment(key, count) {
+  const box = document.createElement("div");
+  box.className = "seg";
+  box.setAttribute("role", "group");
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = t(key + "Set")[i];
+    b.setAttribute("aria-pressed", String(i === state.set[key]));
+    b.addEventListener("click", function () {
+      state.set[key] = i;
+      for (const other of box.children) {
+        other.setAttribute("aria-pressed", String(other === b));
+      }
+    });
+    box.appendChild(b);
+  }
+  return box;
+}
+
+function buildKnobs() {
+  const knobs = $("#knobs");
+  knobs.innerHTML = "";
+  const make = (title, why, body) => {
+    const k = document.createElement("div");
+    k.className = "knob";
+    const h = document.createElement("h3"); h.textContent = title;
+    const p = document.createElement("p"); p.className = "why"; p.textContent = why;
+    k.append(h, p, body);
+    knobs.appendChild(k);
+  };
+  for (const [key, count] of [["century", 4], ["conscience", 4],
+                              ["temptation", 4], ["sleep", 3]]) {
+    make(t(key), t(key + "Why"), segment(key, count));
+  }
+
+  const seedbox = document.createElement("div");
+  seedbox.className = "seg";
+  const input = document.createElement("input");
+  input.type = "number"; input.inputMode = "numeric"; input.value = state.seed;
+  input.setAttribute("aria-label", t("seed"));
+  input.addEventListener("input", function () {
+    state.seed = Number(input.value) || 0;
+  });
+  const roll = document.createElement("button");
+  roll.type = "button"; roll.className = "ghost"; roll.textContent = t("roll");
+  roll.addEventListener("click", function () {
+    state.seed = Math.floor(Math.random() * 1e6); input.value = state.seed;
+  });
+  seedbox.append(input, roll);
+  make(t("seed"), t("seedWhy"), seedbox);
+}
+
 // ------------------------------------------------------------------ running
 
 function run() {
+  const century = PRESETS.century[state.set.century];
   state.life = new Life({
-    seed: state.seed, turbulence: .075, lethality: 1, temptation: 12,
-    conscience: 1 / 26000, sleepBase: .05, allotted: 0,
+    seed: state.seed,
+    turbulence: century.turbulence, lethality: century.lethality,
+    conscience: PRESETS.conscience[state.set.conscience],
+    temptation: PRESETS.temptation[state.set.temptation],
+    sleepBase: PRESETS.sleep[state.set.sleep],
+    allotted: 0,
   });
   let guard = 0;
   while (state.life.alive && guard++ < 130) state.life.stepYear();
   state.years = indexLife(state.life);
-  // whatever was open in the program stays open; it is the same program
-  state.open = new Set([...state.open].filter((id) => id.startsWith("prog")).concat(["life"]));
+  state.open = new Set(["life"]);
   state.more = new Set();
   chrome();
   draw();
-  $("#tree").scrollIntoView({ block: "start", behavior: "smooth" });
 }
 
 function chrome() {
@@ -1677,30 +1716,22 @@ function chrome() {
   $("#lang").textContent = t("lang");
   $("#blurb").textContent = t("blurb");
   $("#hint").textContent = t("hint");
-  $("#l-seed").textContent = t("seed");
-  $("#roll").textContent = t("roll");
   $("#run").textContent = state.life ? t("again") : t("run");
   $("#seedout").textContent = state.life ? t("seed") + " " + state.seed : "";
 }
 
 function init() {
-  $("#seed").value = state.seed;
   chrome();
+  buildKnobs();
   draw();
   $("#tree").addEventListener("click", function (e) {
     const b = e.target.closest ? e.target.closest(".node") : null;
     if (b) clicked(b.dataset.id);
   });
   $("#run").addEventListener("click", run);
-  $("#roll").addEventListener("click", function () {
-    state.seed = Math.floor(Math.random() * 1e6); $("#seed").value = state.seed;
-  });
-  $("#seed").addEventListener("input", function () {
-    state.seed = Number($("#seed").value) || 0;
-  });
   $("#lang").addEventListener("click", function () {
     state.lang = state.lang === "hr" ? "en" : "hr";
-    chrome(); draw();
+    chrome(); buildKnobs(); draw();
   });
 }
 

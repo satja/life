@@ -1,23 +1,45 @@
-// Only the commentary is translated. Everything the program says — its
-// source, and the values it produces — stays in the language it was
-// written in, which is Python.
+// Only the commentary is translated. Everything the program says — the names
+// in it, and the values it produces — stays in the language it was written
+// in, which is Python.
 
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a tree. You see only what happened; open a year and you get its " +
-      "months, a month and you get its days, a day and you get the things you did, a " +
-      "thing and you get the thoughts you had on the way to it, a thought and you get " +
-      "the line of live.py that thought it.",
+    blurb: "A life is a tree. Set the conditions, run one, and you see only what " +
+      "happened in it; open a year and you get its months, a month and you get its " +
+      "days, a day and you get the things you did, a thing and you get the thoughts " +
+      "you had on the way to it. A year also holds the six numbers the loop was " +
+      "reading while it passed.",
     run: "run one life", again: "run another", seed: "seed", roll: "roll",
-    hint: "The rule is the same at every depth: the children something happened in are " +
-      "shown, the rest are counted. Nothing here is retyped — every line of Python is " +
-      "read out of the file it claims to be, and a line greyed out never ran.",
+    hint: "The rule is the same at every depth: the children something happened in " +
+      "are shown, the rest are counted. The six numbers are computed by wind_up() in " +
+      "world.py out of what you were given, what was done to you before you could " +
+      "object, and what happens to be going on — and beside each one is the line of " +
+      "live.py that reads it.",
 
-    lines: "lines", aLife: "a life", years: "years", account: "what it came to",
-    more: "… % more", mostly: "mostly", tru: "true", isA: "what it is",
-    base: "base", readBy: "read by",
-    stillAwake: "still awake", attempts: "% attempts",
+    century: "the century",
+    centuryWhy: "How much happens that is not about you. Governments, borders, money, " +
+      "weather, war. A little of it can kill you.",
+    centurySet: ["quiet", "ordinary", "turbulent", "catastrophic"],
+    conscience: "conscience",
+    conscienceWhy: "How often the list of things you meant to do is visible to you at " +
+      "all. At ordinary, about eight moments in a lifetime.",
+    conscienceSet: ["rarely", "ordinary", "often", "constantly"],
+    temptation: "temptation",
+    temptationWhy: "How often the things you know better than to do have a length " +
+      "greater than zero.",
+    temptationSet: ["seldom", "ordinary", "often", "constantly"],
+    sleep: "sleep",
+    sleepWhy: "How readily you fall asleep once you are lying down. The rest of the " +
+      "night is spent thinking.",
+    sleepSet: ["badly", "ordinarily", "easily"],
+    seedWhy: "The same seed and the same settings give the same life, exactly, every time.",
+
+    aLife: "a life", years: "years", account: "what it came to",
+    more: "… % more", mostly: "mostly",
+    theDials: "what the loop was reading", base: "base", readBy: "read at",
+    asFar: "as far as it is allowed to go",
+    stillAwake: "still awake", asleep: "asleep", attempts: "% attempts",
 
     inOrder: "the bases, in that order",
     died: "died at", inTheYearOf: "in the year of",
@@ -31,20 +53,38 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stablo. Vidi se samo ono što se dogodilo; otvoriš godinu i dobiješ " +
-      "njezine mjesece, mjesec i dobiješ dane, dan i dobiješ ono što si radio, radnju i " +
-      "dobiješ misli koje su joj prethodile, misao i dobiješ redak iz live.py koji ju je " +
-      "pomislio.",
+    blurb: "Život je stablo. Postavi uvjete, pokreni jedan, i vidiš samo ono što se u " +
+      "njemu dogodilo; otvoriš godinu i dobiješ njezine mjesece, mjesec i dobiješ dane, " +
+      "dan i dobiješ ono što si radio, radnju i dobiješ misli koje su joj prethodile. " +
+      "Godina drži i šest brojeva koje je petlja čitala dok je prolazila.",
     run: "pokreni jedan život", again: "pokreni još jedan", seed: "sjeme", roll: "baci",
     hint: "Pravilo je na svakoj dubini isto: prikazuje se ono u čemu se nešto dogodilo, " +
-      "ostalo se prebroji. Ništa ovdje nije prepisano — svaki se redak Pythona čita iz " +
-      "datoteke za koju tvrdi da je, a posivljeni se redak nikad nije izvršio.",
+      "ostalo se prebroji. Šest brojeva računa wind_up() u world.py iz onoga što si " +
+      "dobio, onoga što ti je učinjeno prije nego si mogao prigovoriti, i onoga što se " +
+      "u tom trenutku događa — a uz svaki piše redak iz live.py koji ga čita.",
 
-    lines: "redaka", aLife: "jedan život", years: "godina",
-    account: "što je od toga ostalo",
-    more: "… još %", mostly: "uglavnom", tru: "istinito", isA: "što je to",
-    base: "temelj", readBy: "čita",
-    stillAwake: "još budan", attempts: "% pokušaja",
+    century: "stoljeće",
+    centuryWhy: "Koliko se toga događa što nije o tebi. Vlade, granice, novac, vrijeme, " +
+      "rat. Ponešto od toga te može ubiti.",
+    centurySet: ["tiho", "obično", "burno", "katastrofalno"],
+    conscience: "savjest",
+    conscienceWhy: "Koliko ti je često popis onoga što si namjeravao uopće vidljiv. Na " +
+      "obično, otprilike osam trenutaka u životu.",
+    conscienceSet: ["rijetko", "obično", "često", "stalno"],
+    temptation: "napast",
+    temptationWhy: "Koliko često stvari za koje znaš da ih ne bi trebao imaju duljinu " +
+      "veću od nule.",
+    temptationSet: ["rijetko", "obično", "često", "stalno"],
+    sleep: "san",
+    sleepWhy: "Koliko lako zaspiš kad već ležiš. Ostatak noći potrošen je na misli.",
+    sleepSet: ["loše", "obično", "lako"],
+    seedWhy: "Isto sjeme i iste postavke daju točno isti život, svaki put.",
+
+    aLife: "jedan život", years: "godina", account: "što je od toga ostalo",
+    more: "… još %", mostly: "uglavnom",
+    theDials: "što je petlja čitala", base: "temelj", readBy: "čita se u",
+    asFar: "dalje ne smije",
+    stillAwake: "još budan", asleep: "usnuo", attempts: "% pokušaja",
 
     inOrder: "baze, tim redom",
     died: "umro u", inTheYearOf: "u godini u kojoj je bilo:",
