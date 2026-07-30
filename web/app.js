@@ -372,7 +372,8 @@ function shown(n) {
 }
 
 function row(n, depth, open) {
-  const cls = "node " + (n.cls || "") + (open ? " open" : "") + (n.leaf ? " leaf" : "");
+  const cls = "node d" + depth + " " + (n.cls || "") +
+              (open ? " open" : "") + (n.leaf ? " leaf" : "");
   return '<button class="' + cls + '" style="--d:' + depth + '" data-id="' +
     esc(n.id) + '" type="button">' +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +

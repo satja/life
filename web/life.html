@@ -6,6 +6,7 @@
   --muted: #6B726E;
   --faint: #A9AFAB;
   --hair:  #E6E9E6;
+  --rail:  #E0E5E1;
   --accent:#1D6F6A;
   --warm:  #9A6510;
   --loss:  #96454F;
@@ -14,15 +15,18 @@
 }
 @media (prefers-color-scheme: dark) {
   :root { --paper: #0F1213; --ink: #E4E8E5; --muted: #8E9793; --faint: #59615E;
-          --hair: #1F2426; --accent: #56B8AC; --warm: #D3A054; --loss: #D2757F; }
+          --hair: #1F2426; --rail: #272F31; --accent: #56B8AC; --warm: #D3A054;
+          --loss: #D2757F; }
 }
 :root[data-theme="dark"] {
   --paper: #0F1213; --ink: #E4E8E5; --muted: #8E9793; --faint: #59615E;
-  --hair: #1F2426; --accent: #56B8AC; --warm: #D3A054; --loss: #D2757F;
+  --hair: #1F2426; --rail: #272F31; --accent: #56B8AC; --warm: #D3A054;
+  --loss: #D2757F;
 }
 :root[data-theme="light"] {
   --paper: #FCFCFA; --ink: #1A1D1B; --muted: #6B726E; --faint: #A9AFAB;
-  --hair: #E6E9E6; --accent: #1D6F6A; --warm: #9A6510; --loss: #96454F;
+  --hair: #E6E9E6; --rail: #E0E5E1; --accent: #1D6F6A; --warm: #9A6510;
+  --loss: #96454F;
 }
 
 * { box-sizing: border-box; }
@@ -74,26 +78,36 @@ button.ghost { font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
 button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-/* ---- one row, at every scale ---- */
-.tree { border-top: 1px solid var(--hair); }
+/* ---- one row, at every scale ----
+   Every row is indented by its depth, and behind it runs one hairline rail
+   per level above it, so where a thing sits is legible without counting. */
+/* a fixed step, so the rails stay aligned when the type steps down */
+.tree { --step: 31px; border-top: 1px solid var(--ink); }
 .node {
   display: grid;
-  grid-template-columns: 1.2em 5.6em 1fr auto;
+  grid-template-columns: 1.1em 5.6em 1fr auto;
   gap: 0 10px;
   align-items: baseline;
   width: 100%;
   font: inherit;
   text-align: left;
-  background: none;
   border: 0;
-  border-bottom: 1px solid var(--hair);
-  padding: 3px 4px 3px calc(var(--d) * 1.35em + 4px);
+  padding: 4px 4px 4px calc(var(--d) * var(--step) + 6px);
   cursor: pointer;
   color: inherit;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(to right,
+      var(--rail) 0 1px, transparent 1px var(--step));
+  background-size: calc(var(--d) * var(--step)) 100%;
+  background-repeat: no-repeat;
+  background-position: 0.5em 0;
 }
-.node:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.node:hover { background-color: color-mix(in srgb, var(--accent) 8%, transparent); }
 .node.leaf { cursor: default; }
-.node.leaf:hover { background: none; }
+.node.leaf:hover { background-color: transparent; }
+/* an open row is the ground its children stand on, so it is given some */
+.node.open { background-color: color-mix(in srgb, var(--accent) 5%, transparent); }
+.node.open:hover { background-color: color-mix(in srgb, var(--accent) 11%, transparent); }
 .node > .mark { color: var(--faint); }
 .node.open > .mark { color: var(--accent); }
 .node > .when { color: var(--muted); font-variant-numeric: tabular-nums;
@@ -101,6 +115,17 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .node > .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .node > .tail { color: var(--faint); font-size: 11.5px; white-space: nowrap;
                 font-variant-numeric: tabular-nums; }
+
+/* the hairline between rows belongs to the top two levels; deeper down the
+   rails carry the structure and a rule every row would only be noise */
+.node.d0, .node.d1 { border-bottom: 1px solid var(--hair); }
+.node.d0 { border-bottom-color: var(--faint); }
+
+/* each level is a little quieter than the one it hangs from */
+.node.d2 { font-size: 13px; }
+.node.d3 { font-size: 12.6px; }
+.node.d4 { font-size: 12.3px; }
+.node.d5, .node.d6, .node.d7 { font-size: 12px; }
 
 .node.ev > .what { color: var(--ink); }
 .node.ev.world > .what { color: var(--warm); }
@@ -118,7 +143,8 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 @media (max-width: 620px) {
   body { font-size: 12.5px; }
   .wrap { padding: 20px 12px 60px; }
-  .node { grid-template-columns: 1em 4.4em 1fr; padding-left: calc(var(--d) * .9em + 2px); }
+  .tree { --step: 19px; }
+  .node { grid-template-columns: 1em 4.4em 1fr; }
   .node > .tail { grid-column: 2 / -1; font-size: 10.5px; }
   .seedline { margin-left: 0; }
 }
@@ -1601,7 +1627,8 @@ function shown(n) {
 }
 
 function row(n, depth, open) {
-  const cls = "node " + (n.cls || "") + (open ? " open" : "") + (n.leaf ? " leaf" : "");
+  const cls = "node d" + depth + " " + (n.cls || "") +
+              (open ? " open" : "") + (n.leaf ? " leaf" : "");
   return '<button class="' + cls + '" style="--d:' + depth + '" data-id="' +
     esc(n.id) + '" type="button">' +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
