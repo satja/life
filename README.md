@@ -174,8 +174,8 @@ Q: Where does the world get into the loop?
 
 A: Through "things_you_can_do". "restock()" adds every active circumstance's
 own activities to the pool that "live()" draws from, and "take_place()" is what
-turns a war into a circumstance. Click the name in the web version and the
-three of them unfold in order.
+turns a war into a circumstance. In the web version, open the years after one:
+the pool has changed and what you spend the day on has changed with it.
 
 Q: Why does "inherit()" use a shallow copy?
 
