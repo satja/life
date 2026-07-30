@@ -72,6 +72,7 @@ button.go { font-family: var(--mono); font-size: 12px; letter-spacing: .1em;
   text-transform: uppercase; background: var(--ink); color: var(--paper);
   border: 0; padding: 10px 20px; cursor: pointer; }
 button.go:hover { background: var(--accent); }
+button.go[disabled] { background: var(--faint); cursor: wait; }
 button.ghost { font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
   background: transparent; color: var(--muted); border: 1px solid var(--hair);
   padding: 5px 10px; cursor: pointer; }
@@ -112,7 +113,8 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .node.open > .mark { color: var(--accent); }
 .node > .when { color: var(--muted); font-variant-numeric: tabular-nums;
                 white-space: nowrap; text-align: right; overflow: hidden; }
-.node > .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.node > .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                min-width: 0; }
 .node > .tail { color: var(--faint); font-size: 11.5px; white-space: nowrap;
                 font-variant-numeric: tabular-nums; }
 
@@ -145,7 +147,8 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
   .wrap { padding: 20px 12px 60px; }
   .tree { --step: 19px; }
   .node { grid-template-columns: 1em 4.4em 1fr; }
-  .node > .tail { grid-column: 2 / -1; font-size: 10.5px; }
+  .node > .tail { grid-column: 2 / -1; font-size: 10.5px;
+                  white-space: normal; min-width: 0; }
   .seedline { margin-left: 0; }
 }
 </style>
@@ -182,7 +185,8 @@ const UI = {
       "days, a day and you get the things you did, a thing and you get the thoughts " +
       "you had on the way to it. A year also holds the six numbers the loop was " +
       "reading while it passed.",
-    run: "run one life", again: "run another", seed: "seed", roll: "roll",
+    run: "run one life", again: "run another", running: "living it…",
+    seed: "seed", roll: "roll",
     hint: "Every year is there and every year opens, including the ones nothing " +
       "happened in, which were lived through all the same. Below the year the rule is " +
       "the same at every depth: the children something happened in are shown, the rest " +
@@ -215,6 +219,14 @@ const UI = {
     asFar: "as far as it is allowed to go",
     stillAwake: "still awake", asleep: "asleep", attempts: "% attempts",
 
+    elsewhere: "of waking minutes with the mind somewhere else",
+    measuredAt: "measured at 46.9% — Killingsworth & Gilbert, Science 2010",
+    ptAhead: "pointing ahead", ptBehind: "pointing behind",
+    ptNow: "on the moment", ptAlways: "on nothing in particular",
+    tonePlus: "pleasant", toneZero: "neutral", toneMinus: "unpleasant",
+    whoAbout: "who and what it was all about",
+    goneAt: "gone at", notSpeaking: "not speaking", achesFrom: "from then on",
+
     inOrder: "the bases, in that order",
     died: "died at", inTheYearOf: "in the year of",
     mornings: "mornings", thingsDone: "things done", thoughts: "thoughts",
@@ -231,7 +243,8 @@ const UI = {
       "njemu dogodilo; otvoriš godinu i dobiješ njezine mjesece, mjesec i dobiješ dane, " +
       "dan i dobiješ ono što si radio, radnju i dobiješ misli koje su joj prethodile. " +
       "Godina drži i šest brojeva koje je petlja čitala dok je prolazila.",
-    run: "pokreni jedan život", again: "pokreni još jedan", seed: "sjeme", roll: "baci",
+    run: "pokreni jedan život", again: "pokreni još jedan", running: "živi se…",
+    seed: "sjeme", roll: "baci",
     hint: "Svaka je godina tu i svaka se otvara, i one u kojima se ništa nije dogodilo, " +
       "koje su svejedno proživljene. Ispod godine pravilo je na svakoj dubini isto: " +
       "prikazuje se ono u čemu se nešto dogodilo, ostalo se prebroji. Šest brojeva " +
@@ -261,6 +274,14 @@ const UI = {
     theDials: "što je petlja čitala", base: "temelj", readBy: "čita se u",
     asFar: "dalje ne smije",
     stillAwake: "još budan", asleep: "usnuo", attempts: "% pokušaja",
+
+    elsewhere: "budnih minuta s mislima negdje drugdje",
+    measuredAt: "izmjereno 46,9% — Killingsworth i Gilbert, Science 2010.",
+    ptAhead: "usmjereno naprijed", ptBehind: "usmjereno unatrag",
+    ptNow: "na ovaj trenutak", ptAlways: "ni na što određeno",
+    tonePlus: "ugodno", toneZero: "neutralno", toneMinus: "neugodno",
+    whoAbout: "o kome se i o čemu radilo",
+    goneAt: "otišao u", notSpeaking: "ne razgovarate", achesFrom: "otad nadalje",
 
     inOrder: "baze, tim redom",
     died: "umro u", inTheYearOf: "u godini u kojoj je bilo:",
@@ -493,6 +514,103 @@ const SUBJECTS = {
 const WORTH_KEEPING = ["long division","the other language, badly","how to look busy",
   "the word for window","how to sit through things"];
 
+
+// ---- memory.py: who and what the thinking is about ----------------------
+// The mind was a list of fifty things, and a list of fifty things comes
+// round in a fortnight. What a person thinks about is a small number of
+// shapes and a very large number of particulars, and the particulars come
+// out of the life being lived.
+
+const M_STAGES = ["infant", "child", "teenager", "young", "middle", "later",
+                  "old", "late"];
+const BEHIND = "behind", NOW = "now", AHEAD = "ahead", ALWAYS = "always";
+
+const ONES = ["zero","one","two","three","four","five","six","seven","eight",
+  "nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
+  "seventeen","eighteen","nineteen"];
+const TENS = ["","","twenty","thirty","forty","fifty","sixty","seventy",
+  "eighty","ninety"];
+function spell(n) {
+  if (n < 20) return ONES[n];
+  return TENS[Math.floor(n / 10)] + (n % 10 ? "-" + ONES[n % 10] : "");
+}
+
+// each shape is [words, theme, earliest stage, where it points, how it feels]
+const PERSON = [
+  ["whether %s is all right", "love", 2, NOW, 0],
+  ["what %s would say about this", "shame", 2, AHEAD, 0],
+  ["%s, and the thing you did not say", "love", 3, BEHIND, -1],
+  ["ringing %s, at some point", "love", 3, AHEAD, 0],
+  ["whether %s ever thinks about it too", "love", 2, NOW, 0],
+  ["the way %s says your name", "love", 1, ALWAYS, 1],
+  ["what you owe %s, which is not money", "money", 4, AHEAD, -1],
+  ["%s was right, and knew it", "shame", 4, BEHIND, -1],
+  ["whether %s will call", "love", 5, AHEAD, 0],
+  ["being no use to %s", "shame", 4, NOW, -1],
+  ["something %s said that turned out to be true", "love", 4, BEHIND, 1],
+  ["a day out with %s, when it is warmer", "love", 3, AHEAD, 1],
+];
+const GONE = [
+  ["what you never asked %s", "death", 0, BEHIND, -1],
+  ["%s, in the doorway", "death", 0, BEHIND, 0],
+  ["the last thing %s said, or what you have made of it", "death", 0, BEHIND, 0],
+  ["whether %s would know you now", "death", 0, NOW, 0],
+  ["the year %s was still on the phone", "death", 0, BEHIND, 1],
+];
+const ESTRANGED = [
+  ["whether %s would answer", "shame", 0, AHEAD, 0],
+  ["who stopped first, you or %s", "shame", 0, BEHIND, -1],
+  ["what it would take, with %s", "shame", 0, AHEAD, 0],
+];
+const THING = [
+  ["%s, still", "money", 2, NOW, -1],
+  ["getting to %s at the weekend", "time", 2, AHEAD, 0],
+  ["%s, and how long it has been like that", "shame", 3, BEHIND, -1],
+  ["what %s would cost now", "money", 4, AHEAD, -1],
+  ["the afternoon %s is finally done", "time", 3, AHEAD, 1],
+];
+const PLACE = [
+  ["the smell of %s", "home", 1, ALWAYS, 1],
+  ["%s, in the dark", "fear", 1, ALWAYS, -1],
+  ["whether %s is still there", "home", 4, NOW, 0],
+  ["standing %@, doing nothing", "home", 3, ALWAYS, 1],
+  ["something that happened %@, once", "home", 4, BEHIND, 0],
+  ["going back to %s, one of these years", "home", 4, AHEAD, 1],
+];
+const ACHE = [
+  ["the noise %s makes", "body", 0, NOW, -1],
+  ["%s, in the morning", "body", 0, NOW, -1],
+  ["whether %s is getting worse", "body", 0, AHEAD, -1],
+];
+const YEAR = [
+  ["what you said at %s", "shame", 3, BEHIND, -1],
+  ["the summer you were %s", "time", 3, BEHIND, 1],
+  ["how sure you were at %s", "shame", 4, BEHIND, 0],
+  ["being %s again, for an hour", "time", 5, BEHIND, 1],
+];
+
+const M_NAMES = ["Marko","Vera","Ivan","Nada","Josip","Ljubica","Zoran","Ana",
+  "Damir","Snje\u017eana","Tomislav","Mira","Branko","Dubravka"];
+const M_THINGS = ["the tap","the boxes in the hall","the documents","the car",
+  "the letter you did not send","the photograph in the drawer",
+  "the coat that still fits","the money you lent",
+  "the shelf that was going to go up"];
+// a place carries the preposition that goes with it, because nobody stands
+// in the stairs
+const M_PLACES = [["the hallway","in"],["the stairs","on"],
+  ["the room at the back","in"],["the kitchen table","at"],["the yard","in"],
+  ["the road out of town","on"],["the top of the house","at"],
+  ["the corridor at school","in"],["the back step","on"]];
+
+// %s takes the name of the thing, %@ takes it with its preposition
+function fill(template, who) {
+  return template.indexOf("%@") >= 0
+    ? template.replace("%@", who.at + " " + who.word)
+    : template.replace("%s", who.word);
+}
+const M_ACHES = ["the knee","the back","the shoulder","the tooth","the hands",
+  "the eyes","the hip"];
+
 function stageAt(age) {
   if (age >= 76) return "late";
   if (age >= 65) return "old";
@@ -569,12 +687,88 @@ class Life {
     this.worldEvents = [];
     this.seenEvents = new Set();
 
+    this.wandering = 0; this.waking = 0; this.wokeAt = 0;
+    this.points = new Map(); this.tone = new Map();
+    this.buildMemory();
+
     this.inherit();
     this.raiseChildhood();
     this.goToSchool();
     this.timeline = this.unfoldHistory();
     this.windUp();
     this.schedule = this.buildSchedule();
+  }
+
+  // ---- memory.py: the particulars this life happens to have
+  buildMemory() {
+    const take = (list, n) => {
+      const left = list.slice(), out = [];
+      for (let i = 0; i < n && left.length; i++) {
+        out.push(left.splice(Math.floor(this.rng() * left.length), 1)[0]);
+      }
+      return out;
+    };
+    const About = (key, word, kind, since, at) =>
+      ({ key, word, kind, since: since || 0, gone: null, estranged: false,
+         at: at || "in" });
+    this.people = [About("mother", "your mother", "person", 0),
+                   About("father", "your father", "person", 0)];
+    this.spare = take(M_NAMES.slice(1), 5);
+    this.things = take(M_THINGS, 4).map((w, i) => About("t" + i, w, "thing", 0));
+    this.places = take(M_PLACES, 4).map((w, i) => About("p" + i, w[0], "place", 0, w[1]));
+    this.aches = take(M_ACHES, 3).map((w, i) =>
+      About("a" + i, w, "ache", this.rrange(26, 62)));
+    const ages = [];
+    while (ages.length < 3) {
+      const n = this.rrange(13, 33);
+      if (!ages.includes(n)) ages.push(n);
+    }
+    ages.sort((a, b) => a - b);
+    this.years = ages.map((n) => About("y" + n, spell(n), "year", n + 4));
+  }
+
+  entersMemory(key, word, since) {
+    if (this.people.some((p) => p.key === key)) return;
+    this.people.push({ key, word, kind: "person", since,
+                       gone: null, estranged: false });
+  }
+
+  someone() {
+    return this.spare.length ? this.spare.pop() : this.pick(M_NAMES);
+  }
+
+  estrange(age) {
+    const here = this.people.filter((p) => p.gone === null && !p.estranged &&
+      p.since <= age && p.key !== "mother" && p.key !== "child");
+    if (here.length) this.pick(here).estranged = true;
+  }
+
+  subjectsAt(age) {
+    const all = this.people.concat(this.things, this.places, this.aches, this.years);
+    return all.filter((w) => w.since <= age &&
+      (w.kind !== "person" || w.gone === null || w.gone <= age));
+  }
+
+  // everything this life is in a position to think, said in full
+  compose(age, stage) {
+    const index = M_STAGES.indexOf(stage), out = [];
+    const take = (who, shapes) => {
+      for (const [words, theme, from, points, tone] of shapes) {
+        if (index >= from) {
+          out.push([fill(words, who), theme, who.key, points, tone]);
+        }
+      }
+    };
+    for (const who of this.people) {
+      if (who.since > age) continue;
+      if (who.gone !== null) take(who, GONE);
+      else { take(who, PERSON); if (who.estranged) take(who, ESTRANGED); }
+    }
+    for (const who of this.things) take(who, THING);
+    for (const who of this.places) take(who, PLACE);
+    for (const who of this.aches) if (who.since <= age) take(who, ACHE);
+    for (const who of this.years) if (who.since <= age) take(who, YEAR);
+    return out;
   }
 
   hit(line, note) {
@@ -618,6 +812,10 @@ class Life {
     for (const c of this.circumstances) {
       if (FROM_HISTORY[c.kind]) lean(c.text, FROM_HISTORY[c.kind]);
     }
+    const withAge = Math.round((1.15 - 0.005 * this.age) * 1000) / 1000;
+    this.working.restless.push(["being " + this.age, "x", withAge]);
+    this.dials.restless *= withAge;
+
     this.dials.sleep = Math.max(0.008, this.dials.sleep);
     this.dials.persistence = Math.min(0.995, this.dials.persistence);
     this.dialsAt[this.age] = { dials: Object.assign({}, this.dials),
@@ -784,14 +982,16 @@ class Life {
       plan.get(age).push([text, effect || null]);
     };
     add(1, "says a word, on purpose");
-    add(6, "starts school");
+    add(6, "starts school", "school");
     add(18, "leaves school with a certificate stating that you can be taught");
     add(18, "average mark: " + this.average.toFixed(1));
-    add(this.rrange(15, 20), "falls in love, silently");
-    add(this.rrange(19, 26), "first job");
+    add(this.rrange(15, 20), "falls in love, silently", "loved");
+    add(this.rrange(19, 26), "first job", "work");
     add(this.rrange(20, 29), "moves out for good");
     if (this.rint(3) > 0) add(this.rrange(26, 39), "becomes a parent, and promises not to", "parent");
-    if (this.rint(2) === 0) add(this.rrange(30, 55), "stops speaking to someone");
+    if (this.rint(2) === 0) {
+      add(this.rrange(30, 55), "stops speaking to someone", "estranged");
+    }
     const buriesFather = this.rrange(37, 72);
     add(buriesFather, "your father dies", "father");
     add(Math.min(96, buriesFather + this.rrange(0, 15)), "your mother dies", "mother");
@@ -804,29 +1004,53 @@ class Life {
   // ------------------------------------------------------------ the machinery
 
   refreshMind() {
-    const age = this.age;
-    let thoughts = THOUGHTS[stageAt(age)].slice();
-    for (const c of this.circumstances) if (c.thinks) thoughts = thoughts.concat(c.thinks);
-    if (!this.preoccupation || this.preoccupation[1] <= age) {
-      this.preoccupation = [this.pick(thoughts), age + this.rrange(2, 8), age];
+    const age = this.age, stage = stageAt(age);
+    let thoughts = THOUGHTS[stage].map((t) => [t[0], t[1], null, ALWAYS, 0]);
+    for (const c of this.circumstances) {
+      if (c.thinks) {
+        thoughts = thoughts.concat(c.thinks.map((t) => [t[0], t[1], null, NOW, 0]));
+      }
     }
-    thoughts = thoughts.concat([this.preoccupation[0], this.preoccupation[0], this.preoccupation[0]]);
-    this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1], deep: false }));
+    thoughts = thoughts.concat(this.compose(age, stage));
+    // live.py draws from the pool uniformly, so a bias can only be a number
+    // of copies of a thing in it. The shapes come out at about three
+    // thoughts forward for every two back on their own; the pleasant ones
+    // need a thumb, or a life here is more rueful than the sampling says.
+    thoughts = thoughts.concat(thoughts.filter((t) => t[4] > 0));
+
+    // a preoccupation is a subject, not a sentence: for a few years more of
+    // what you think is about the same person, or the same unpaid thing
+    const subjects = this.subjectsAt(age);
+    if (subjects.length && (!this.preoccupation || this.preoccupation[1] <= age)) {
+      this.preoccupation = [this.pick(subjects).key, age + this.rrange(2, 8), age];
+    }
+    if (this.preoccupation) {
+      const on = this.preoccupation[0];
+      thoughts = thoughts.concat(thoughts.filter((t) => t[2] === on),
+                                 thoughts.filter((t) => t[2] === on));
+    }
+    this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1], about: t[2],
+                                            points: t[3], tone: t[4], deep: false }));
     this.subconscious = DEEP.filter((d) => age >= d[2])
-      .map((d) => ({ text: d[0], theme: d[1], deep: true })).concat(this.scars);
+      .map((d) => ({ text: d[0], theme: d[1], about: null, points: ALWAYS,
+                     tone: -1, deep: true })).concat(this.scars);
     this.neverDo = age >= 13
       ? NEVER_DO.map((n) => ({ name: n, kind: 3, minutes: this.rrange(5, 40) })) : [];
-    this.byTheme = new Map();
+    this.byTheme = new Map(); this.bySubject = new Map();
     for (const t of this.conscious.concat(this.subconscious)) {
       if (!this.byTheme.has(t.theme)) this.byTheme.set(t.theme, []);
       this.byTheme.get(t.theme).push(t);
+      if (t.about) {
+        if (!this.bySubject.has(t.about)) this.bySubject.set(t.about, []);
+        this.bySubject.get(t.about).push(t);
+      }
     }
   }
 
   remember(text, theme) {
     if (this.scars.length >= 8) return;
     if (this.scars.some((s) => s.text === text)) return;
-    const t = { text, theme, deep: true };
+    const t = { text, theme, about: null, points: BEHIND, tone: -1, deep: true };
     this.scars.push(t); this.subconscious.push(t);
     if (!this.byTheme.has(theme)) this.byTheme.set(theme, []);
     this.byTheme.get(theme).push(t);
@@ -895,16 +1119,28 @@ class Life {
 
   takeEffect(key) {
     const age = this.age;
-    if (key === "parent") {
+    if (key === "school") {
+      this.entersMemory("school1", "Marko", age);
+      this.entersMemory("school2", this.someone(), age);
+    } else if (key === "work") {
+      this.entersMemory("work1", this.someone(), age);
+    } else if (key === "loved") {
+      this.entersMemory("loved", this.someone(), age);
+    } else if (key === "estranged") {
+      this.estrange(age);
+    } else if (key === "parent") {
       this.circumstances.push({
         text: "a child", until: age + 18, risk: 0, kind: "child",
         does: [["carrying someone who is asleep", 60], ["reading the same book aloud", 30],
                ["worrying about someone else", 45]],
-        thinks: [["whether they are all right", "love"]],
+        thinks: [],
       });
+      this.entersMemory("child", "the child", age);
     } else if (key === "father") {
+      for (const p of this.people) if (p.key === "father") p.gone = age;
       this.remember("the silence at the table", "death");
     } else if (key === "mother") {
+      for (const p of this.people) if (p.key === "mother") p.gone = age;
       this.remember("the hallway, empty", "death");
       this.noLonger.add("call your mother");
       this.shouldDo = this.shouldDo.filter((d) => d.name !== "call your mother");
@@ -970,6 +1206,7 @@ class Life {
     this.dayIndex = this.day;
     this.sleepAttempts = 0; this.insomniaNoted = false; this.lying = false;
     this.eveningLeft = this.rrange(30, 150);
+    this.wokeAt = this.minute;
     const age = this.age;
     if (age !== this.yearSeen) { this.yearSeen = age; this.birthday(age); }
     if (!this.alive) { this.canDo = []; return; }
@@ -1026,7 +1263,7 @@ class Life {
         if (at >= 0) { pool.splice(at, 1); break; }
       }
     }
-    this.idle += Math.round(this.rint(3) * this.dials.restless);
+    this.idle += Math.round(this.rrange(4, 13) * this.dials.restless);
     this.tempted = this.rnd() < this.dials.temptation;
     if (!this.reminded && this.rnd() < this.dials.conscience) {
       this.reminded = true; this.record.remembered++; this.rememberedTotal++;
@@ -1034,7 +1271,13 @@ class Life {
   }
 
   think(thought) {
-    this.tick(this.rrange(1, 4));
+    // while you are up you are already doing something, so the thought does
+    // not stop the day; it colours a stretch of it, and that stretch is what
+    // the sampling work counts. Lying down there is nothing alongside it.
+    if (this.lying) this.tick(this.rrange(1, 4));
+    else this.wandering += this.rrange(2, 8);
+    this.points.set(thought.points, (this.points.get(thought.points) || 0) + 1);
+    this.tone.set(thought.tone, (this.tone.get(thought.tone) || 0) + 1);
     this.idle--;
     this.totalThoughts++;
     this.record.thoughts.push(this.thoughtId(thought.text));
@@ -1043,7 +1286,14 @@ class Life {
     if (thought.deep) { this.deepCount++; this.deepTexts.add(thought.text); }
   }
 
-  related(thought) { return this.byTheme.get(thought.theme) || this.conscious; }
+  // what a thought leads to is the same subject before it is the same theme
+  related(thought) {
+    if (thought.about && this.rint(3) > 0) {
+      const near = this.bySubject.get(thought.about);
+      if (near && near.length) return near;
+    }
+    return this.byTheme.get(thought.theme) || this.conscious;
+  }
 
   thinkAboutStuff() {
     const all = this.subconscious.concat(this.conscious);
@@ -1106,6 +1356,7 @@ class Life {
   }
 
   night() {
+    this.waking += Math.max(0, this.minute - this.wokeAt);
     if (this.insomniaNoted && this.sleepAttempts > this.worstNight[0]) {
       this.worstNight = [this.sleepAttempts, this.age, this.clockTime()];
     }
@@ -1579,6 +1830,16 @@ function account() {
   out.push(plain(fmt(life.totalDone), t("thingsDone")));
   out.push(plain(fmt(life.totalThoughts), t("thoughts") + ", " +
                  fmt(life.thoughtCount.size) + " " + t("different")));
+  out.push(node("acct/mind", "held", {
+    when: pc(life.wandering / life.waking), what: t("elsewhere"),
+    cls: "ev", tail: t("measuredAt"), leaf: false,
+    kids: mindRows(),
+  }));
+  out.push(node("acct/cast", "held", {
+    when: String(life.people.length + life.things.length + life.places.length),
+    what: t("whoAbout"), cls: "ev world", leaf: false, kids: castRows(),
+  }));
+
   out.push(plain(fmt(life.neverTotal), t("knewBetter")));
   out.push(plain(fmt(life.gotRoundTo), t("gotRoundTo"), "ev kept"));
   out.push(plain(fmt(life.insomniaNights), t("nightsAwake")));
@@ -1603,6 +1864,44 @@ function account() {
       })),
     }));
   }
+  return out;
+}
+
+const pc = (x) => (100 * x).toFixed(0) + "%";
+
+// where the thinking pointed and how it felt, which are the two things
+// about it anybody has actually measured
+function mindRows() {
+  const life = state.life, out = [];
+  let total = 0;
+  for (const v of life.points.values()) total += v;
+  const say = (key, count, label, cls) => out.push(node("acct/mind/" + key, "leafrow",
+    { when: pc(count / total), what: label, cls: cls, leaf: true }));
+  say("ahead", life.points.get("ahead") || 0, t("ptAhead"), "ev kept");
+  say("behind", life.points.get("behind") || 0, t("ptBehind"), "ev loss");
+  say("now", life.points.get("now") || 0, t("ptNow"), "quiet");
+  say("always", life.points.get("always") || 0, t("ptAlways"), "quiet");
+  say("good", life.tone.get(1) || 0, t("tonePlus"), "ev kept");
+  say("flat", life.tone.get(0) || 0, t("toneZero"), "quiet");
+  say("bad", life.tone.get(-1) || 0, t("toneMinus"), "ev loss");
+  return out;
+}
+
+// the particulars this life had to think about, which is where the words
+// in every thought came from
+function castRows() {
+  const life = state.life, out = [];
+  const row = (w, tail, cls) => out.push(node("acct/cast/" + out.length, "leafrow",
+    { what: w.word, when: w.since ? String(w.since) : "", tail: tail, cls: cls,
+      leaf: true }));
+  for (const p of life.people) {
+    row(p, p.gone !== null ? t("goneAt") + " " + p.gone
+           : p.estranged ? t("notSpeaking") : "", "ev");
+  }
+  for (const w of life.things) row(w, "", "quiet");
+  for (const w of life.places) row(w, "", "quiet");
+  for (const w of life.aches) row(w, t("achesFrom"), "ev loss");
+  for (const w of life.years) row(w, "", "quiet");
   return out;
 }
 
@@ -1719,7 +2018,15 @@ function buildKnobs() {
 
 // ------------------------------------------------------------------ running
 
+// a life is a second or so of work now; say so, and let the browser paint
+// before it starts, or the click looks like it did nothing
 function run() {
+  $("#run").textContent = t("running");
+  $("#run").disabled = true;
+  setTimeout(live, 20);
+}
+
+function live() {
   const century = PRESETS.century[state.set.century];
   state.life = new Life({
     seed: state.seed,
@@ -1734,6 +2041,7 @@ function run() {
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
   state.more = new Set();
+  $("#run").disabled = false;
   chrome();
   draw();
 }

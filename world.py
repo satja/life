@@ -8,6 +8,7 @@ import genes
 import upbringing
 import education
 import history
+import memory
 from trajectory import chronicle
 
 __all__ = [
@@ -21,6 +22,33 @@ __all__ = [
 
 MINUTES_PER_DAY = 24 * 60
 DAYS_PER_YEAR = 365
+
+# What anybody has actually measured about thinking, and what is only a
+# shape. Two of these are numbers; two are directions, and the slopes used
+# for them here are invented. It is worth knowing which is which.
+#
+#   WANDERING = 0.469
+#       the share of waking moments at which people report thinking about
+#       something other than what they are doing. Killingsworth & Gilbert,
+#       Science 2010 — 2,250 adults, about 250,000 samples by telephone.
+#       Crucially it is a share of moments *while doing something else*, so
+#       thinking here costs the clock nothing during the day; only at night,
+#       lying down, where there is nothing for it to happen alongside.
+#
+#   TRANSITIONS = 6200
+#       thought transitions in a day, estimated from brain state changes.
+#       Tseng & Poppenk, Nature Communications 2020. This model records
+#       every thought it has and a life is 29,000 days, so it does not go
+#       anywhere near this; a thought here is an episode, not a transition.
+#
+#   ahead of behind — wandering points forward more often than back, and to
+#       the near more often than the far. Direction measured; the 2:1 used
+#       here is a round number.
+#
+#   less with age — mind-wandering declines over a life. Direction measured
+#       (Jackson & Balota 2012; Maillet & Schacter 2016); the slope is not.
+WANDERING = 0.469
+TRANSITIONS = 6200
 
 STAGES = [(76, 'late'), (65, 'old'), (50, 'later'), (35, 'middle'),
           (20, 'young'), (13, 'teenager'), (3, 'child'), (0, 'infant')]
@@ -266,6 +294,10 @@ def wind_up():
         if kind in FROM_HISTORY:
             lean(circumstance['text'], FROM_HISTORY[kind])
 
+    with_age = round(1.15 - 0.005 * clock.age, 3)
+    working['restless'].append(('being %d' % clock.age, 'x', with_age))
+    state.dials['restless'] *= with_age
+
     state.dials['sleep'] = max(0.008, state.dials['sleep'])
     state.dials['persistence'] = min(0.995, state.dials['persistence'])
     state.working = working
@@ -356,11 +388,14 @@ class Doing:
 
 
 class Thought:
-    __slots__ = ('text', 'theme')
+    __slots__ = ('text', 'theme', 'about', 'points', 'tone')
 
-    def __init__(self, text, theme):
+    def __init__(self, text, theme, about=None, points='always', tone=0):
         self.text = text
         self.theme = theme
+        self.about = about
+        self.points = points
+        self.tone = tone
 
 
 class State:
@@ -373,6 +408,7 @@ class State:
         self.tempted = False
         self.reminded = False
         self.sleep_attempts = 0
+        self.woke_at = 0
         self.insomnia_noted = False
         self.insomnia_nights = 0
         self.worst_night = (0, 0, '')
@@ -410,6 +446,7 @@ things_you_should_never_do = Temptations()
 consciousness = Pool()
 subconsciousness = Pool()
 by_theme = {}
+by_subject = {}
 
 
 def stage_at(age):
@@ -457,34 +494,62 @@ def weighted_pick(choices, wanted):
 
 
 def refresh_mind():
-    name = stage_at(clock.age)
-    thoughts = list(THOUGHTS[name])
-    for circumstance in state.circumstances:
-        thoughts += circumstance['thinks']
     age = clock.age
-    if not state.preoccupation or state.preoccupation[1] <= age:
-        state.preoccupation = (random.choice(thoughts),
+    name = stage_at(age)
+    thoughts = [(t, m, None, 'always', 0) for t, m in THOUGHTS[name]]
+    for circumstance in state.circumstances:
+        thoughts += [(t, m, None, 'now', 0) for t, m in circumstance['thinks']]
+    thoughts += memory.compose(age, name)
+    # live.py draws from the pool uniformly, so a bias can only be a number
+    # of copies of a thing in it. The shapes come out at about three thoughts
+    # forward for every two back on their own; the pleasant ones need a
+    # thumb, because otherwise a life here is more rueful than the sampling
+    # work says a life is.
+    thoughts += [t for t in thoughts if t[4] > 0]
+
+    # a preoccupation is a subject, not a sentence: for a few years more of
+    # what you think is about the same person, or the same unpaid thing
+    subjects = memory.subjects(age)
+    if subjects and (not state.preoccupation or state.preoccupation[1] <= age):
+        state.preoccupation = (random.choice(subjects).key,
                                age + random.randrange(2, 8))
-    thoughts += [state.preoccupation[0]] * 3
-    consciousness[:] = [Thought(t, m) for t, m in thoughts]
+    if state.preoccupation:
+        on = state.preoccupation[0]
+        thoughts += [t for t in thoughts if t[2] == on] * 2
+    consciousness[:] = [Thought(t, m, a, p, v) for t, m, a, p, v in thoughts]
     subconsciousness[:] = [Thought(t, m) for t, m, since in DEEP
                            if age >= since] + list(state.scars)
     things_you_should_never_do[:] = [
         Doing(n, 'never', random.randrange(5, 40))
         for n in (NEVER_DO if age >= 13 else [])]
     by_theme.clear()
+    by_subject.clear()
     for thought in consciousness + subconsciousness:
         by_theme.setdefault(thought.theme, []).append(thought)
+        if thought.about:
+            by_subject.setdefault(thought.about, []).append(thought)
 
 
 def related(thought):
+    if thought.about and random.randrange(3) > 0:
+        near = by_subject.get(thought.about)
+        if near:
+            return near
     return by_theme.get(thought.theme) or list(consciousness)
 
 
 def think(thought):
-    clock.tick(random.randrange(1, 4))
+    # while you are up you are already doing something, so the thought does
+    # not stop the day; it colours a stretch of it, and that stretch is what
+    # the sampling work is counting. Lying down there is nothing alongside
+    # it, and then it costs the clock what it costs.
+    if state.lying:
+        clock.tick(random.randrange(1, 4))
+    else:
+        chronicle.wandering += random.randrange(2, 8)
     state.idle -= 1
-    chronicle.thought(clock.age, clock.month, thought.text)
+    chronicle.thought(clock.age, clock.month, thought.text,
+                      thought.points, thought.tone)
 
 
 def do(thing):
@@ -502,7 +567,7 @@ def do(thing):
             if thing in pool:
                 pool.remove(thing)
                 break
-    state.idle += round(random.randrange(0, 3) * state.dials['restless'])
+    state.idle += round(random.randrange(4, 13) * state.dials['restless'])
     state.tempted = random.random() < state.dials['temptation']
     if not state.reminded:
         state.reminded = random.random() < state.dials['conscience']
@@ -589,6 +654,7 @@ def fall_asleep():
 
 
 def night():
+    chronicle.waking += max(0, clock.minute - state.woke_at)
     if state.insomnia_noted and state.sleep_attempts > state.worst_night[0]:
         state.worst_night = (state.sleep_attempts, clock.age, clock.time())
     wake = 6 * 60 + random.randrange(0, 150)
@@ -617,6 +683,7 @@ def morning_of(full):
     state.insomnia_noted = False
     state.lying = False
     state.evening_left = random.randrange(30, 150)
+    state.woke_at = clock.minute
 
     age = clock.age
     if age != state.year_seen:
@@ -698,17 +765,29 @@ def owe(name):
 
 def take_effect(key):
     age = clock.age
-    if key == 'parent':
+    if key == 'school':
+        memory.enters('school1', "Marko", 'person', age)
+        memory.enters('school2', memory.someone(age), 'person', age)
+    elif key == 'work':
+        memory.enters('work1', memory.someone(age), 'person', age)
+    elif key == 'loved':
+        memory.enters('loved', memory.someone(age), 'person', age)
+    elif key == 'estranged':
+        memory.estrange(age)
+    elif key == 'parent':
         state.circumstances.append(
             {'text': 'a child', 'until': age + 18, 'risk': 0.0,
              'kind': 'child',
              'does': [("carrying someone who is asleep", 60),
                       ("reading the same book aloud", 30),
                       ("worrying about someone else", 45)],
-             'thinks': [("whether they are all right", 'love')]})
+             'thinks': []})
+        memory.enters('child', "the child", 'person', age)
     elif key == 'father':
+        memory.departs('father', age)
         remember("the silence at the table", 'death')
     elif key == 'mother':
+        memory.departs('mother', age)
         remember("the hallway, empty", 'death')
         state.no_longer_possible.add("call your mother")
         for item in list(things_you_should_do):
@@ -808,17 +887,17 @@ def build_schedule():
         plan.setdefault(age, []).append((text, effect))
 
     add(1, 'says a word, on purpose')
-    add(6, 'starts school')
+    add(6, 'starts school', 'school')
     add(18, 'leaves school with ' + education.diploma)
     add(18, 'average mark: %.1f' % education.average)
-    add(random.randrange(15, 20), 'falls in love, silently')
-    add(random.randrange(19, 26), 'first job')
+    add(random.randrange(15, 20), 'falls in love, silently', 'loved')
+    add(random.randrange(19, 26), 'first job', 'work')
     add(random.randrange(20, 29), 'moves out for good')
     if random.randrange(3) > 0:
         add(random.randrange(26, 39),
             'becomes a parent, and promises not to', 'parent')
     if random.randrange(2) == 0:
-        add(random.randrange(30, 55), 'stops speaking to someone')
+        add(random.randrange(30, 55), 'stops speaking to someone', 'estranged')
     buries_father = random.randrange(37, 72)
     add(buries_father, 'your father dies', 'father')
     add(min(96, buries_father + random.randrange(0, 15)),
@@ -859,6 +938,17 @@ def epilogue():
     closing.append('  things done              %11s' % '{:,}'.format(chronicle.total_done))
     closing.append('  thoughts thought         %11s   (%d of them different)'
                    % ('{:,}'.format(chronicle.total_thoughts), len(chronicle.thoughts)))
+    if chronicle.waking:
+        pointing = sum(chronicle.points.values()) or 1
+        closing.append('  mind somewhere else      %10.0f%%   (measured 46.9%%: '
+                       'Killingsworth & Gilbert, Science 2010)'
+                       % (100.0 * chronicle.wandering / chronicle.waking))
+        closing.append('      of it, %.0f%% pointed ahead and %.0f%% behind; '
+                       '%.0f%% was pleasant, %.0f%% was not.'
+                       % (100.0 * chronicle.points['ahead'] / pointing,
+                          100.0 * chronicle.points['behind'] / pointing,
+                          100.0 * chronicle.tone[1] / pointing,
+                          100.0 * chronicle.tone[-1] / pointing))
     closing.append('  alarms obeyed            %11s' % '{:,}'.format(state.alarms))
     closing.append('  things you got round to  %11d' % state.got_round_to)
     closing.append('  nights still awake at three %8s'

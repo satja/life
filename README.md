@@ -72,6 +72,8 @@ Feel free to contribute.
 
 "history.py" — what was going on at the time, which was not about you.
 
+"memory.py" — who and what the thinking is about.
+
 "world.py" — everything live.py assumes and does not define.
 
 "live.py" — the main loop.
@@ -113,6 +115,60 @@ are very young or very old. About one life in ten ends this way.
 
 "genes", "upbringing" and "education" do their work at import time, before the
 loop starts. This is not a workaround.
+
+
+# The thinking
+
+The mind used to be a list of about fifty sentences, drawn from at random.
+Fifty sentences is not a mind: it comes round in a fortnight and after that
+you are counting. A life now thinks two hundred or so different things,
+because "memory.py" holds shapes rather than sentences, and the particulars
+are the life's own — the people it actually met, the four things it actually
+owes, the years it actually had, the joints that actually started to go and
+the age they started.
+
+    the way Marko says your name
+    what you owe Marko, which is not money
+    standing on the back step, doing nothing
+    the afternoon the coat that still fits is finally done
+    what you said at seventeen
+
+A preoccupation is a subject and not a sentence, so for a few years at a
+time more of what you think is about the same person, or the same unpaid
+thing, and "related()" walks to the same subject before it walks to the same
+theme. That is why the thoughts before one thing done tend to be a train
+rather than a shuffle.
+
+Four things about thinking have actually been measured, and this is what the
+model does with them. Two are numbers and two are only directions; the
+constants are in "world.py" and say which is which.
+
+- Minds are somewhere else about 46.9% of waking moments — Killingsworth &
+  Gilbert, Science 2010, 2,250 adults and about 250,000 samples. So a
+  thought here does not stop the day: while you are up you are already doing
+  something and the thought colours a stretch of it. Over fourteen lives the
+  model averages 49%, and any one life runs from 32% to 68% — because worry
+  multiplies the "restless" dial by 1.35 and patience by 0.80, so a patient
+  person's mind wanders less, which is the point of having the dial at all.
+  Lying down there is nothing alongside it, and then it costs the clock what
+  it costs, which is why the night is long.
+- About 6,200 thought transitions in a day — Tseng & Poppenk, Nature
+  Communications 2020. This model records every thought it has and a life is
+  29,000 days, so it does not go near that: it has about 100 a day, and a
+  thought here is an episode rather than a transition.
+- Wandering points forward more often than back. Direction measured; this
+  comes out around thirteen ahead for every ten behind, which is on the low
+  side of what is reported, and is not tuned to a figure — the shapes are
+  written first and the ratio is whatever they give.
+- Wandering is more often pleasant than unpleasant, and it declines with age
+  (Jackson & Balota 2012; Maillet & Schacter 2016). Directions only. The
+  pleasant shapes get one extra copy in the pool, and "restless" — the dial
+  live.py:30 reads — is multiplied by a term falling from 1.15 to 0.75 over
+  a life. That slope is invented, and the web version prints it in the
+  working with everything else that leans on the dial.
+
+The account at the end reports all of it, so the model can be checked
+against the paper rather than believed.
 
 
 # Frequently Asked Questions

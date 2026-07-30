@@ -324,6 +324,16 @@ function account() {
   out.push(plain(fmt(life.totalDone), t("thingsDone")));
   out.push(plain(fmt(life.totalThoughts), t("thoughts") + ", " +
                  fmt(life.thoughtCount.size) + " " + t("different")));
+  out.push(node("acct/mind", "held", {
+    when: pc(life.wandering / life.waking), what: t("elsewhere"),
+    cls: "ev", tail: t("measuredAt"), leaf: false,
+    kids: mindRows(),
+  }));
+  out.push(node("acct/cast", "held", {
+    when: String(life.people.length + life.things.length + life.places.length),
+    what: t("whoAbout"), cls: "ev world", leaf: false, kids: castRows(),
+  }));
+
   out.push(plain(fmt(life.neverTotal), t("knewBetter")));
   out.push(plain(fmt(life.gotRoundTo), t("gotRoundTo"), "ev kept"));
   out.push(plain(fmt(life.insomniaNights), t("nightsAwake")));
@@ -348,6 +358,44 @@ function account() {
       })),
     }));
   }
+  return out;
+}
+
+const pc = (x) => (100 * x).toFixed(0) + "%";
+
+// where the thinking pointed and how it felt, which are the two things
+// about it anybody has actually measured
+function mindRows() {
+  const life = state.life, out = [];
+  let total = 0;
+  for (const v of life.points.values()) total += v;
+  const say = (key, count, label, cls) => out.push(node("acct/mind/" + key, "leafrow",
+    { when: pc(count / total), what: label, cls: cls, leaf: true }));
+  say("ahead", life.points.get("ahead") || 0, t("ptAhead"), "ev kept");
+  say("behind", life.points.get("behind") || 0, t("ptBehind"), "ev loss");
+  say("now", life.points.get("now") || 0, t("ptNow"), "quiet");
+  say("always", life.points.get("always") || 0, t("ptAlways"), "quiet");
+  say("good", life.tone.get(1) || 0, t("tonePlus"), "ev kept");
+  say("flat", life.tone.get(0) || 0, t("toneZero"), "quiet");
+  say("bad", life.tone.get(-1) || 0, t("toneMinus"), "ev loss");
+  return out;
+}
+
+// the particulars this life had to think about, which is where the words
+// in every thought came from
+function castRows() {
+  const life = state.life, out = [];
+  const row = (w, tail, cls) => out.push(node("acct/cast/" + out.length, "leafrow",
+    { what: w.word, when: w.since ? String(w.since) : "", tail: tail, cls: cls,
+      leaf: true }));
+  for (const p of life.people) {
+    row(p, p.gone !== null ? t("goneAt") + " " + p.gone
+           : p.estranged ? t("notSpeaking") : "", "ev");
+  }
+  for (const w of life.things) row(w, "", "quiet");
+  for (const w of life.places) row(w, "", "quiet");
+  for (const w of life.aches) row(w, t("achesFrom"), "ev loss");
+  for (const w of life.years) row(w, "", "quiet");
   return out;
 }
 
@@ -464,7 +512,15 @@ function buildKnobs() {
 
 // ------------------------------------------------------------------ running
 
+// a life is a second or so of work now; say so, and let the browser paint
+// before it starts, or the click looks like it did nothing
 function run() {
+  $("#run").textContent = t("running");
+  $("#run").disabled = true;
+  setTimeout(live, 20);
+}
+
+function live() {
   const century = PRESETS.century[state.set.century];
   state.life = new Life({
     seed: state.seed,
@@ -479,6 +535,7 @@ function run() {
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
   state.more = new Set();
+  $("#run").disabled = false;
   chrome();
   draw();
 }

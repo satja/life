@@ -32,6 +32,10 @@ class Chronicle:
         self.events = {}
         self.world_events = {}
         self.thoughts = Counter()
+        self.points = Counter()
+        self.wandering = 0
+        self.waking = 0
+        self.tone = Counter()
         self.done = Counter()
         self.total_done = 0
         self.total_thoughts = 0
@@ -50,9 +54,11 @@ class Chronicle:
         self.done[name] += 1
         self.total_done += 1
 
-    def thought(self, age, month, text):
+    def thought(self, age, month, text, points='always', tone=0):
         self.cell(age, month)['thoughts'][text] += 1
         self.thoughts[text] += 1
+        self.points[points] += 1
+        self.tone[tone] += 1
         self.total_thoughts += 1
 
     def event(self, age, month, text):

@@ -10,7 +10,8 @@ const UI = {
       "days, a day and you get the things you did, a thing and you get the thoughts " +
       "you had on the way to it. A year also holds the six numbers the loop was " +
       "reading while it passed.",
-    run: "run one life", again: "run another", seed: "seed", roll: "roll",
+    run: "run one life", again: "run another", running: "living it…",
+    seed: "seed", roll: "roll",
     hint: "Every year is there and every year opens, including the ones nothing " +
       "happened in, which were lived through all the same. Below the year the rule is " +
       "the same at every depth: the children something happened in are shown, the rest " +
@@ -43,6 +44,14 @@ const UI = {
     asFar: "as far as it is allowed to go",
     stillAwake: "still awake", asleep: "asleep", attempts: "% attempts",
 
+    elsewhere: "of waking minutes with the mind somewhere else",
+    measuredAt: "measured at 46.9% — Killingsworth & Gilbert, Science 2010",
+    ptAhead: "pointing ahead", ptBehind: "pointing behind",
+    ptNow: "on the moment", ptAlways: "on nothing in particular",
+    tonePlus: "pleasant", toneZero: "neutral", toneMinus: "unpleasant",
+    whoAbout: "who and what it was all about",
+    goneAt: "gone at", notSpeaking: "not speaking", achesFrom: "from then on",
+
     inOrder: "the bases, in that order",
     died: "died at", inTheYearOf: "in the year of",
     mornings: "mornings", thingsDone: "things done", thoughts: "thoughts",
@@ -59,7 +68,8 @@ const UI = {
       "njemu dogodilo; otvoriš godinu i dobiješ njezine mjesece, mjesec i dobiješ dane, " +
       "dan i dobiješ ono što si radio, radnju i dobiješ misli koje su joj prethodile. " +
       "Godina drži i šest brojeva koje je petlja čitala dok je prolazila.",
-    run: "pokreni jedan život", again: "pokreni još jedan", seed: "sjeme", roll: "baci",
+    run: "pokreni jedan život", again: "pokreni još jedan", running: "živi se…",
+    seed: "sjeme", roll: "baci",
     hint: "Svaka je godina tu i svaka se otvara, i one u kojima se ništa nije dogodilo, " +
       "koje su svejedno proživljene. Ispod godine pravilo je na svakoj dubini isto: " +
       "prikazuje se ono u čemu se nešto dogodilo, ostalo se prebroji. Šest brojeva " +
@@ -89,6 +99,14 @@ const UI = {
     theDials: "što je petlja čitala", base: "temelj", readBy: "čita se u",
     asFar: "dalje ne smije",
     stillAwake: "još budan", asleep: "usnuo", attempts: "% pokušaja",
+
+    elsewhere: "budnih minuta s mislima negdje drugdje",
+    measuredAt: "izmjereno 46,9% — Killingsworth i Gilbert, Science 2010.",
+    ptAhead: "usmjereno naprijed", ptBehind: "usmjereno unatrag",
+    ptNow: "na ovaj trenutak", ptAlways: "ni na što određeno",
+    tonePlus: "ugodno", toneZero: "neutralno", toneMinus: "neugodno",
+    whoAbout: "o kome se i o čemu radilo",
+    goneAt: "otišao u", notSpeaking: "ne razgovarate", achesFrom: "otad nadalje",
 
     inOrder: "baze, tim redom",
     died: "umro u", inTheYearOf: "u godini u kojoj je bilo:",
