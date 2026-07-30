@@ -11,10 +11,10 @@ const UI = {
       "you had on the way to it. A year also holds the six numbers the loop was " +
       "reading while it passed.",
     run: "run one life", again: "run another", seed: "seed", roll: "roll",
-    hint: "A life is the years something happened in; the rest were lived, and that is " +
-      "all there is to say about them. Below the year the rule is the same at every " +
-      "depth: the children something happened in are shown, the rest are counted. The " +
-      "six numbers are computed by wind_up() in " +
+    hint: "Every year is there and every year opens, including the ones nothing " +
+      "happened in, which were lived through all the same. Below the year the rule is " +
+      "the same at every depth: the children something happened in are shown, the rest " +
+      "are counted. The six numbers are computed by wind_up() in " +
       "world.py out of what you were given, what was done to you before you could " +
       "object, and what happens to be going on — and beside each one is the line of " +
       "live.py that reads it.",
@@ -60,10 +60,10 @@ const UI = {
       "dan i dobiješ ono što si radio, radnju i dobiješ misli koje su joj prethodile. " +
       "Godina drži i šest brojeva koje je petlja čitala dok je prolazila.",
     run: "pokreni jedan život", again: "pokreni još jedan", seed: "sjeme", roll: "baci",
-    hint: "Život su godine u kojima se nešto dogodilo; ostale su proživljene i o njima " +
-      "se nema što više reći. Ispod godine pravilo je na svakoj dubini isto: prikazuje " +
-      "se ono u čemu se nešto dogodilo, ostalo se prebroji. Šest brojeva računa " +
-      "wind_up() u world.py iz onoga što si " +
+    hint: "Svaka je godina tu i svaka se otvara, i one u kojima se ništa nije dogodilo, " +
+      "koje su svejedno proživljene. Ispod godine pravilo je na svakoj dubini isto: " +
+      "prikazuje se ono u čemu se nešto dogodilo, ostalo se prebroji. Šest brojeva " +
+      "računa wind_up() u world.py iz onoga što si " +
       "dobio, onoga što ti je učinjeno prije nego si mogao prigovoriti, i onoga što se " +
       "u tom trenutku događa — a uz svaki piše redak iz live.py koji ga čita.",
 

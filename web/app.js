@@ -357,10 +357,10 @@ function account() {
 // all; otherwise show the ones something happened in, and count the rest
 function shown(n) {
   const kids = n.kids || childrenOf(n);
-  // a life is the years something happened in. The others were lived, and
-  // that is all there is to say about them, so they are not offered.
-  if (n.kind === "life") return kids.filter((k) => k.notable);
-  if (n.kind === "year" || kids.length <= CAP || state.more.has(n.id)) return kids;
+  // every year is there and every year opens, including the ones with
+  // nothing in them; a year nothing happened in was still lived through
+  if (n.kind === "life" || n.kind === "year") return kids;
+  if (kids.length <= CAP || state.more.has(n.id)) return kids;
   const worth = kids.filter((k) => k.notable);
   // if nothing happened in any of them there is nothing to fold away, and a
   // stretch in which nothing happened is still the thing you asked for
