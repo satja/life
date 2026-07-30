@@ -28,12 +28,13 @@ row, drawn at every scale, and you see only what happened in it:
                  whether this is the job
       ... 25 more
 
-Open a year and you get its months, a month and you get its days, a day and
-you get the things you did, a thing and you get the thoughts you had on the
-way to it. The rule is the same at every depth: the children something
-happened in are shown, the rest are counted. What is left after the last
-thing done belongs to the night, which is where the thinking goes that the
-day had no room for.
+A life is the years something happened in; the rest were lived, and that is
+all there is to say about them. Open a year and you get its months, a month
+and you get its days, a day and you get the things you did, a thing and you
+get the thoughts you had on the way to it. Below the year the rule is the
+same at every depth: the children something happened in are shown, the rest
+are counted. What is left after the last thing done belongs to the night,
+which is where the thinking goes that the day had no room for.
 
 A year also holds the six numbers the loop was reading while it passed, and
 each of them opens into its working — the base the knobs set, then what

@@ -357,6 +357,9 @@ function account() {
 // all; otherwise show the ones something happened in, and count the rest
 function shown(n) {
   const kids = n.kids || childrenOf(n);
+  // a life is the years something happened in. The others were lived, and
+  // that is all there is to say about them, so they are not offered.
+  if (n.kind === "life") return kids.filter((k) => k.notable);
   if (n.kind === "year" || kids.length <= CAP || state.more.has(n.id)) return kids;
   const worth = kids.filter((k) => k.notable);
   // if nothing happened in any of them there is nothing to fold away, and a
@@ -473,7 +476,7 @@ function run() {
   let guard = 0;
   while (state.life.alive && guard++ < 130) state.life.stepYear();
   state.years = indexLife(state.life);
-  state.open = new Set(["life"]);
+  state.open = new Set(["life", "acct"]);
   state.more = new Set();
   chrome();
   draw();
