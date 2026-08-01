@@ -117,6 +117,47 @@ are very young or very old. About one life in ten ends this way.
 loop starts. This is not a workaround.
 
 
+# The day, the week, and the house
+
+A day used to be a bag: live() ran until "things_you_can_do" was empty, so
+the length of the day was whatever the bag happened to hold. The measured
+result was absurd — the commonest bedtime was five in the afternoon, a
+quarter of days held more than sixteen hours of activity, and Saturday was
+the heaviest working day of the week.
+
+The day is a length of time now, and things belong to parts of it. Nobody
+starts a day's work at eight in the evening, nobody renews the documents at
+eleven at night, and "waiting for it to get light" happens at dawn. The pool
+offers what suits the hour; it prefers but never refuses, because live.py
+asks how long the pool is to decide whether to go round again and asks again
+to pick something out of it, with the clock moving in between. What ends the
+day is "do()", which empties the pool once the hour is past. So the loop
+still ends when there is nothing to do — it is just that now there is
+nothing to do because the day is over rather than the other way round.
+
+Weekends exist. Work and school are not in the pool on a Saturday, and a
+Saturday has its own things: the long walk, the shopping, seeing people,
+cooking properly.
+
+A life also has somebody in it. It meets someone in its twenties, moves in
+with them a year or four later, may have children who are born, start
+school, and leave home, and may be left or bereaved. Each of those is a
+circumstance like a war: it puts its own things in the pool and takes them
+out again. The room at the back is empty for four years after the last one
+goes.
+
+Two numbers are kept that the loop never reads by name. "health" wears down
+after thirty-five, drops while an ailment is running, and multiplies how
+easily a bad year can kill you. "money" is a level rather than a heap — it
+is what you are living on, so it pulls towards what you are living on it
+from, rises with years in the same job, falls when the works close, and
+takes the hit when the currency is reformed. Below a certain point the pool
+gains counting it again and the cheaper shop and loses the sea; above
+another it gains having it done properly. Ailments arrive on their own
+schedule, more often the older and the less well you are, and about a
+seventh of lives end in one.
+
+
 # The thinking
 
 The mind used to be a list of about fifty sentences, drawn from at random.
@@ -132,6 +173,12 @@ the age they started.
     standing on the back step, doing nothing
     the afternoon the coat that still fits is finally done
     what you said at seventeen
+
+Thoughts know the hour. Three in the morning is not nine in the morning:
+what is available to think is the same, but what comes to hand at night
+leans backward and unpleasant and what comes to hand in the morning leans
+forward. Measured over a life it comes out at 42% forward in the morning
+against 10% back, and 34% back at night against 22% forward.
 
 A preoccupation is a subject and not a sentence, so for a few years at a
 time more of what you think is about the same person, or the same unpaid

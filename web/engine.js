@@ -19,6 +19,106 @@ function mulberry32(a) {
   };
 }
 
+// A day is not a bag you empty; it is a length of time, and things belong to
+// parts of it. Anything not named here can happen whenever.
+const BANDS = {
+  dawn:      (t) => t >= 300 && t < 540,
+  morning:   (t) => t >= 360 && t < 720,
+  workday:   (t) => t >= 480 && t < 1080,
+  day:       (t) => t >= 540 && t < 1140,
+  afternoon: (t) => t >= 720 && t < 1140,
+  evening:   (t) => t >= 1020 || t < 120,
+  any:       () => true,
+};
+
+const WHEN = {
+  "working": "workday", "working, still": "workday", "going to work": "workday",
+  "going back to it": "workday", "answering messages": "workday",
+  "answering the message": "workday", "paying the bill": "workday",
+  "looking for work": "workday", "how to look busy": "workday",
+  "applying": "workday", "waiting for an answer": "workday",
+  "going to school": "morning", "handing it in": "morning",
+  "explaining yourself": "morning", "doing the homework": "afternoon",
+  "studying the night before": "evening", "lying about homework": "morning",
+  "watching cartoons": "morning", "playing until it is dark": "afternoon",
+  "riding a bike": "afternoon", "collecting stones": "afternoon",
+  "running": "afternoon", "being outside again": "afternoon",
+  "opening the windows": "morning", "waiting for it to get light": "dawn",
+  "keeping warm": "evening", "staying in": "day",
+  "watching it get dark early": "evening", "sitting in the shade": "afternoon",
+  "going to the water": "day", "lying awake in the heat": "evening",
+  "being at the sea": "day", "doing nothing, on purpose": "day",
+  "reading half a book": "afternoon", "eating outside": "evening",
+  "staying up too late": "evening", "slamming a door": "evening",
+  "looking in the mirror": "morning", "saying nothing at dinner": "evening",
+  "arguing": "evening", "listening to the same song": "evening",
+  "drinking too much": "evening", "going somewhere cheap": "day",
+  "moving out": "day", "calling home, briefly": "evening",
+  "driving somewhere": "day", "carrying something heavy": "day",
+  "being needed": "evening", "seeing fewer friends": "evening",
+  "sleeping badly": "evening", "cancelling": "workday",
+  "worrying about money": "evening", "fixing the same thing again": "afternoon",
+  "getting it repaired": "workday", "taking the bins out": "evening",
+  "looking after someone": "day", "going to funerals": "morning",
+  "walking for the sake of it": "afternoon",
+  "reading the news too closely": "morning",
+  "having the same argument": "evening", "putting something aside": "afternoon",
+  "standing in the doorway of a room": "evening",
+  "walking slowly": "afternoon", "reading the same page twice": "afternoon",
+  "watering the plants": "morning", "watching the news": "evening",
+  "waiting for the phone": "day", "telling the story again": "evening",
+  "sitting in the sun": "afternoon", "going to the doctor": "morning",
+  "going to the check-up": "morning", "taking the pills": "morning",
+  "being visited": "afternoon", "sleeping in the afternoon": "afternoon",
+  "not recognising the street": "day", "looking at photographs": "evening",
+  "waiting": "day", "sitting": "afternoon",
+  "carrying someone who is asleep": "evening",
+  "reading the same book aloud": "evening",
+  "worrying about someone else": "evening",
+  "renewing the documents": "workday", "getting it looked at": "morning",
+  "carrying things upstairs": "day", "queueing": "morning",
+};
+
+// what a Saturday is for, which is not what a Tuesday is for
+const WEEKEND = [["having a lie-in", 55, "morning"], ["the long walk", 120, "day"],
+  ["seeing people", 150, "afternoon"], ["the shopping", 90, "morning"],
+  ["mending something", 70, "afternoon"], ["cooking properly", 110, "evening"]];
+
+// two numbers a life carries rather than has
+const AILMENTS = [
+  ["something is found", 3, 0.055,
+   [["going to the hospital", 180, "morning"], ["waiting for the result", 60, "day"],
+    ["taking the pills", 45, "morning"]]],
+  ["the operation", 1, 0.050,
+   [["lying still", 240, "any"], ["being visited", 90, "afternoon"],
+    ["learning to walk about again", 60, "day"]]],
+  ["the bad winter", 2, 0.018,
+   [["staying in", 200, "day"], ["coughing", 30, "any"]]],
+  ["the back goes", 4, 0.0,
+   [["lying on the floor", 90, "any"], ["not lifting anything", 40, "day"]]],
+  ["the nerves", 5, 0.0,
+   [["not answering the phone", 40, "day"], ["sitting very still", 120, "evening"]]],
+];
+const COSTS = { money: -0.22, war: -0.16, plague: -0.06, nature: -0.12,
+                politics: -0.04, progress: 0.06 };
+const POOR = [["counting it again", 30, "evening"], ["going without", 40, "any"],
+  ["the cheaper shop", 45, "morning"], ["asking for more hours", 25, "workday"]];
+const COMFORTABLE = [["having it done properly", 90, "workday"],
+  ["going away for a few days", 300, "day"], ["giving some of it away", 30, "any"]];
+const POORLY = [["resting", 120, "afternoon"], ["taking it slowly", 60, "any"],
+  ["going to the doctor", 110, "morning"]];
+const HARD_WORK = new Set(["carrying something heavy", "carrying things upstairs",
+  "the long walk", "riding a bike", "running", "going to the water"]);
+const TRADES = ["at the works", "in the office", "on the buses", "in the shop",
+  "at the school", "on the site", "in the kitchens", "on the road"];
+
+// when a life of this age goes to bed, and when it gets up
+const BEDTIME = { infant: 1140, child: 1230, teenager: 1410, young: 1380,
+                  middle: 1350, later: 1350, old: 1320, late: 1260 };
+const WAKING = { infant: 390, child: 420, teenager: 420, young: 420,
+                 middle: 405, later: 405, old: 390, late: 420 };
+const aWeekend = (day) => day % 7 === 5 || day % 7 === 6;
+
 const CAN_DO = {
   infant: [["sleeping",120],["being carried",40],["crying",20],["staring at the lamp",30],
            ["eating",35],["putting it in your mouth",25],["laughing at nothing",20],
@@ -391,6 +491,8 @@ export class Life {
     this.seenEvents = new Set();
 
     this.wandering = 0; this.waking = 0; this.wokeAt = 0;
+    this.dayEnds = 22 * 60; this.health = 1.0; this.money = 0.5;
+    this.job = null; this.yearsInJob = 0; this.ailments = [];
     this.points = new Map(); this.tone = new Map();
     this.buildMemory();
 
@@ -416,11 +518,17 @@ export class Life {
          at: at || "in" });
     this.people = [About("mother", "your mother", "person", 0),
                    About("father", "your father", "person", 0)];
-    this.spare = take(M_NAMES.slice(1), 5);
+    this.spare = take(M_NAMES.slice(1), 10);
     this.things = take(M_THINGS, 4).map((w, i) => About("t" + i, w, "thing", 0));
     this.places = take(M_PLACES, 4).map((w, i) => About("p" + i, w[0], "place", 0, w[1]));
     this.aches = take(M_ACHES, 3).map((w, i) =>
       About("a" + i, w, "ache", this.rrange(26, 62)));
+    // whoever else was in the house. Siblings are there from the start.
+    const sibs = this.rint(3);
+    for (let i = 0; i < sibs && this.spare.length; i++) {
+      this.people.push({ key: "sib" + i, word: this.spare.pop(), kind: "person",
+                         since: 0, gone: null, estranged: false, at: "in" });
+    }
     const ages = [];
     while (ages.length < 3) {
       const n = this.rrange(13, 33);
@@ -437,7 +545,10 @@ export class Life {
   }
 
   someone() {
-    return this.spare.length ? this.spare.pop() : this.pick(M_NAMES);
+    if (this.spare.length) return this.spare.pop();
+    const taken = new Set(this.people.map((p) => p.word));
+    const left = M_NAMES.filter((n) => !taken.has(n));
+    return this.pick(left.length ? left : M_NAMES);
   }
 
   estrange(age) {
@@ -691,14 +802,30 @@ export class Life {
     add(this.rrange(15, 20), "falls in love, silently", "loved");
     add(this.rrange(19, 26), "first job", "work");
     add(this.rrange(20, 29), "moves out for good");
-    if (this.rint(3) > 0) add(this.rrange(26, 39), "becomes a parent, and promises not to", "parent");
+    // somebody to live with, which the model had no room for at all
+    const met = this.rrange(19, 34), them = this.someone();
+    add(met, "meets " + them, ["meet", them, met]);
+    const moved = met + this.rrange(1, 5);
+    add(moved, "moves in with " + them, ["movein", them]);
+    for (let i = 0, n = this.pick([0, 1, 1, 1, 2, 2, 3]); i < n; i++) {
+      const born = moved + this.rrange(1, 12), name = this.someone();
+      add(born, name + " is born", ["born", name, born]);
+      add(born + 6, name + " starts school", ["school-age", name, born]);
+      add(born + this.rrange(18, 27), name + " leaves home", ["leaves", name]);
+    }
+    const ending = this.rint(5);
+    if (ending === 0) {
+      add(moved + this.rrange(6, 31), "it ends, with " + them, ["parted", them]);
+    } else if (ending === 1) {
+      add(moved + this.rrange(22, 51), them + " dies first", ["bereaved", them]);
+    }
     if (this.rint(2) === 0) {
       add(this.rrange(30, 55), "stops speaking to someone", "estranged");
     }
     const buriesFather = this.rrange(37, 72);
     add(buriesFather, "your father dies", "father");
     add(Math.min(96, buriesFather + this.rrange(0, 15)), "your mother dies", "mother");
-    add(66, "stops going to work");
+    add(66, "stops going to work", "retires");
     if (this.raised) add(this.raised[0],
       "raises it — " + this.raised[1] + " — at someone who was not there");
     return plan;
@@ -729,8 +856,7 @@ export class Life {
     }
     if (this.preoccupation) {
       const on = this.preoccupation[0];
-      thoughts = thoughts.concat(thoughts.filter((t) => t[2] === on),
-                                 thoughts.filter((t) => t[2] === on));
+      thoughts = thoughts.concat(thoughts.filter((t) => t[2] === on));
     }
     this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1], about: t[2],
                                             points: t[3], tone: t[4], deep: false }));
@@ -764,11 +890,77 @@ export class Life {
     for (const s of this.skillsKept) choices.push([s, 45]);
     for (const c of this.circumstances) if (c.does) choices = choices.concat(c.does);
     choices = choices.concat(SEASON[SEASONS[this.month]]);
+    if (this.money < 0.35) {
+      choices = choices.concat(POOR).filter((c) =>
+        c[0] !== "going somewhere cheap" && c[0] !== "being at the sea" &&
+        c[0] !== "eating outside");
+    } else if (this.money > 0.72) {
+      choices = choices.concat(COMFORTABLE);
+    }
+    if (this.health < 0.62) {
+      choices = choices.concat(POORLY).filter((c) => !HARD_WORK.has(c[0]));
+    }
     const already = new Set(), distinct = [];
-    for (const [name, minutes] of choices) {
+    for (const entry of choices) {
+      const name = entry[0], minutes = entry[1];
+      // a thing that arrives with a circumstance says when it happens
+      if (entry.length > 2 && !(name in WHEN)) WHEN[name] = entry[2];
       if (!already.has(name)) { already.add(name); distinct.push([name, minutes]); }
     }
     this.choices = distinct;
+  }
+
+  // what there is to do is what there is to do *now*, and nobody starts a
+  // day's work at eight in the evening
+  fitting(pool, strict) {
+    if (!this.alive) return [];
+    const now = this.minute % MIN_DAY;
+    let fits = pool.filter((d) => BANDS[d.band || "any"](now));
+    if (!fits.length && !strict) {
+      // nothing suits the hour, so anything that suits any hour will do
+      fits = pool.filter((d) => (d.band || "any") === "any");
+      if (!fits.length) fits = pool.slice();
+    }
+    const room = this.dayEnds - this.minute;
+    const inside = fits.filter((d) => d.minutes <= room + 20);
+    return inside.length ? inside : fits;
+  }
+
+  // health and money are not dials — the loop never reads them by name.
+  // They are read by what there is to do, and by how easily a bad year can
+  // kill you, which is the same thing as being read by the loop.
+  keepTheBooks(age) {
+    const wear = age < 35 ? 0 : (age - 35) * 0.0009;
+    let ill = 0;
+    for (const c of this.circumstances) if (c.kind === "ailment") ill += 0.04;
+    this.health = Math.min(1, Math.max(0.05, this.health - wear - ill + 0.015));
+
+    let target;
+    if (age < 18) target = 0.5;
+    else if (age >= 66) target = 0.42;
+    else {
+      const earning = this.job !== null &&
+        !this.circumstances.some((c) => c.kind === "work");
+      this.yearsInJob = earning ? this.yearsInJob + 1 : 0;
+      target = earning ? 0.46 + Math.min(0.22, this.yearsInJob * 0.011) : 0.24;
+    }
+    for (const c of this.circumstances) if (c.kind === "child") target -= 0.05;
+    this.money += (target - this.money) * 0.3 + this.gauss() * 0.02;
+    for (const c of this.circumstances) {
+      if (c.costs) { this.money += c.costs; c.costs = 0; }
+    }
+    this.money = Math.min(1, Math.max(0.02, this.money));
+
+    if (age >= 20 && this.rnd() < (0.006 + Math.max(0, age - 35) * 0.0018) *
+                                  (2 - this.health)) {
+      const [text, years, risk, does] = this.pick(AILMENTS);
+      if (!this.circumstances.some((c) => c.text === text)) {
+        this.circumstances.push({ text, until: age + years, kind: "ailment",
+          risk: risk * (2 - this.health), does, thinks: [], costs: -0.05 });
+        this.note(text, "loss");
+        this.remember(text, "body");
+      }
+    }
   }
 
   drift() {
@@ -808,7 +1000,10 @@ export class Life {
       text: event.t, until: age + event.years, kind: event.kind,
       risk: (event.risk || 0) * this.opts.lethality,
       does: event.does || [], thinks: event.thinks || [],
+      costs: COSTS[event.kind] || 0,
     });
+    // the works closing is not a mood; it is the end of a wage
+    if (event.kind === "work" && this.job) this.job = null;
     this.worldEvents.push({ age, month, text: event.t, kind: event.kind });
     this.events.push({ age, month, day, text: event.t, kind: "world" });
     if (event.costs) this.owe(event.costs);
@@ -820,25 +1015,78 @@ export class Life {
     this.shouldDo.push({ name, kind: 2, minutes: this.rrange(20, 120) });
   }
 
+  takeHousehold(what, age) {
+    const kind = what[0];
+    if (kind === "meet") {
+      this.entersMemory("partner", what[1], what[2]);
+    } else if (kind === "movein") {
+      this.circumstances.push({ text: "living with " + what[1], until: 200,
+        risk: 0, kind: "household", thinks: [],
+        does: [["cooking properly", 110, "evening"],
+               ["the same argument", 35, "evening"],
+               ["going somewhere together", 180, "day"],
+               ["sitting in the same room, not talking", 60, "evening"]] });
+    } else if (kind === "parted") {
+      this.dropCircumstance("household");
+      for (const p of this.people) if (p.word === what[1]) p.estranged = true;
+      this.remember("the door, and then the stairs", "love");
+      this.alone();
+    } else if (kind === "bereaved") {
+      this.dropCircumstance("household");
+      for (const p of this.people) if (p.word === what[1]) p.gone = age;
+      this.remember("the other side of the bed", "death");
+      this.alone();
+    } else if (kind === "born") {
+      this.entersMemory(what[1], what[1], what[2]);
+      this.circumstances.push({ text: "a small child", until: age + 6, risk: 0,
+        kind: "child", thinks: [],
+        does: [["carrying someone who is asleep", 60, "evening"],
+               ["reading the same book aloud", 30, "evening"],
+               ["being up in the night", 45, "evening"],
+               ["worrying about someone else", 45, "evening"]] });
+    } else if (kind === "school-age") {
+      this.circumstances.push({ text: "a child at school", until: age + 12,
+        risk: 0, kind: "child", thinks: [],
+        does: [["the school run", 40, "morning"],
+               ["helping with the homework", 45, "afternoon"],
+               ["being shouted at by someone small", 20, "evening"],
+               ["worrying about someone else", 45, "evening"]] });
+    } else if (kind === "leaves") {
+      this.dropCircumstance("child");
+      this.circumstances.push({ text: "the room at the back, empty",
+        until: age + 4, risk: 0, kind: "quiet", thinks: [],
+        does: [["standing in the doorway of a room", 15, "evening"],
+               ["ringing them, briefly", 14, "evening"]] });
+    }
+  }
+
+  dropCircumstance(kind) {
+    this.circumstances = this.circumstances.filter((c) => c.kind !== kind);
+  }
+
+  alone() {
+    this.circumstances.push({ text: "living alone", until: 200, risk: 0,
+      kind: "alone", thinks: [],
+      does: [["eating standing up", 20, "any"], ["leaving the radio on", 90, "any"],
+             ["nobody to tell", 30, "evening"]] });
+  }
+
   takeEffect(key) {
     const age = this.age;
+    if (Array.isArray(key)) { this.takeHousehold(key, age); return; }
     if (key === "school") {
       this.entersMemory("school1", "Marko", age);
       this.entersMemory("school2", this.someone(), age);
     } else if (key === "work") {
+      this.job = this.pick(TRADES);
+      this.note("starts " + this.job, "milestone");
       this.entersMemory("work1", this.someone(), age);
+    } else if (key === "retires") {
+      this.job = null;
     } else if (key === "loved") {
       this.entersMemory("loved", this.someone(), age);
     } else if (key === "estranged") {
       this.estrange(age);
-    } else if (key === "parent") {
-      this.circumstances.push({
-        text: "a child", until: age + 18, risk: 0, kind: "child",
-        does: [["carrying someone who is asleep", 60], ["reading the same book aloud", 30],
-               ["worrying about someone else", 45]],
-        thinks: [],
-      });
-      this.entersMemory("child", "the child", age);
     } else if (key === "father") {
       for (const p of this.people) if (p.key === "father") p.gone = age;
       this.remember("the silence at the table", "death");
@@ -864,10 +1112,11 @@ export class Life {
   birthday(age) {
     this.circumstances = this.circumstances.filter((c) => c.until > age);
     for (const [start, event] of this.timeline) if (start === age) this.takePlace(event);
+    this.keepTheBooks(age);
     this.windUp();
     if (age > this.lifespan) { this.die(null); return; }
     for (const c of this.circumstances) {
-      const chance = c.risk * frailty(age) * this.dials.frailty;
+      const chance = c.risk * frailty(age) * this.dials.frailty * (2 - this.health);
       if (chance && this.rnd() < chance) { this.die(c.text); return; }
     }
     this.pending = (this.schedule.get(age) || []).map((e) => [this.rint(12), e[0], e[1]]);
@@ -896,7 +1145,9 @@ export class Life {
     const later = [];
     for (const [month, text, effect] of this.pending) {
       if (month !== this.month) { later.push([month, text, effect]); continue; }
-      this.note(text, effect === "father" || effect === "mother" ? "loss" : "milestone");
+      const grief = effect === "father" || effect === "mother" ||
+        (Array.isArray(effect) && (effect[0] === "bereaved" || effect[0] === "parted"));
+      this.note(text, grief ? "loss" : "milestone");
       if (effect) this.takeEffect(effect);
     }
     this.pending = later;
@@ -908,28 +1159,43 @@ export class Life {
     this.mornings++;
     this.dayIndex = this.day;
     this.sleepAttempts = 0; this.insomniaNoted = false; this.lying = false;
-    this.eveningLeft = this.rrange(30, 150);
     this.wokeAt = this.minute;
     const age = this.age;
     if (age !== this.yearSeen) { this.yearSeen = age; this.birthday(age); }
     if (!this.alive) { this.canDo = []; return; }
     if (this.month !== this.monthSeen) this.newMonth();
-    const energy = energyAt(age) - (full ? 0 : 1);
-    const doy = this.day % DAYS_YEAR;
+    const stage = this.stage, day = this.day;
+    const late = aWeekend(day) && stage !== "infant" && stage !== "child" ? 50 : 0;
+    this.dayEnds = this.dayIndex * MIN_DAY + BEDTIME[stage] + late +
+                   Math.round(this.gauss() * 40);
+    if (this.dayEnds <= this.minute + 90) this.dayEnds = this.minute + 90;
+
+    const doy = day % DAYS_YEAR;
     const away = doy >= this.holidayFrom && doy < this.holidayTo;
+    const weekend = aWeekend(day);
     let pool = this.choices;
     if (away) {
       pool = pool.filter((c) => !WORK.has(c[0]) && !TERM_ONLY.has(c[0])).concat(HOLIDAY);
+    } else if (weekend) {
+      // nobody goes to work on a Sunday, and Saturday has its own things
+      pool = pool.filter((c) => !WORK.has(c[0]) && !SCHOOL.has(c[0]) &&
+                                !TERM_ONLY.has(c[0]));
+      for (const [n, m, b] of WEEKEND) { if (!(n in WHEN)) WHEN[n] = b; }
+      pool = pool.concat(WEEKEND.map(([n, m]) => [n, m]));
     } else if (age < 20 && doy >= 172 && doy < 244) {
       pool = pool.filter((c) => !TERM_ONLY.has(c[0]));
     }
-    this.canDo = this.weightedPick(pool, Math.max(1, energy)).map(
-      ([name, minutes]) => ({ name, kind: 0, minutes }));
-    if (!away && this.mustDo.length < 9 && this.rint(2) === 0) {
+    // more is offered than the day can hold, because the day is what runs out
+    const offered = Math.min(pool.length, energyAt(age) + (full ? 5 : 3));
+    this.canDo = this.weightedPick(pool, Math.max(1, offered)).map(
+      ([name, minutes]) => ({ name, kind: 0, minutes, band: WHEN[name] || "any" }));
+    if (!away && !weekend && this.mustDo.length < 9 && this.rint(2) === 0) {
       let owed = MUST_DO[this.stage];
       if (doy >= 172 && doy < 244) owed = owed.filter((o) => !SCHOOL.has(o));
       if (owed.length) {
-        this.mustDo.push({ name: this.pick(owed), kind: 1, minutes: this.rrange(20, 90) });
+        const name = this.pick(owed);
+        this.mustDo.push({ name, kind: 1, minutes: this.rrange(20, 90),
+                           band: WHEN[name] || "any" });
       }
     }
     this.tempted = this.rnd() < this.dials.temptation;
@@ -967,6 +1233,8 @@ export class Life {
       }
     }
     this.idle += Math.round(this.rrange(4, 13) * this.dials.restless);
+    // the day is over when the hour says so, and not when the bag is empty
+    if (thing.kind === 0 && this.minute >= this.dayEnds) this.canDo = [];
     this.tempted = this.rnd() < this.dials.temptation;
     if (!this.reminded && this.rnd() < this.dials.conscience) {
       this.reminded = true; this.record.remembered++; this.rememberedTotal++;
@@ -989,17 +1257,30 @@ export class Life {
     if (thought.deep) { this.deepCount++; this.deepTexts.add(thought.text); }
   }
 
+  // three in the morning is not nine in the morning. What is available to
+  // think is the same; what comes to hand is not.
+  atThisHour(thoughts) {
+    const hour = Math.floor((this.minute % MIN_DAY) / 60);
+    let leaning;
+    if (hour >= 22 || hour < 5) {
+      leaning = thoughts.filter((t) => t.points === BEHIND || t.tone < 0);
+    } else if (hour < 11) {
+      leaning = thoughts.filter((t) => t.points === AHEAD);
+    } else return thoughts;
+    return leaning.length ? leaning.concat(leaning, thoughts) : thoughts;
+  }
+
   // what a thought leads to is the same subject before it is the same theme
   related(thought) {
     if (thought.about && this.rint(3) > 0) {
       const near = this.bySubject.get(thought.about);
-      if (near && near.length) return near;
+      if (near && near.length) return this.atThisHour(near);
     }
-    return this.byTheme.get(thought.theme) || this.conscious;
+    return this.atThisHour(this.byTheme.get(thought.theme) || this.conscious);
   }
 
   thinkAboutStuff() {
-    const all = this.subconscious.concat(this.conscious);
+    const all = this.atThisHour(this.subconscious.concat(this.conscious));
     if (!all.length) return;
     let thought = this.pick(all);
     this.hit(29, thought.text);
@@ -1029,8 +1310,11 @@ export class Life {
   lyingDown() {
     this.tick();
     if (this.lying) return true;
-    this.eveningLeft--;
-    if (this.eveningLeft <= 0) { this.lying = true; this.idle += this.rrange(2, 9); return true; }
+    if (this.minute >= this.dayEnds) {
+      this.lying = true;
+      this.idle += Math.round(this.rrange(2, 9) * this.dials.restless);
+      return true;
+    }
     return false;
   }
   isMorning() {
@@ -1066,8 +1350,12 @@ export class Life {
     this.record.attempts = this.sleepAttempts;
     this.record.asleep = this.minute % MIN_DAY;
     this.record.insomnia = this.insomniaNoted;
-    const wake = 6 * 60 + this.rint(150);
-    const target = (this.dayIndex + 1) * MIN_DAY + wake;
+    const tomorrow = this.dayIndex + 1;
+    const stage = this.stage || "young";
+    const lieIn = aWeekend(tomorrow) && stage !== "infant" && stage !== "old" &&
+                  stage !== "late" ? 75 : 0;
+    const wake = WAKING[stage] + lieIn + Math.round(this.gauss() * 25);
+    const target = tomorrow * MIN_DAY + wake;
     this.minute = Math.max(target, this.minute + 45);
     this.grogginess = this.rint(45);
     this.lying = false;
@@ -1095,18 +1383,20 @@ export class Life {
   liveADay() {
     let guard = 0;
     for (;;) {
-      const more = this.canDo.length > 0;
-      this.hitIf(38, more, more ? this.canDo.length + " left" : "the day is spent");
-      if (!more || guard++ >= 200) break;
+      let now = this.fitting(this.canDo, false);
+      const more = now.length > 0;
+      this.hitIf(38, more, more ? now.length + " to hand" : "the day is over");
+      if (!more || guard++ >= 300) break;
       this.hit(39); this.thinkAboutStuff();
 
-      const must = this.mustDo.length > 0;
-      this.hitIf(41, must, must ? this.mustDo.length : "");
+      const dueNow = this.fitting(this.mustDo, true);
+      const must = dueNow.length > 0;
+      this.hitIf(41, must, must ? dueNow.length : "");
       if (must) {
-        const now = this.rint(2) === 0;
-        this.hitIf(42, now);
-        if (now) {
-          const thing = this.pick(this.mustDo);
+        const yes = this.rint(2) === 0;
+        this.hitIf(42, yes);
+        if (yes) {
+          const thing = this.pick(dueNow);
           this.hit(43, thing.name); this.hit(44, thing.minutes + " min");
           this.doThing(thing);
         }
@@ -1115,9 +1405,9 @@ export class Life {
       const should = this.reminded && this.shouldDo.length > 0;
       this.hitIf(46, should, should ? "in view" : "len() is 0");
       if (should) {
-        const now = this.rint(3) === 0;
-        this.hitIf(47, now);
-        if (now) {
+        const yes = this.rint(3) === 0;
+        this.hitIf(47, yes);
+        if (yes) {
           const thing = this.pick(this.shouldDo);
           this.hit(48, thing.name); this.hit(49, thing.minutes + " min");
           this.doThing(thing);
@@ -1127,17 +1417,18 @@ export class Life {
       const never = this.tempted && this.neverDo.length > 0;
       this.hitIf(51, never, never ? "tempted" : "len() is 0");
       if (never) {
-        const now = this.rint(4) === 0;
-        this.hitIf(52, now);
-        if (now) {
+        const yes = this.rint(4) === 0;
+        this.hitIf(52, yes);
+        if (yes) {
           const thing = this.pick(this.neverDo);
           this.hit(53, thing.name); this.hit(54, thing.minutes + " min");
           this.doThing(thing);
         }
       }
 
-      if (!this.canDo.length) break;
-      const thing = this.pick(this.canDo);
+      now = this.fitting(this.canDo, false);
+      if (!now.length) break;
+      const thing = this.pick(now);
       this.hit(56, thing.name); this.hit(57, thing.minutes + " min");
       this.doThing(thing);
       this.hit(59); this.thinkAboutStuff();

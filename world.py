@@ -53,6 +53,108 @@ TRANSITIONS = 6200
 STAGES = [(76, 'late'), (65, 'old'), (50, 'later'), (35, 'middle'),
           (20, 'young'), (13, 'teenager'), (3, 'child'), (0, 'infant')]
 
+# A day is not a bag you empty; it is a length of time, and things belong to
+# parts of it. Anything not named here can happen whenever.
+def _dawn(t):      return 5 * 60 <= t < 9 * 60
+def _morning(t):   return 6 * 60 <= t < 12 * 60
+def _workday(t):   return 8 * 60 <= t < 18 * 60
+def _daytime(t):   return 9 * 60 <= t < 19 * 60
+def _afternoon(t): return 12 * 60 <= t < 19 * 60
+def _evening(t):   return t >= 17 * 60 or t < 2 * 60
+def _whenever(t):  return True
+
+BANDS = {'dawn': _dawn, 'morning': _morning, 'workday': _workday,
+         'day': _daytime, 'afternoon': _afternoon, 'evening': _evening,
+         'any': _whenever}
+
+WHEN = {
+    "working": 'workday', "working, still": 'workday', "going to work": 'workday',
+    "going back to it": 'workday', "answering messages": 'workday',
+    "answering the message": 'workday', "paying the bill": 'workday',
+    "looking for work": 'workday', "how to look busy": 'workday',
+    "applying": 'workday', "waiting for an answer": 'workday',
+    "going to school": 'morning', "handing it in": 'morning',
+    "explaining yourself": 'morning', "doing the homework": 'afternoon',
+    "studying the night before": 'evening', "lying about homework": 'morning',
+    "watching cartoons": 'morning', "playing until it is dark": 'afternoon',
+    "riding a bike": 'afternoon', "collecting stones": 'afternoon',
+    "running": 'afternoon', "being outside again": 'afternoon',
+    "opening the windows": 'morning', "waiting for it to get light": 'dawn',
+    "keeping warm": 'evening', "staying in": 'day',
+    "watching it get dark early": 'evening', "sitting in the shade": 'afternoon',
+    "going to the water": 'day', "lying awake in the heat": 'evening',
+    "being at the sea": 'day', "doing nothing, on purpose": 'day',
+    "reading half a book": 'afternoon', "eating outside": 'evening',
+    "staying up too late": 'evening', "slamming a door": 'evening',
+    "looking in the mirror": 'morning', "saying nothing at dinner": 'evening',
+    "arguing": 'evening', "listening to the same song": 'evening',
+    "drinking too much": 'evening', "going somewhere cheap": 'day',
+    "moving out": 'day', "calling home, briefly": 'evening',
+    "driving somewhere": 'day', "carrying something heavy": 'day',
+    "being needed": 'evening', "seeing fewer friends": 'evening',
+    "sleeping badly": 'evening', "cancelling": 'workday',
+    "worrying about money": 'evening', "fixing the same thing again": 'afternoon',
+    "getting it repaired": 'workday', "taking the bins out": 'evening',
+    "looking after someone": 'day', "going to funerals": 'morning',
+    "walking for the sake of it": 'afternoon',
+    "reading the news too closely": 'morning',
+    "having the same argument": 'evening', "putting something aside": 'afternoon',
+    "standing in the doorway of a room": 'evening',
+    "walking slowly": 'afternoon', "reading the same page twice": 'afternoon',
+    "watering the plants": 'morning', "watching the news": 'evening',
+    "waiting for the phone": 'day', "telling the story again": 'evening',
+    "sitting in the sun": 'afternoon', "going to the doctor": 'morning',
+    "going to the check-up": 'morning', "taking the pills": 'morning',
+    "being visited": 'afternoon', "sleeping in the afternoon": 'afternoon',
+    "not recognising the street": 'day', "looking at photographs": 'evening',
+    "waiting": 'day', "sitting": 'afternoon',
+    "carrying someone who is asleep": 'evening',
+    "reading the same book aloud": 'evening',
+    "worrying about someone else": 'evening',
+    "renewing the documents": 'workday', "getting it looked at": 'morning',
+    "carrying things upstairs": 'day', "queueing": 'morning',
+}
+
+# Two numbers that a life carries rather than has: they move slowly, they
+# are read by what there is to do and by how easily the world can kill you,
+# and nothing in the loop knows their names.
+AILMENTS = [
+    ("something is found", 3, 0.055,
+     [("going to the hospital", 180, 'morning'), ("waiting for the result", 60, 'day'),
+      ("taking the pills", 45, 'morning')]),
+    ("the operation", 1, 0.050,
+     [("lying still", 240, 'any'), ("being visited", 90, 'afternoon'),
+      ("learning to walk about again", 60, 'day')]),
+    ("the bad winter", 2, 0.018,
+     [("staying in", 200, 'day'), ("coughing", 30, 'any')]),
+    ("the back goes", 4, 0.0,
+     [("lying on the floor", 90, 'any'), ("not lifting anything", 40, 'day')]),
+    ("the nerves", 5, 0.0,
+     [("not answering the phone", 40, 'day'), ("sitting very still", 120, 'evening')]),
+]
+# what an age outside does to what is in the bank
+COSTS = {'money': -0.22, 'war': -0.16, 'plague': -0.06, 'nature': -0.12,
+         'politics': -0.04, 'progress': 0.06}
+POOR = [("counting it again", 30, 'evening'), ("going without", 40, 'any'),
+        ("the cheaper shop", 45, 'morning'), ("asking for more hours", 25, 'workday')]
+COMFORTABLE = [("having it done properly", 90, 'workday'),
+               ("going away for a few days", 300, 'day'),
+               ("giving some of it away", 30, 'any')]
+POORLY = [("resting", 120, 'afternoon'), ("taking it slowly", 60, 'any'),
+          ("going to the doctor", 110, 'morning')]
+HARD_WORK = {"carrying something heavy", "carrying things upstairs",
+             "the long walk", "riding a bike", "running", "going to the water"}
+
+TRADES = ["at the works", "in the office", "on the buses", "in the shop",
+          "at the school", "on the site", "in the kitchens", "on the road"]
+
+
+# what a Saturday is for, which is not what a Tuesday is for
+WEEKEND = [("having a lie-in", 55, 'morning'), ("the long walk", 120, 'day'),
+           ("seeing people", 150, 'afternoon'), ("the shopping", 90, 'morning'),
+           ("mending something", 70, 'afternoon'),
+           ("cooking properly", 110, 'evening')]
+
 CAN_DO = {
     'infant': [("sleeping", 120), ("being carried", 40), ("crying", 20),
                ("staring at the lamp", 30), ("eating", 35),
@@ -306,6 +408,30 @@ def wind_up():
 RECOVERS = 1 / 26000.0
 
 
+# when a life of this age goes to bed, and when it gets up. A day is now
+# a length of time between the two, and what fits in it is what fits.
+BEDTIME = {'infant': 19 * 60, 'child': 20 * 60 + 30, 'teenager': 23 * 60 + 30,
+           'young': 23 * 60, 'middle': 22 * 60 + 30, 'later': 22 * 60 + 30,
+           'old': 22 * 60, 'late': 21 * 60}
+WAKING = {'infant': 6 * 60 + 30, 'child': 7 * 60, 'teenager': 7 * 60,
+          'young': 7 * 60, 'middle': 6 * 60 + 45, 'later': 6 * 60 + 45,
+          'old': 6 * 60 + 30, 'late': 7 * 60}
+
+
+def a_weekend(day):
+    return day % 7 in (5, 6)
+
+
+def bedtime(stage, day):
+    late = 50 if a_weekend(day) and stage not in ('infant', 'child') else 0
+    return BEDTIME[stage] + late + int(random.gauss(0, 40))
+
+
+def waking(stage, day):
+    lie_in = 75 if a_weekend(day) and stage not in ('infant', 'old', 'late') else 0
+    return WAKING[stage] + lie_in + int(random.gauss(0, 25))
+
+
 def energy_at(age):
     if age < 3:
         return 4
@@ -368,6 +494,68 @@ class Pool(list):
     pass
 
 
+class Day(Pool):
+    """What there is to do is what there is to do *now*. Things belong to
+    parts of a day, and the pool only offers what belongs to the hour it is.
+
+    live.py asks how long the pool is to decide whether to go round again,
+    and asks again to pick something out of it, with the clock moving in
+    between. So this can prefer, but it must not refuse: if nothing suits
+    the hour it offers everything rather than nothing. What ends the day is
+    do(), which empties it when the hour is past."""
+
+    strict = False
+
+    def fitting(self):
+        if not state.alive:
+            return []
+        now = clock.minute % MINUTES_PER_DAY
+        fits = [d for d in list.__iter__(self) if BANDS[d.band](now)]
+        if not fits and not self.strict:
+            # nothing suits the hour, so anything that suits any hour will do
+            fits = [d for d in list.__iter__(self) if d.band == 'any']
+            fits = fits or list(list.__iter__(self))
+        # and nobody starts a day's work at eight in the evening
+        room = state.day_ends - clock.minute
+        return [d for d in fits if d.minutes <= room + 20] or fits
+
+    def __len__(self):
+        return len(self.fitting())
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return list.__getitem__(self, index)
+        return self.fitting()[index]
+
+
+class MustDo(Day):
+    """What you really must do can wait for the right hour; nobody renews
+    the documents at eleven at night."""
+
+    strict = True
+
+
+def at_this_hour(thoughts):
+    """Three in the morning is not nine in the morning. What is available to
+    think is the same; what comes to hand is not."""
+    hour = (clock.minute % MINUTES_PER_DAY) // 60
+    if hour >= 22 or hour < 5:
+        leaning = [t for t in thoughts if t.points == 'behind' or t.tone < 0]
+    elif hour < 11:
+        leaning = [t for t in thoughts if t.points == 'ahead']
+    else:
+        return thoughts
+    return leaning + leaning + thoughts if leaning else thoughts
+
+
+class Mind(Pool):
+    """live.py adds the two halves of the mind together and picks out of the
+    sum. The sum is not the same at four in the morning."""
+
+    def __add__(self, other):
+        return at_this_hour(list.__add__(list(self), list(other)))
+
+
 class Temptations(Pool):
     def __len__(self):
         return Pool.__len__(self) if state.tempted else 0
@@ -379,12 +567,13 @@ class Reproach(Pool):
 
 
 class Doing:
-    __slots__ = ('name', 'kind', 'minutes')
+    __slots__ = ('name', 'kind', 'minutes', 'band')
 
-    def __init__(self, name, kind, minutes):
+    def __init__(self, name, kind, minutes, band=None):
         self.name = name
         self.kind = kind
         self.minutes = minutes
+        self.band = band or WHEN.get(name, 'any')
 
 
 class Thought:
@@ -402,7 +591,11 @@ class State:
     def __init__(self):
         self.alive = True
         self.grogginess = 0
-        self.evening_left = 60
+        self.day_ends = 22 * 60
+        self.health = 1.0
+        self.money = 0.5
+        self.job = None
+        self.years_in_job = 0
         self.idle = 0
         self.lying = False
         self.tempted = False
@@ -439,12 +632,12 @@ class State:
 clock = Clock()
 state = State()
 
-things_you_can_do = Pool()
-things_you_really_must_do = Pool()
+things_you_can_do = Day()
+things_you_really_must_do = MustDo()
 things_you_should_do = Reproach()
 things_you_should_never_do = Temptations()
-consciousness = Pool()
-subconsciousness = Pool()
+consciousness = Mind()
+subconsciousness = Mind()
 by_theme = {}
 by_subject = {}
 
@@ -515,7 +708,7 @@ def refresh_mind():
                                age + random.randrange(2, 8))
     if state.preoccupation:
         on = state.preoccupation[0]
-        thoughts += [t for t in thoughts if t[2] == on] * 2
+        thoughts += [t for t in thoughts if t[2] == on]
     consciousness[:] = [Thought(t, m, a, p, v) for t, m, a, p, v in thoughts]
     subconsciousness[:] = [Thought(t, m) for t, m, since in DEEP
                            if age >= since] + list(state.scars)
@@ -524,7 +717,7 @@ def refresh_mind():
         for n in (NEVER_DO if age >= 13 else [])]
     by_theme.clear()
     by_subject.clear()
-    for thought in consciousness + subconsciousness:
+    for thought in list(consciousness) + list(subconsciousness):
         by_theme.setdefault(thought.theme, []).append(thought)
         if thought.about:
             by_subject.setdefault(thought.about, []).append(thought)
@@ -534,8 +727,8 @@ def related(thought):
     if thought.about and random.randrange(3) > 0:
         near = by_subject.get(thought.about)
         if near:
-            return near
-    return by_theme.get(thought.theme) or list(consciousness)
+            return at_this_hour(near)
+    return at_this_hour(by_theme.get(thought.theme) or list(consciousness))
 
 
 def think(thought):
@@ -568,6 +761,10 @@ def do(thing):
                 pool.remove(thing)
                 break
     state.idle += round(random.randrange(4, 13) * state.dials['restless'])
+    # the day is over when the hour says so, and not when the bag is empty.
+    # Emptying it here is safe: live.py has made its choice for this lap.
+    if thing.kind == 'can' and clock.minute >= state.day_ends:
+        del things_you_can_do[:]
     state.tempted = random.random() < state.dials['temptation']
     if not state.reminded:
         state.reminded = random.random() < state.dials['conscience']
@@ -605,8 +802,7 @@ def _must_wake_up():
 def _lying_down():
     if state.lying:
         return True
-    state.evening_left -= 1
-    if state.evening_left <= 0:
+    if clock.minute >= state.day_ends:
         state.lying = True
         state.idle += round(random.randrange(2, 9) * state.dials['restless'])
         return True
@@ -657,8 +853,8 @@ def night():
     chronicle.waking += max(0, clock.minute - state.woke_at)
     if state.insomnia_noted and state.sleep_attempts > state.worst_night[0]:
         state.worst_night = (state.sleep_attempts, clock.age, clock.time())
-    wake = 6 * 60 + random.randrange(0, 150)
-    target = (state.day_index + 1) * MINUTES_PER_DAY + wake
+    tomorrow = state.day_index + 1
+    target = tomorrow * MINUTES_PER_DAY + waking(state.stage or 'young', tomorrow)
     clock.minute = max(target, clock.minute + 45)
     state.grogginess = random.randrange(0, 45)
     state.lying = False
@@ -682,7 +878,6 @@ def morning_of(full):
     state.sleep_attempts = 0
     state.insomnia_noted = False
     state.lying = False
-    state.evening_left = random.randrange(30, 150)
     state.woke_at = clock.minute
 
     age = clock.age
@@ -695,19 +890,33 @@ def morning_of(full):
     if clock.month != state.month_seen:
         new_month()
 
-    energy = energy_at(age) - (0 if full else 1)
+    stage = state.stage
+    state.day_ends = state.day_index * MINUTES_PER_DAY + bedtime(stage, clock.day)
+    if state.day_ends <= clock.minute + 90:
+        state.day_ends = clock.minute + 90
+
     doy = clock.day % DAYS_PER_YEAR
     away = state.holiday_from <= doy < state.holiday_to
+    weekend = a_weekend(clock.day)
     pool = state.choices
     if away:
         pool = [c for c in pool
                 if c[0] not in WORK and c[0] not in TERM_ONLY] + HOLIDAY
+    elif weekend:
+        # nobody goes to work on a Sunday, and Saturday has its own things
+        pool = [c for c in pool if c[0] not in WORK and c[0] not in SCHOOL
+                and c[0] not in TERM_ONLY]
+        pool = pool + [(n, m) for n, m, b in WEEKEND
+                       if WHEN.setdefault(n, b) or True]
     elif age < 20 and 172 <= doy < 244:
         pool = [c for c in pool if c[0] not in TERM_ONLY]
+    # more is offered than the day can hold, because the day is what runs out
+    offered = min(len(pool), energy_at(age) + (5 if full else 3))
     things_you_can_do[:] = [
-        Doing(n, 'can', m) for n, m in weighted_pick(pool, max(1, energy))]
+        Doing(n, 'can', m) for n, m in weighted_pick(pool, max(1, offered))]
 
-    if not away and len(things_you_really_must_do) < 9 and random.randrange(2) == 0:
+    if (not away and not weekend and len(things_you_really_must_do) < 9
+            and random.randrange(2) == 0):
         owed = MUST_DO[state.stage]
         if 172 <= doy < 244:
             owed = [o for o in owed if o not in SCHOOL]
@@ -746,7 +955,11 @@ def take_place(event):
     age = clock.age
     state.circumstances.append(
         {'text': event.text, 'until': age + event.years, 'risk': event.risk,
-         'kind': event.kind, 'does': event.does, 'thinks': event.thinks})
+         'kind': event.kind, 'does': event.does, 'thinks': event.thinks,
+         'costs': COSTS.get(event.kind, 0.0)})
+    if event.kind == 'work' and state.job:
+        # the works closing is not a mood; it is the end of a wage
+        state.job = None
     month = random.randrange(12)
     state.world_events.append((age, month, event.text))
     chronicle.world(age, month, event.text)
@@ -765,13 +978,20 @@ def owe(name):
 
 def take_effect(key):
     age = clock.age
+    if isinstance(key, tuple):
+        take_household(key, age)
+        return
     if key == 'school':
         memory.enters('school1', "Marko", 'person', age)
         memory.enters('school2', memory.someone(age), 'person', age)
     elif key == 'work':
+        state.job = random.choice(TRADES)
+        once(age, 'starts %s' % state.job)
         memory.enters('work1', memory.someone(age), 'person', age)
     elif key == 'loved':
         memory.enters('loved', memory.someone(age), 'person', age)
+    elif key == 'retires':
+        state.job = None
     elif key == 'estranged':
         memory.estrange(age)
     elif key == 'parent':
@@ -795,16 +1015,125 @@ def take_effect(key):
                 things_you_should_do.remove(item)
 
 
+def take_household(what, age):
+    kind = what[0]
+    if kind == 'meet':
+        memory.enters('partner', what[1], 'person', what[2])
+    elif kind == 'movein':
+        state.circumstances.append(
+            {'text': 'living with %s' % what[1], 'until': 200, 'risk': 0.0,
+             'kind': 'household',
+             'does': [("cooking properly", 110), ("the same argument", 35),
+                      ("going somewhere together", 180),
+                      ("sitting in the same room, not talking", 60)],
+             'thinks': []})
+    elif kind == 'parted':
+        drop_circumstance('household')
+        memory.estrange_named(what[1])
+        remember("the door, and then the stairs", 'love')
+        alone()
+    elif kind == 'bereaved':
+        drop_circumstance('household')
+        memory.departs_named(what[1], age)
+        remember("the other side of the bed", 'death')
+        alone()
+    elif kind == 'born':
+        memory.enters(what[1], what[1], 'person', what[2])
+        state.circumstances.append(
+            {'text': 'a small child', 'until': age + 6, 'risk': 0.0,
+             'kind': 'child',
+             'does': [("carrying someone who is asleep", 60),
+                      ("reading the same book aloud", 30),
+                      ("being up in the night", 45),
+                      ("worrying about someone else", 45)],
+             'thinks': []})
+    elif kind == 'school-age':
+        state.circumstances.append(
+            {'text': 'a child at school', 'until': age + 12, 'risk': 0.0,
+             'kind': 'child',
+             'does': [("the school run", 40), ("helping with the homework", 45),
+                      ("being shouted at by someone small", 20),
+                      ("worrying about someone else", 45)],
+             'thinks': []})
+    elif kind == 'leaves':
+        drop_circumstance('child')
+        state.circumstances.append(
+            {'text': 'the room at the back, empty', 'until': age + 4,
+             'risk': 0.0, 'kind': 'quiet',
+             'does': [("standing in the doorway of a room", 15),
+                      ("ringing them, briefly", 14)],
+             'thinks': []})
+
+
+def drop_circumstance(kind):
+    state.circumstances = [c for c in state.circumstances
+                           if c.get('kind') != kind]
+
+
+def alone():
+    state.circumstances.append(
+        {'text': 'living alone', 'until': 200, 'risk': 0.0, 'kind': 'alone',
+         'does': [("eating standing up", 20), ("leaving the radio on", 90),
+                  ("nobody to tell", 30)],
+         'thinks': []})
+
+
+def keep_the_books(age):
+    """Health and money are not dials — the loop never reads them by name.
+    They are read by what there is to do, and by how easily a bad year can
+    kill you, which is the same thing as being read by the loop."""
+    wear = 0.0 if age < 35 else (age - 35) * 0.0009
+    ill = sum(0.04 for c in state.circumstances if c.get('kind') == 'ailment')
+    state.health = min(1.0, max(0.05, state.health - wear - ill + 0.015))
+
+    # money is a level and not a heap: it is what you are living on, and it
+    # pulls towards what you are living on it from
+    if age < 18:
+        target = 0.5                       # what the house has, not what you have
+    elif age >= 66:
+        target = 0.42
+    else:
+        earning = state.job is not None and not any(
+            c.get('kind') == 'work' for c in state.circumstances)
+        state.years_in_job = state.years_in_job + 1 if earning else 0
+        target = (0.46 + min(0.22, state.years_in_job * 0.011)) if earning else 0.24
+    target -= 0.05 * sum(1 for c in state.circumstances
+                         if c.get('kind') == 'child')
+    state.money += (target - state.money) * 0.3 + random.gauss(0, 0.02)
+    for circumstance in state.circumstances:
+        if circumstance.get('costs'):
+            state.money += circumstance['costs']
+            circumstance['costs'] = 0.0
+    state.money = min(1.0, max(0.02, state.money))
+
+    if age >= 20 and random.random() < ailment_chance(age):
+        text, years, risk, does = random.choice(AILMENTS)
+        if not any(c['text'] == text for c in state.circumstances):
+            state.circumstances.append(
+                {'text': text, 'until': age + years, 'kind': 'ailment',
+                 'risk': risk * (2.0 - state.health), 'does': does,
+                 'thinks': [], 'costs': -0.05})
+            once(age, text)
+            remember(text, 'body')
+
+
+def ailment_chance(age):
+    base = 0.006 + max(0, age - 35) * 0.0018
+    return base * (2.0 - state.health)
+
+
 def birthday(age):
     state.circumstances = [c for c in state.circumstances if c['until'] > age]
     for event in history.starting(age):
         take_place(event)
+    keep_the_books(age)
     wind_up()
     if age > genes.lifespan:
         die(age, None)
         return
     for circumstance in state.circumstances:
-        chance = circumstance['risk'] * frailty(age) * state.dials['frailty']
+        chance = (circumstance['risk'] * frailty(age) * state.dials['frailty']
+                  * (2.0 - state.health))
         if chance and random.random() < chance:
             die(age, circumstance['text'])
             return
@@ -830,9 +1159,22 @@ def restock():
     for circumstance in state.circumstances:
         choices += circumstance['does']
     choices += SEASON[SEASONS[clock.month]]
+    if state.money < 0.35:
+        choices += POOR
+        choices = [c for c in choices if c[0] not in
+                   ("going somewhere cheap", "being at the sea", "eating outside")]
+    elif state.money > 0.72:
+        choices += COMFORTABLE
+    if state.health < 0.62:
+        choices += POORLY
+        choices = [c for c in choices if c[0] not in HARD_WORK]
     already = set()
     distinct = []
-    for name, minutes in choices:
+    for entry in choices:
+        name, minutes = entry[0], entry[1]
+        if len(entry) > 2:
+            # a thing that arrives with a circumstance says when it happens
+            WHEN.setdefault(name, entry[2])
         if name not in already:
             already.add(name)
             distinct.append((name, minutes))
@@ -893,16 +1235,33 @@ def build_schedule():
     add(random.randrange(15, 20), 'falls in love, silently', 'loved')
     add(random.randrange(19, 26), 'first job', 'work')
     add(random.randrange(20, 29), 'moves out for good')
-    if random.randrange(3) > 0:
-        add(random.randrange(26, 39),
-            'becomes a parent, and promises not to', 'parent')
+    # somebody to live with, which the model had no room for at all
+    met = random.randrange(19, 34)
+    them = memory.someone(met)
+    add(met, 'meets %s' % them, ('meet', them, met))
+    moved = met + random.randrange(1, 5)
+    add(moved, 'moves in with %s' % them, ('movein', them))
+    for i in range(random.choice([0, 1, 1, 1, 2, 2, 3])):
+        born = moved + random.randrange(1, 12)
+        name = memory.someone(born)
+        add(born, '%s is born' % name, ('born', name, born))
+        add(born + 6, '%s starts school' % name, ('school-age', name, born))
+        add(born + random.randrange(18, 27), '%s leaves home' % name,
+            ('leaves', name))
+    ending = random.randrange(5)
+    if ending == 0:
+        add(moved + random.randrange(6, 31), 'it ends, with %s' % them,
+            ('parted', them))
+    elif ending == 1:
+        add(moved + random.randrange(22, 51), '%s dies first' % them,
+            ('bereaved', them))
     if random.randrange(2) == 0:
         add(random.randrange(30, 55), 'stops speaking to someone', 'estranged')
     buries_father = random.randrange(37, 72)
     add(buries_father, 'your father dies', 'father')
     add(min(96, buries_father + random.randrange(0, 15)),
         'your mother dies', 'mother')
-    add(66, 'stops going to work')
+    add(66, 'stops going to work', 'retires')
     if upbringing.raised:
         age, thing = upbringing.raised
         add(age, 'raises it — %s — at someone who was not there' % thing)
@@ -940,7 +1299,10 @@ def epilogue():
                    % ('{:,}'.format(chronicle.total_thoughts), len(chronicle.thoughts)))
     if chronicle.waking:
         pointing = sum(chronicle.points.values()) or 1
-        closing.append('  mind somewhere else      %10.0f%%   (measured 46.9%%: '
+        closing.append('  what you were living on   %10.0f%%   of the health you started '
+                   'with, %.0f%% of what there is to have'
+                   % (100 * state.health, 100 * state.money))
+    closing.append('  mind somewhere else      %10.0f%%   (measured 46.9%%: '
                        'Killingsworth & Gilbert, Science 2010)'
                        % (100.0 * chronicle.wandering / chronicle.waking))
         closing.append('      of it, %.0f%% pointed ahead and %.0f%% behind; '

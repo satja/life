@@ -135,7 +135,7 @@ ACHES = ["the knee", "the back", "the shoulder", "the tooth", "the hands",
 # what this life happens to have to think about
 people = [About('mother', "your mother", 'person'),
           About('father', "your father", 'person')]
-spare = random.sample(NAMES[1:], 5)
+spare = random.sample(NAMES[1:], 10)
 things = [About('t%d' % i, w, 'thing')
           for i, w in enumerate(random.sample(THINGS, 4))]
 places = [About('p%d' % i, w, 'place', 0, at)
@@ -144,6 +144,14 @@ aches = [About('a%d' % i, w, 'ache', random.randrange(26, 62))
          for i, w in enumerate(random.sample(ACHES, 3))]
 years = [About('y%d' % n, spell(n), 'year', n + 4)
          for n in sorted(random.sample(range(13, 33), 3))]
+
+
+# whoever else was in the house. Siblings are there from the start; the
+# rest arrive when the life gets round to them.
+siblings = [About('sib%d' % i, name, 'person')
+            for i, name in enumerate(spare[:random.randrange(0, 3)])]
+del spare[:len(siblings)]
+people += siblings
 
 
 def enters(key, word, kind='person', since=0):
@@ -156,8 +164,13 @@ def enters(key, word, kind='person', since=0):
 
 
 def someone(age):
-    """A name this life has not used yet."""
-    return spare.pop() if spare else random.choice(NAMES)
+    """A name this life has not used yet. Two people in one life may end up
+    with the same name, as they do, but not until the names run out."""
+    if spare:
+        return spare.pop()
+    taken = {who.word for who in people}
+    left = [n for n in NAMES if n not in taken]
+    return random.choice(left or NAMES)
 
 
 def departs(key, age):
@@ -173,6 +186,18 @@ def estrange(age):
             and p.key not in ('mother', 'child')]
     if here:
         random.choice(here).estranged = True
+
+
+def departs_named(word, age):
+    for who in people:
+        if who.word == word:
+            who.gone = age
+
+
+def estrange_named(word):
+    for who in people:
+        if who.word == word:
+            who.estranged = True
 
 
 def subjects(age):

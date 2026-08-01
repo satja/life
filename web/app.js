@@ -73,6 +73,25 @@ function indexLife(life) {
     }
     y.months = y.months.filter(Boolean);
   }
+  // what a year was is not what there was most of — forty years running
+  // that all say "mostly working" say nothing. What it was is what moved.
+  let before = null;
+  for (const y of years) {
+    let total = 0;
+    for (const v of y.mins.values()) total += v;
+    const share = new Map();
+    for (const [k, v] of y.mins) share.set(k, v / (total || 1));
+    if (before) {
+      let best = null, by = 0;
+      for (const [k, v] of share) {
+        const was = before.get(k) || 0;
+        if (Math.abs(v - was) > Math.abs(by)) { by = v - was; best = k; }
+      }
+      if (best && Math.abs(by) >= 0.045) y.change = [by > 0 ? "moreOf" : "less", best];
+    }
+    before = share;
+  }
+
   const lastDay = life.days.length ? life.days[life.days.length - 1].dayOfLife : 0;
   for (const e of life.events) {
     const rec = byDay.get(Math.min(e.day, lastDay));
@@ -156,7 +175,8 @@ function childrenOf(n) {
     case "life":
       return state.years.map(function (y) {
         const ev = y.events.length ? said(y.events)
-                                   : { what: mostly(y.mins), cls: "quiet" };
+          : y.change ? { what: t(y.change[0]) + " " + y.change[1], cls: "quiet" }
+          : { what: mostly(y.mins), cls: "quiet" };
         return node("life/y" + y.age, "year", {
           when: String(y.age), what: ev.what, cls: ev.cls, y: y,
           tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
@@ -318,6 +338,20 @@ function account() {
       when: clock(last.wake) + "–" + clock(last.asleep), what: dayLabel(last),
       cls: "quiet", rec: last, leaf: !last.acts.length,
     })] : [],
+  }));
+
+  out.push(node("acct/carried", "held", {
+    when: pc(life.health), what: t("carried"), cls: "ev world", leaf: false,
+    tail: life.job ? t("worked") + " " + life.job : t("noJob"),
+    kids: [
+      node("acct/carried/h", "leafrow",
+           { when: pc(life.health), what: t("healthLeft"), cls: "quiet", leaf: true }),
+      node("acct/carried/m", "leafrow",
+           { when: pc(life.money), what: t("moneyLeft"), cls: "quiet", leaf: true }),
+      node("acct/carried/y", "leafrow",
+           { when: String(life.yearsInJob), what: t("yearsInJob"), cls: "quiet",
+             leaf: true }),
+    ],
   }));
 
   out.push(plain(fmt(life.mornings), t("mornings")));

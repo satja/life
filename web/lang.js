@@ -44,6 +44,10 @@ const UI = {
     asFar: "as far as it is allowed to go",
     stillAwake: "still awake", asleep: "asleep", attempts: "% attempts",
 
+    less: "less", moreOf: "more",
+    carried: "what it was living on, at the end",
+    healthLeft: "of the health it started with", moneyLeft: "of what there is to have",
+    yearsInJob: "years in the same job", worked: "worked", noJob: "not working",
     elsewhere: "of waking minutes with the mind somewhere else",
     measuredAt: "measured at 46.9% — Killingsworth & Gilbert, Science 2010",
     ptAhead: "pointing ahead", ptBehind: "pointing behind",
@@ -100,6 +104,10 @@ const UI = {
     asFar: "dalje ne smije",
     stillAwake: "još budan", asleep: "usnuo", attempts: "% pokušaja",
 
+    less: "manje", moreOf: "više",
+    carried: "od čega je živio, na kraju",
+    healthLeft: "zdravlja s kojim je počeo", moneyLeft: "od onoga što se može imati",
+    yearsInJob: "godina na istom poslu", worked: "radio", noJob: "ne radi",
     elsewhere: "budnih minuta s mislima negdje drugdje",
     measuredAt: "izmjereno 46,9% — Killingsworth i Gilbert, Science 2010.",
     ptAhead: "usmjereno naprijed", ptBehind: "usmjereno unatrag",
