@@ -44,7 +44,8 @@ const UI = {
     asFar: "as far as it is allowed to go",
     stillAwake: "still awake", asleep: "asleep", attempts: "% attempts",
 
-    less: "less", moreOf: "more",
+    less: "less", moreOf: "more", tookUp: "took up", noMore: "no more",
+    thinkingOf: "mostly about",
     carried: "what it was living on, at the end",
     healthLeft: "of the health it started with", moneyLeft: "of what there is to have",
     yearsInJob: "years in the same job", worked: "worked", noJob: "not working",
@@ -104,7 +105,8 @@ const UI = {
     asFar: "dalje ne smije",
     stillAwake: "još budan", asleep: "usnuo", attempts: "% pokušaja",
 
-    less: "manje", moreOf: "više",
+    less: "manje", moreOf: "više", tookUp: "prihvatio se —", noMore: "više ne —",
+    thinkingOf: "uglavnom o —",
     carried: "od čega je živio, na kraju",
     healthLeft: "zdravlja s kojim je počeo", moneyLeft: "od onoga što se može imati",
     yearsInJob: "godina na istom poslu", worked: "radio", noJob: "ne radi",

@@ -466,7 +466,8 @@ export class Life {
     this.salience = new Map(); this.scars = []; this.circumstances = [];
     this.pending = []; this.noLonger = new Set(); this.preoccupation = null;
     this.cause = null; this.diedAt = null;
-    this.dials = Object.assign({}, DIALS); this.working = {}; this.dialsAt = {};
+    this.dials = Object.assign({}, DIALS); this.working = {};
+    this.dialsAt = {}; this.mindAt = {};
 
     this.canDo = []; this.mustDo = []; this.shouldDo = []; this.neverDo = [];
     this.conscious = []; this.subconscious = []; this.byTheme = new Map();
@@ -858,6 +859,11 @@ export class Life {
       const on = this.preoccupation[0];
       thoughts = thoughts.concat(thoughts.filter((t) => t[2] === on));
     }
+    // what was on your mind this year, kept so a quiet year can say it
+    if (this.preoccupation) {
+      const on = this.subjectsAt(age).find((w) => w.key === this.preoccupation[0]);
+      if (on) this.mindAt[age] = on.word;
+    }
     this.conscious = thoughts.map((t) => ({ text: t[0], theme: t[1], about: t[2],
                                             points: t[3], tone: t[4], deep: false }));
     this.subconscious = DEEP.filter((d) => age >= d[2])
@@ -1123,8 +1129,11 @@ export class Life {
     this.schedule.delete(age);
     this.offerSomething(age);
     this.stage = stageAt(age);
-    const keeping = (52 - age) / 32.0;
-    this.skillsKept = this.skills.filter(() => age >= 20 && age < 52 && this.rnd() < keeping);
+    // what school left you is kept or it is not, and once it has gone it has
+    // gone. It used to be redrawn every year, so long division came and went
+    // like weather, which is not what happens to long division.
+    if (age === 20) this.skillsKept = this.skills.filter(() => this.rint(3) > 0);
+    else if (age > 20) this.skillsKept = this.skillsKept.filter(() => this.rnd() < 0.96);
     this.monthSeen = -1;
     if (age >= 5 && age < 66) {
       this.holidayFrom = this.rrange(176, 232);

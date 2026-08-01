@@ -1141,9 +1141,13 @@ def birthday(age):
                      for text, effect in schedule.pop(age, [])]
     offer_something_you_should_do(age)
     state.stage = stage_at(age)
-    keeping = (52 - age) / 32.0
-    state.skills_kept = [s for s in education.skills
-                         if 20 <= age < 52 and random.random() < keeping]
+    # what school left you is kept or it is not, and once it has gone it has
+    # gone. It used to be redrawn every year, so long division came and went
+    # like weather, which is not what happens to long division.
+    if age == 20:
+        state.skills_kept = [s for s in education.skills if random.randrange(3) > 0]
+    elif age > 20:
+        state.skills_kept = [s for s in state.skills_kept if random.random() < 0.96]
     state.month_seen = -1
     if 5 <= age < 66:
         state.holiday_from = random.randrange(176, 232)

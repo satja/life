@@ -73,23 +73,52 @@ function indexLife(life) {
     }
     y.months = y.months.filter(Boolean);
   }
-  // what a year was is not what there was most of — forty years running
-  // that all say "mostly working" say nothing. What it was is what moved.
-  let before = null;
-  for (const y of years) {
+  // What a year was is not what there was most of — forty years running that
+  // all say "mostly working" say nothing at all. What a year was is what
+  // arrived in it, what left it, or what it drifted towards; and a year that
+  // was none of those is a year you can only say what you spent it thinking
+  // about. A share that moves two or three points is the random walk in
+  // salience, not a change in a life, so it is not reported as one.
+  const shares = years.map((y) => {
     let total = 0;
     for (const v of y.mins.values()) total += v;
     const share = new Map();
     for (const [k, v] of y.mins) share.set(k, v / (total || 1));
-    if (before) {
-      let best = null, by = 0;
-      for (const [k, v] of share) {
-        const was = before.get(k) || 0;
-        if (Math.abs(v - was) > Math.abs(by)) { by = v - was; best = k; }
-      }
-      if (best && Math.abs(by) >= 0.045) y.change = [by > 0 ? "moreOf" : "less", best];
+    return share;
+  });
+  years.forEach(function (y, i) {
+    if (!i) return;
+    const now = shares[i], was = shares[i - 1];
+    let took = null, gone = null;
+    for (const [k, v] of now) {
+      if (v >= 0.02 && !(was.get(k) > 0.002) && (!took || v > now.get(took))) took = k;
     }
-    before = share;
+    for (const [k, v] of was) {
+      if (v >= 0.03 && !(now.get(k) > 0.002) && (!gone || v > was.get(gone))) gone = k;
+    }
+    if (took) { y.change = ["tookUp", took]; return; }
+    if (gone) { y.change = ["noMore", gone]; return; }
+    // a slow drift only counts once it has been drifting for a while
+    const back = shares.slice(Math.max(0, i - 3), i);
+    let best = null, by = 0;
+    for (const [k, v] of now) {
+      let mean = 0;
+      for (const s of back) mean += s.get(k) || 0;
+      mean /= back.length;
+      if (Math.abs(v - mean) > Math.abs(by)) { by = v - mean; best = k; }
+    }
+    if (best && Math.abs(by) >= 0.05) { y.change = [by > 0 ? "moreOf" : "less", best]; return; }
+    const on = life.mindAt[y.age];
+    if (on && on !== life.mindAt[y.age - 1]) y.change = ["thinkingOf", on];
+  });
+  // and a year that would say exactly what last year said says the other
+  // thing it can say instead, which is what it was spent thinking about
+  let said = null;
+  for (const y of years) {
+    if (y.events.length) { said = null; continue; }
+    const text = y.change ? t(y.change[0]) + " " + y.change[1] : mostly(y.mins);
+    if (text === said && life.mindAt[y.age]) y.change = ["thinkingOf", life.mindAt[y.age]];
+    said = y.change ? t(y.change[0]) + " " + y.change[1] : mostly(y.mins);
   }
 
   const lastDay = life.days.length ? life.days[life.days.length - 1].dayOfLife : 0;
