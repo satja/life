@@ -146,6 +146,15 @@ circumstance like a war: it puts its own things in the pool and takes them
 out again. The room at the back is empty for four years after the last one
 goes.
 
+A job has a name and can change. It used to be one item in a pool of
+fifteen, so a life with a trade worked two days in five and thirty years
+running were all called "working"; and once the works closed nothing ever
+gave the job back, so a factory closing at forty meant twenty-six years out
+of work. Work is now something you really must do on a weekday — 35% of
+waking minutes, on 97% of weekdays — it is called after the trade, so a year
+can say "more working on the buses", and a life takes two or three trades in
+the course of it.
+
 Two numbers are kept that the loop never reads by name. "health" wears down
 after thirty-five, drops while an ailment is running, and multiplies how
 easily a bad year can kill you. "money" is a level rather than a heap — it

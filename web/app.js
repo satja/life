@@ -79,12 +79,22 @@ function indexLife(life) {
   // was none of those is a year you can only say what you spent it thinking
   // about. A share that moves two or three points is the random walk in
   // salience, not a change in a life, so it is not reported as one.
+  // a trade changing renames the work, and a rename is not a thing arriving
+  // and another thing leaving — the change of trade is an event already
+  const same = (name) => (name.indexOf("working") === 0 ? "working" : name);
   const shares = years.map((y) => {
     let total = 0;
     for (const v of y.mins.values()) total += v;
     const share = new Map();
-    for (const [k, v] of y.mins) share.set(k, v / (total || 1));
+    for (const [k, v] of y.mins) {
+      share.set(same(k), (share.get(same(k)) || 0) + v / (total || 1));
+    }
     return share;
+  });
+  const named = years.map((y) => {
+    let best = "", bv = -1;
+    for (const [k, v] of y.mins) if (v > bv) { bv = v; best = k; }
+    return best;
   });
   years.forEach(function (y, i) {
     if (!i) return;
@@ -96,8 +106,9 @@ function indexLife(life) {
     for (const [k, v] of was) {
       if (v >= 0.03 && !(now.get(k) > 0.002) && (!gone || v > was.get(gone))) gone = k;
     }
-    if (took) { y.change = ["tookUp", took]; return; }
-    if (gone) { y.change = ["noMore", gone]; return; }
+    const say = (k) => (k === "working" ? named[i] || k : k);
+    if (took) { y.change = ["tookUp", say(took)]; return; }
+    if (gone) { y.change = ["noMore", say(gone)]; return; }
     // a slow drift only counts once it has been drifting for a while
     const back = shares.slice(Math.max(0, i - 3), i);
     let best = null, by = 0;
@@ -107,7 +118,9 @@ function indexLife(life) {
       mean /= back.length;
       if (Math.abs(v - mean) > Math.abs(by)) { by = v - mean; best = k; }
     }
-    if (best && Math.abs(by) >= 0.05) { y.change = [by > 0 ? "moreOf" : "less", best]; return; }
+    if (best && Math.abs(by) >= 0.05) {
+      y.change = [by > 0 ? "moreOf" : "less", say(best)]; return;
+    }
     const on = life.mindAt[y.age];
     if (on && on !== life.mindAt[y.age - 1]) y.change = ["thinkingOf", on];
   });

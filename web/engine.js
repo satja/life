@@ -374,7 +374,7 @@ const THING = [
   ["getting to %s at the weekend", "time", 2, AHEAD, 0],
   ["%s, and how long it has been like that", "shame", 3, BEHIND, -1],
   ["what %s would cost now", "money", 4, AHEAD, -1],
-  ["the afternoon %s is finally done", "time", 3, AHEAD, 1],
+  ["the afternoon you finally deal with %s", "time", 3, AHEAD, 1],
 ];
 const PLACE = [
   ["the smell of %s", "home", 1, ALWAYS, 1],
@@ -504,7 +504,7 @@ export class Life {
 
     this.wandering = 0; this.waking = 0; this.wokeAt = 0;
     this.dayEnds = 22 * 60; this.health = 1.0; this.money = 0.5;
-    this.job = null; this.yearsInJob = 0; this.ailments = [];
+    this.job = null; this.hadJob = false; this.yearsInJob = 0;
     this.points = new Map(); this.tone = new Map();
     this.buildMemory();
 
@@ -925,12 +925,23 @@ export class Life {
     }
     const already = new Set(), distinct = [];
     for (const entry of choices) {
-      const name = entry[0], minutes = entry[1];
+      const name = this.namedForTheJob(entry[0]), minutes = entry[1];
       // a thing that arrives with a circumstance says when it happens
       if (entry.length > 2 && !(name in WHEN)) WHEN[name] = entry[2];
       if (!already.has(name)) { already.add(name); distinct.push([name, minutes]); }
     }
     this.choices = distinct;
+  }
+
+  // Working is not a thing anybody does; a trade is. Thirty years all called
+  // "working" is thirty years that look the same because they were never
+  // given a name.
+  namedForTheJob(name) {
+    if (!this.job || name.indexOf("working") !== 0) return name;
+    const named = name.replace("working", "working " + this.job);
+    if (!(named in WHEN)) WHEN[named] = "workday";
+    WORK.add(named);
+    return named;
   }
 
   // what there is to do is what there is to do *now*, and nobody starts a
@@ -958,12 +969,26 @@ export class Life {
     for (const c of this.circumstances) if (c.kind === "ailment") ill += 0.04;
     this.health = Math.min(1, Math.max(0.05, this.health - wear - ill + 0.015));
 
+    const shut = this.circumstances.some((c) => c.kind === "work");
+    if (age >= 18 && age < 66 && this.hadJob && !shut) {
+      // a works closing is not the end of working; it used to be, because
+      // nothing ever gave the job back
+      if (this.job === null && this.rnd() < 0.55) {
+        this.job = this.pick(TRADES); this.yearsInJob = 0;
+        this.note("finds work " + this.job, "milestone");
+      } else if (this.job && this.rnd() < 0.035) {
+        const was = this.job;
+        this.job = this.pick(TRADES.filter((t) => t !== was));
+        this.yearsInJob = 0;
+        this.note("leaves " + was + " for " + this.job, "milestone");
+      }
+    }
+
     let target;
-    if (age < 18) target = 0.5;
+    if (age < 18 || !this.hadJob) target = 0.5;
     else if (age >= 66) target = 0.42;
     else {
-      const earning = this.job !== null &&
-        !this.circumstances.some((c) => c.kind === "work");
+      const earning = this.job !== null && !shut;
       this.yearsInJob = earning ? this.yearsInJob + 1 : 0;
       target = earning ? 0.46 + Math.min(0.22, this.yearsInJob * 0.011) : 0.24;
     }
@@ -1101,6 +1126,7 @@ export class Life {
       this.entersMemory("school1", "Marko", age);
       this.entersMemory("school2", this.someone(), age);
     } else if (key === "work") {
+      this.hadJob = true;
       this.job = this.pick(TRADES);
       this.note("starts " + this.job, "milestone");
       this.entersMemory("work1", this.someone(), age);
@@ -1215,6 +1241,17 @@ export class Life {
     const offered = Math.min(pool.length, energyAt(age) + (full ? 5 : 3));
     this.canDo = this.weightedPick(pool, Math.max(1, offered)).map(
       ([name, minutes]) => ({ name, kind: 0, minutes, band: WHEN[name] || "any" }));
+    // a job is not a thing you might get round to. It used to be one item in
+    // the pool among fifteen, so a life with a trade worked two days in five.
+    if (!away && !weekend && this.job && age >= 19 && age < 66) {
+      pool = pool.filter((c) => c[0].indexOf("working") !== 0);
+      if (!this.mustDo.some((d) => d.name.indexOf("working") === 0)) {
+        const name = this.namedForTheJob("working");
+        this.mustDo.push({ name, kind: 1, minutes: this.rrange(380, 470),
+                           band: "workday" });
+      }
+    }
+
     if (!away && !weekend && this.mustDo.length < 9 && this.rint(2) === 0) {
       let owed = MUST_DO[this.stage];
       if (doy >= 172 && doy < 244) owed = owed.filter((o) => !SCHOOL.has(o));

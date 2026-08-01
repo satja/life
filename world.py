@@ -595,6 +595,7 @@ class State:
         self.health = 1.0
         self.money = 0.5
         self.job = None
+        self.had_job = False
         self.years_in_job = 0
         self.idle = 0
         self.lying = False
@@ -915,6 +916,16 @@ def morning_of(full):
     things_you_can_do[:] = [
         Doing(n, 'can', m) for n, m in weighted_pick(pool, max(1, offered))]
 
+    # a job is not a thing you might get round to. It used to be one item in
+    # the pool among fifteen, so a life with a trade worked two days in five.
+    if not away and not weekend and state.job and 19 <= age < 66:
+        pool = [c for c in pool if not c[0].startswith('working')]
+        if not any(d.name.startswith('working')
+                   for d in list.__iter__(things_you_really_must_do)):
+            things_you_really_must_do.append(
+                Doing(named_for_the_job('working'), 'must',
+                      random.randrange(380, 470)))
+
     if (not away and not weekend and len(things_you_really_must_do) < 9
             and random.randrange(2) == 0):
         owed = MUST_DO[state.stage]
@@ -985,6 +996,7 @@ def take_effect(key):
         memory.enters('school1', "Marko", 'person', age)
         memory.enters('school2', memory.someone(age), 'person', age)
     elif key == 'work':
+        state.had_job = True
         state.job = random.choice(TRADES)
         once(age, 'starts %s' % state.job)
         memory.enters('work1', memory.someone(age), 'person', age)
@@ -1088,8 +1100,23 @@ def keep_the_books(age):
 
     # money is a level and not a heap: it is what you are living on, and it
     # pulls towards what you are living on it from
-    if age < 18:
-        target = 0.5                       # what the house has, not what you have
+    working_age = 18 <= age < 66
+    shut = any(c.get('kind') == 'work' for c in state.circumstances)
+    if working_age and state.had_job and not shut:
+        # a works closing is not the end of working; it used to be, because
+        # nothing ever gave the job back
+        if state.job is None and random.random() < 0.55:
+            state.job = random.choice(TRADES)
+            state.years_in_job = 0
+            once(age, 'finds work %s' % state.job)
+        elif state.job and random.random() < 0.035:
+            was, state.job = state.job, random.choice(
+                [t for t in TRADES if t != state.job])
+            state.years_in_job = 0
+            once(age, 'leaves %s for %s' % (was, state.job))
+
+    if age < 18 or not state.had_job:
+        target = 0.5      # what the house has, which is not what you have
     elif age >= 66:
         target = 0.42
     else:
@@ -1161,6 +1188,8 @@ def restock():
     choices = list(CAN_DO[state.stage])
     choices += [(s, 45) for s in state.skills_kept
                 if s in education.CAN_STILL_DO]
+    choices = [(named_for_the_job(n), m) + tuple(rest)
+               for n, m, *rest in (tuple(c) for c in choices)]
     for circumstance in state.circumstances:
         choices += circumstance['does']
     choices += SEASON[SEASONS[clock.month]]
@@ -1184,6 +1213,18 @@ def restock():
             already.add(name)
             distinct.append((name, minutes))
     state.choices = distinct
+
+
+def named_for_the_job(name):
+    """Working is not a thing anybody does; a trade is. Thirty years all
+    called "working" is thirty years that look the same because they were
+    never given a name."""
+    if not state.job or not name.startswith('working'):
+        return name
+    named = name.replace('working', 'working ' + state.job, 1)
+    WHEN.setdefault(named, 'workday')
+    WORK.add(named)
+    return named
 
 
 def new_month():

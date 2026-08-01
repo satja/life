@@ -94,7 +94,7 @@ THING = [
     ("getting to %s at the weekend", 'time', 2, AHEAD, 0),
     ("%s, and how long it has been like that", 'shame', 3, BEHIND, -1),
     ("what %s would cost now", 'money', 4, AHEAD, -1),
-    ("the afternoon %s is finally done", 'time', 3, AHEAD, 1),
+    ("the afternoon you finally deal with %s", 'time', 3, AHEAD, 1),
 ]
 PLACE = [
     ("the smell of %s", 'home', 1, ALWAYS, 1),
