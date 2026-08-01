@@ -621,6 +621,10 @@ const SUBJECTS = {
   arithmetic:3, geography:3, history:3, biology:3,
   "the other language":2, chemistry:2, physics:2, literature:2,
 };
+// What survives school divides in two, and the model kept confusing them.
+// Some of it is a thing you go on doing; the rest is a thing you go on
+// knowing, and knowing long division is not an afternoon's activity.
+const CAN_STILL_DO = new Set(["how to look busy", "how to sit through things"]);
 const WORTH_KEEPING = ["long division","the other language, badly","how to look busy",
   "the word for window","how to sit through things"];
 
@@ -697,6 +701,13 @@ const YEAR = [
   ["the summer you were %s", "time", 3, BEHIND, 1],
   ["how sure you were at %s", "shame", 4, BEHIND, 0],
   ["being %s again, for an hour", "time", 5, BEHIND, 1],
+];
+
+// what school left you that is not a pastime: you know it, and it sits there
+const KNOWN = [
+  ["whether you could still do %s", "time", 3, NOW, 0],
+  ["%s, which has never once come up", "shame", 4, BEHIND, 0],
+  ["teaching someone %s", "love", 4, AHEAD, 1],
 ];
 
 const M_NAMES = ["Marko","Vera","Ivan","Nada","Josip","Ljubica","Zoran","Ana",
@@ -866,7 +877,8 @@ class Life {
   }
 
   subjectsAt(age) {
-    const all = this.people.concat(this.things, this.places, this.aches, this.years);
+    const all = this.people.concat(this.things, this.places, this.aches, this.years,
+                                   this.learned || []);
     return all.filter((w) => w.since <= age &&
       (w.kind !== "person" || w.gone === null || w.gone <= age));
   }
@@ -890,6 +902,7 @@ class Life {
     for (const who of this.places) take(who, PLACE);
     for (const who of this.aches) if (who.since <= age) take(who, ACHE);
     for (const who of this.years) if (who.since <= age) take(who, YEAR);
+    for (const who of this.learned || []) take(who, KNOWN);
     return out;
   }
 
@@ -1075,6 +1088,10 @@ class Life {
     }
     this.average = taken ? grades / taken : 0;
     for (const skill of WORTH_KEEPING) if (this.rint(3) > 0) this.skills.push(skill);
+    // what school left you that you only know, rather than do
+    this.learned = this.skills.filter((s) => !CAN_STILL_DO.has(s)).map((w, i) =>
+      ({ key: "k" + i, word: w, kind: "known", since: 18, gone: null,
+         estranged: false, at: "in" }));
   }
 
   unfoldHistory() {
@@ -1200,7 +1217,7 @@ class Life {
 
   restock() {
     let choices = CAN_DO[this.stage].slice();
-    for (const s of this.skillsKept) choices.push([s, 45]);
+    for (const s of this.skillsKept) if (CAN_STILL_DO.has(s)) choices.push([s, 45]);
     for (const c of this.circumstances) if (c.does) choices = choices.concat(c.does);
     choices = choices.concat(SEASON[SEASONS[this.month]]);
     if (this.money < 0.35) {

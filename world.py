@@ -1159,7 +1159,8 @@ def birthday(age):
 
 def restock():
     choices = list(CAN_DO[state.stage])
-    choices += [(s, 45) for s in state.skills_kept]
+    choices += [(s, 45) for s in state.skills_kept
+                if s in education.CAN_STILL_DO]
     for circumstance in state.circumstances:
         choices += circumstance['does']
     choices += SEASON[SEASONS[clock.month]]
@@ -1272,6 +1273,7 @@ def build_schedule():
     return plan
 
 
+memory.taught(education.known)
 schedule = build_schedule()
 
 
@@ -1303,10 +1305,10 @@ def epilogue():
                    % ('{:,}'.format(chronicle.total_thoughts), len(chronicle.thoughts)))
     if chronicle.waking:
         pointing = sum(chronicle.points.values()) or 1
-        closing.append('  what you were living on   %10.0f%%   of the health you started '
-                   'with, %.0f%% of what there is to have'
-                   % (100 * state.health, 100 * state.money))
-    closing.append('  mind somewhere else      %10.0f%%   (measured 46.9%%: '
+        closing.append('  what you were living on   %10.0f%%   of the health you '
+                       'started with, %.0f%% of what there is to have'
+                       % (100 * state.health, 100 * state.money))
+        closing.append('  mind somewhere else      %10.0f%%   (measured 46.9%%: '
                        'Killingsworth & Gilbert, Science 2010)'
                        % (100.0 * chronicle.wandering / chronicle.waking))
         closing.append('      of it, %.0f%% pointed ahead and %.0f%% behind; '

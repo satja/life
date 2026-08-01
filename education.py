@@ -12,17 +12,25 @@ SUBJECTS = {
     'literature': ["what the poet meant", "the year he died"],
 }
 
-WORTH_KEEPING = [
-    "long division",
-    "the other language, badly",
+# What survives school divides in two, and the model kept confusing them.
+# Some of it is a thing you go on doing; the rest is a thing you go on
+# knowing, and knowing long division is not an afternoon's activity.
+CAN_STILL_DO = [
     "how to look busy",
-    "the word for window",
     "how to sit through things",
 ]
+STILL_KNOWN = [
+    "long division",
+    "the other language, badly",
+    "the word for window",
+]
+WORTH_KEEPING = CAN_STILL_DO + STILL_KNOWN
 
 memory = {}
 questions = []
 skills = []
+habits = []
+known = []
 curious_about = random.sample(sorted(SUBJECTS), 2)
 grades = []
 not_understood = []
@@ -91,6 +99,7 @@ def graduate():
     for skill in WORTH_KEEPING:
         if random.randrange(3) > 0:
             skills.append(skill)
+            (habits if skill in CAN_STILL_DO else known).append(skill)
     return "a certificate stating that you can be taught"
 
 for year in range(12):

@@ -234,6 +234,18 @@ Q: "main.py" never sets "dead" to True.
 
 A: It never has to.
 
+Q: What is long division doing in there?
+
+A: It comes out of "education.py", where it is one of the three things
+arithmetic consists of, and one of the five things that survive school at
+all. It used to go into the pool of things you can do, so a life would spend
+forty-five minutes of a Tuesday afternoon on long division, which is not
+what happens to long division. What school leaves you now divides in two:
+things you go on doing, which are how to look busy and how to sit through
+things, and things you go on only knowing, which sit there and are thought
+about instead — whether you could still do it, that it has never once come
+up, teaching it to someone.
+
 Q: "understand()" raises NotImplementedError for most subjects.
 
 A: Only for the ones you were assigned.

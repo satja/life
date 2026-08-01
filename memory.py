@@ -116,6 +116,13 @@ YEAR = [
     ("being %s again, for an hour", 'time', 5, BEHIND, 1),
 ]
 
+# what school left you that is not a pastime: you know it, and it sits there
+KNOWN = [
+    ("whether you could still do %s", 'time', 3, NOW, 0),
+    ("%s, which has never once come up", 'shame', 4, BEHIND, 0),
+    ("teaching someone %s", 'love', 4, AHEAD, 1),
+]
+
 NAMES = ["Marko", "Vera", "Ivan", "Nada", "Josip", "Ljubica", "Zoran", "Ana",
          "Damir", "Snježana", "Tomislav", "Mira", "Branko", "Dubravka"]
 THINGS = ["the tap", "the boxes in the hall", "the documents", "the car",
@@ -152,6 +159,16 @@ siblings = [About('sib%d' % i, name, 'person')
             for i, name in enumerate(spare[:random.randrange(0, 3)])]
 del spare[:len(siblings)]
 people += siblings
+
+
+learned = []
+
+
+def taught(what):
+    """Whatever school left you that you only know, rather than do."""
+    del learned[:]
+    learned.extend(About('k%d' % i, w, 'known', 18)
+                   for i, w in enumerate(what))
 
 
 def enters(key, word, kind='person', since=0):
@@ -202,7 +219,7 @@ def estrange_named(word):
 
 def subjects(age):
     """What could be on your mind for the next few years."""
-    return [w for w in people + things + places + aches + years
+    return [w for w in people + things + places + aches + years + learned
             if w.since <= age and (w.kind != 'person' or w.gone is None
                                    or w.gone <= age)]
 
@@ -236,4 +253,6 @@ def compose(age, stage):
     for who in years:
         if who.since <= age:
             take(who, YEAR)
+    for who in learned:
+        take(who, KNOWN)
     return out
