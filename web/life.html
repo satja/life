@@ -395,16 +395,21 @@ const WEEKEND = [["having a lie-in", 55, "morning"], ["the long walk", 120, "day
 const AILMENTS = [
   ["something is found", 3, 0.055,
    [["going to the hospital", 180, "morning"], ["waiting for the result", 60, "day"],
-    ["taking the pills", 45, "morning"]]],
+    ["taking the pills", 45, "morning"]],
+   "the result comes back, and it is nothing"],
   ["the operation", 1, 0.050,
    [["lying still", 240, "any"], ["being visited", 90, "afternoon"],
-    ["learning to walk about again", 60, "day"]]],
+    ["learning to walk about again", 60, "day"]],
+   "back on your feet, more or less"],
   ["the bad winter", 2, 0.018,
-   [["staying in", 200, "day"], ["coughing", 30, "any"]]],
+   [["staying in", 200, "day"], ["coughing", 30, "any"]],
+   "the cough finally goes"],
   ["the back goes", 4, 0.0,
-   [["lying on the floor", 90, "any"], ["not lifting anything", 40, "day"]]],
+   [["lying on the floor", 90, "any"], ["not lifting anything", 40, "day"]],
+   "the back is no worse, which is what there is"],
   ["the nerves", 5, 0.0,
-   [["not answering the phone", 40, "day"], ["sitting very still", 120, "evening"]]],
+   [["not answering the phone", 40, "day"], ["sitting very still", 120, "evening"]],
+   "it lifts, without anybody saying why"],
 ];
 const COSTS = { money: -0.22, war: -0.16, plague: -0.06, nature: -0.12,
                 politics: -0.04, progress: 0.06 };
@@ -418,6 +423,28 @@ const HARD_WORK = new Set(["carrying something heavy", "carrying things upstairs
   "the long walk", "riding a bike", "running", "going to the water"]);
 const TRADES = ["at the works", "in the office", "on the buses", "in the shop",
   "at the school", "on the site", "in the kitchens", "on the road"];
+// two of them want the certificate to have meant something. Twelve years of
+// study and it had no consequence at all, which was the joke going too far.
+const SCHOOLED = new Set(["in the office", "at the school"]);
+
+// a life with somebody in it is not one event and then silence
+const SPELLS = [
+  ["a bad year, with %s", 2,
+   [["sleeping in the other room", 400, "evening"], ["not saying it", 40, "evening"],
+    ["having the same argument", 45, "evening"]],
+   "it comes right, or stops being said"],
+  ["%s is ill", 2,
+   [["the hospital run", 90, "morning"], ["looking after someone", 130, "day"],
+    ["waiting for the result", 60, "day"]],
+   "the worst of it is over"],
+  ["a week away, with %s", 1,
+   [["being at the sea", 320, "day"], ["eating outside", 95, "evening"],
+    ["doing nothing, on purpose", 190, "day"]],
+   "back, and the post on the mat"],
+  ["a long time, with %s", 1,
+   [["looking at photographs", 45, "evening"],
+    ["telling the story again", 35, "evening"]], null],
+];
 
 // when a life of this age goes to bed, and when it gets up
 const BEDTIME = { infant: 1140, child: 1230, teenager: 1410, young: 1380,
@@ -1125,7 +1152,7 @@ class Life {
     add(18, "leaves school with a certificate stating that you can be taught");
     add(18, "average mark: " + this.average.toFixed(1));
     add(this.rrange(15, 20), "falls in love, silently", "loved");
-    add(this.rrange(19, 26), "first job", "work");
+    add(this.rrange(19, 26) + (this.average >= 2.45 ? 2 : 0), "first job", "work");
     add(this.rrange(20, 29), "moves out for good");
     // somebody to live with, which the model had no room for at all
     const met = this.rrange(19, 34), them = this.someone();
@@ -1138,6 +1165,19 @@ class Life {
       add(born + 6, name + " starts school", ["school-age", name, born]);
       add(born + this.rrange(18, 27), name + " leaves home", ["leaves", name]);
     }
+    // what happens between moving in and whatever happens in the end, which
+    // used to be nothing at all for forty years
+    const when = [];
+    for (let k = 0, n = this.rrange(1, 4); k < n; k++) {
+      const at = this.rrange(moved + 3, moved + 30);
+      if (!when.includes(at)) when.push(at);
+    }
+    when.sort((a, b) => a - b);
+    when.forEach((at, i) => {
+      const spell = SPELLS[i % SPELLS.length];
+      add(at, spell[0].replace("%s", them), ["spell", i % SPELLS.length, them]);
+    });
+
     const ending = this.rint(5);
     if (ending === 0) {
       add(moved + this.rrange(6, 31), "it ends, with " + them, ["parted", them]);
@@ -1281,11 +1321,12 @@ class Life {
       // a works closing is not the end of working; it used to be, because
       // nothing ever gave the job back
       if (this.job === null && this.rnd() < 0.55) {
-        this.job = this.pick(TRADES); this.yearsInJob = 0;
+        this.job = this.pick(this.tradesOpen()); this.yearsInJob = 0;
         this.note("finds work " + this.job, "milestone");
       } else if (this.job && this.rnd() < 0.035) {
         const was = this.job;
-        this.job = this.pick(TRADES.filter((t) => t !== was));
+        const open = this.tradesOpen().filter((t) => t !== was);
+        this.job = open.length ? this.pick(open) : was;
         this.yearsInJob = 0;
         this.note("leaves " + was + " for " + this.job, "milestone");
       }
@@ -1308,10 +1349,11 @@ class Life {
 
     if (age >= 20 && this.rnd() < (0.006 + Math.max(0, age - 35) * 0.0018) *
                                   (2 - this.health)) {
-      const [text, years, risk, does] = this.pick(AILMENTS);
+      const [text, years, risk, does, clears] = this.pick(AILMENTS);
       if (!this.circumstances.some((c) => c.text === text)) {
         this.circumstances.push({ text, until: age + years, kind: "ailment",
-          risk: risk * (2 - this.health), does, thinks: [], costs: -0.05 });
+          risk: risk * (2 - this.health), does, thinks: [], costs: -0.05,
+          clears });
         this.note(text, "loss");
         this.remember(text, "body");
       }
@@ -1406,6 +1448,10 @@ class Life {
                ["helping with the homework", 45, "afternoon"],
                ["being shouted at by someone small", 20, "evening"],
                ["worrying about someone else", 45, "evening"]] });
+    } else if (kind === "spell") {
+      const [text, years, does, clears] = SPELLS[what[1]];
+      this.circumstances.push({ text: text.replace("%s", what[2]),
+        until: age + years, risk: 0, kind: "spell", does, thinks: [], clears });
     } else if (kind === "leaves") {
       this.dropCircumstance("child");
       this.circumstances.push({ text: "the room at the back, empty",
@@ -1434,7 +1480,7 @@ class Life {
       this.entersMemory("school2", this.someone(), age);
     } else if (key === "work") {
       this.hadJob = true;
-      this.job = this.pick(TRADES);
+      this.job = this.pick(this.tradesOpen());
       this.note("starts " + this.job, "milestone");
       this.entersMemory("work1", this.someone(), age);
     } else if (key === "retires") {
@@ -1465,7 +1511,16 @@ class Life {
     this.canDo = [];
   }
 
+  tradesOpen() {
+    return this.average >= 2.45 ? TRADES : TRADES.filter((t) => !SCHOOLED.has(t));
+  }
+
   birthday(age) {
+    // a thing that was wrong with you and is no longer wrong with you is
+    // worth saying; it used to expire in silence
+    for (const c of this.circumstances) {
+      if (c.until <= age && c.clears) this.note(c.clears, "kept");
+    }
     this.circumstances = this.circumstances.filter((c) => c.until > age);
     for (const [start, event] of this.timeline) if (start === age) this.takePlace(event);
     this.keepTheBooks(age);

@@ -121,16 +121,21 @@ WHEN = {
 AILMENTS = [
     ("something is found", 3, 0.055,
      [("going to the hospital", 180, 'morning'), ("waiting for the result", 60, 'day'),
-      ("taking the pills", 45, 'morning')]),
+      ("taking the pills", 45, 'morning')],
+     "the result comes back, and it is nothing"),
     ("the operation", 1, 0.050,
      [("lying still", 240, 'any'), ("being visited", 90, 'afternoon'),
-      ("learning to walk about again", 60, 'day')]),
+      ("learning to walk about again", 60, 'day')],
+     "back on your feet, more or less"),
     ("the bad winter", 2, 0.018,
-     [("staying in", 200, 'day'), ("coughing", 30, 'any')]),
+     [("staying in", 200, 'day'), ("coughing", 30, 'any')],
+     "the cough finally goes"),
     ("the back goes", 4, 0.0,
-     [("lying on the floor", 90, 'any'), ("not lifting anything", 40, 'day')]),
+     [("lying on the floor", 90, 'any'), ("not lifting anything", 40, 'day')],
+     "the back is no worse, which is what there is"),
     ("the nerves", 5, 0.0,
-     [("not answering the phone", 40, 'day'), ("sitting very still", 120, 'evening')]),
+     [("not answering the phone", 40, 'day'), ("sitting very still", 120, 'evening')],
+     "it lifts, without anybody saying why"),
 ]
 # what an age outside does to what is in the bank
 COSTS = {'money': -0.22, 'war': -0.16, 'plague': -0.06, 'nature': -0.12,
@@ -147,6 +152,35 @@ HARD_WORK = {"carrying something heavy", "carrying things upstairs",
 
 TRADES = ["at the works", "in the office", "on the buses", "in the shop",
           "at the school", "on the site", "in the kitchens", "on the road"]
+# two of them want the certificate to have meant something. Twelve years of
+# study and it had no consequence at all, which was the joke going too far.
+SCHOOLED = {"in the office", "at the school"}
+
+
+def trades_open():
+    if education.average >= 2.45:
+        return TRADES
+    return [t for t in TRADES if t not in SCHOOLED]
+
+
+# a life with somebody in it is not one event and then silence
+SPELLS = [
+    ('a bad year, with %s', 2,
+     [("sleeping in the other room", 400, 'evening'), ("not saying it", 40, 'evening'),
+      ("having the same argument", 45, 'evening')],
+     "it comes right, or stops being said"),
+    ('%s is ill', 2,
+     [("the hospital run", 90, 'morning'), ("looking after someone", 130, 'day'),
+      ("waiting for the result", 60, 'day')],
+     "the worst of it is over"),
+    ('a week away, with %s', 1,
+     [("being at the sea", 320, 'day'), ("eating outside", 95, 'evening'),
+      ("doing nothing, on purpose", 190, 'day')],
+     "back, and the post on the mat"),
+    ('a long time, with %s', 1,
+     [("looking at photographs", 45, 'evening'), ("telling the story again", 35, 'evening')],
+     None),
+]
 
 
 # what a Saturday is for, which is not what a Tuesday is for
@@ -997,7 +1031,7 @@ def take_effect(key):
         memory.enters('school2', memory.someone(age), 'person', age)
     elif key == 'work':
         state.had_job = True
-        state.job = random.choice(TRADES)
+        state.job = random.choice(trades_open())
         once(age, 'starts %s' % state.job)
         memory.enters('work1', memory.someone(age), 'person', age)
     elif key == 'loved':
@@ -1067,6 +1101,12 @@ def take_household(what, age):
                       ("being shouted at by someone small", 20),
                       ("worrying about someone else", 45)],
              'thinks': []})
+    elif kind == 'spell':
+        text, years, does, clears = SPELLS[what[1]]
+        state.circumstances.append(
+            {'text': text % what[2], 'until': age + years, 'risk': 0.0,
+             'kind': 'spell', 'does': does, 'thinks': [],
+             'clears': clears})
     elif kind == 'leaves':
         drop_circumstance('child')
         state.circumstances.append(
@@ -1106,12 +1146,12 @@ def keep_the_books(age):
         # a works closing is not the end of working; it used to be, because
         # nothing ever gave the job back
         if state.job is None and random.random() < 0.55:
-            state.job = random.choice(TRADES)
+            state.job = random.choice(trades_open())
             state.years_in_job = 0
             once(age, 'finds work %s' % state.job)
         elif state.job and random.random() < 0.035:
             was, state.job = state.job, random.choice(
-                [t for t in TRADES if t != state.job])
+                [t for t in trades_open() if t != state.job] or [state.job])
             state.years_in_job = 0
             once(age, 'leaves %s for %s' % (was, state.job))
 
@@ -1134,12 +1174,12 @@ def keep_the_books(age):
     state.money = min(1.0, max(0.02, state.money))
 
     if age >= 20 and random.random() < ailment_chance(age):
-        text, years, risk, does = random.choice(AILMENTS)
+        text, years, risk, does, clears = random.choice(AILMENTS)
         if not any(c['text'] == text for c in state.circumstances):
             state.circumstances.append(
                 {'text': text, 'until': age + years, 'kind': 'ailment',
                  'risk': risk * (2.0 - state.health), 'does': does,
-                 'thinks': [], 'costs': -0.05})
+                 'thinks': [], 'costs': -0.05, 'clears': clears})
             once(age, text)
             remember(text, 'body')
 
@@ -1150,6 +1190,11 @@ def ailment_chance(age):
 
 
 def birthday(age):
+    # a thing that was wrong with you and is no longer wrong with you is
+    # worth saying; it used to expire in silence
+    for circumstance in state.circumstances:
+        if circumstance['until'] <= age and circumstance.get('clears'):
+            once(age, circumstance['clears'])
     state.circumstances = [c for c in state.circumstances if c['until'] > age]
     for event in history.starting(age):
         take_place(event)
@@ -1279,7 +1324,8 @@ def build_schedule():
     add(18, 'leaves school with ' + education.diploma)
     add(18, 'average mark: %.1f' % education.average)
     add(random.randrange(15, 20), 'falls in love, silently', 'loved')
-    add(random.randrange(19, 26), 'first job', 'work')
+    add(random.randrange(19, 26) + (2 if education.average >= 2.45 else 0),
+        'first job', 'work')
     add(random.randrange(20, 29), 'moves out for good')
     # somebody to live with, which the model had no room for at all
     met = random.randrange(19, 34)
@@ -1294,6 +1340,14 @@ def build_schedule():
         add(born + 6, '%s starts school' % name, ('school-age', name, born))
         add(born + random.randrange(18, 27), '%s leaves home' % name,
             ('leaves', name))
+    # what happens between moving in and whatever happens in the end, which
+    # used to be nothing at all for forty years
+    last = moved + 35
+    spells = sorted(random.sample(range(moved + 3, moved + 30),
+                                  random.randrange(1, 4)))
+    for i, when in enumerate(spells):
+        add(when, SPELLS[i % len(SPELLS)][0] % them, ('spell', i % len(SPELLS), them))
+
     ending = random.randrange(5)
     if ending == 0:
         add(moved + random.randrange(6, 31), 'it ends, with %s' % them,
@@ -1358,6 +1412,10 @@ def epilogue():
                           100.0 * chronicle.points['behind'] / pointing,
                           100.0 * chronicle.tone[1] / pointing,
                           100.0 * chronicle.tone[-1] / pointing))
+    closing.append('  the certificate was     %11.1f   %s'
+                   % (education.average,
+                      'enough for the office' if education.average >= 2.45
+                      else 'not enough for the office'))
     closing.append('  alarms obeyed            %11s' % '{:,}'.format(state.alarms))
     closing.append('  things you got round to  %11d' % state.got_round_to)
     closing.append('  nights still awake at three %8s'

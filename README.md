@@ -146,6 +146,24 @@ circumstance like a war: it puts its own things in the pool and takes them
 out again. The room at the back is empty for four years after the last one
 goes.
 
+And things go on happening between moving in and whatever happens in the
+end, which used to be nothing at all for forty years. There are one to three
+spells: a bad year, an illness, a week away, a long time. Each brings its own
+things — sleeping in the other room, the hospital run, being at the sea — and
+each says so when it is over:
+
+    44  a bad year, with Mira
+    45  more sleeping in the other room
+    46  it comes right, or stops being said
+
+An ailment says so too. They used to expire in silence, so a thing that had
+been wrong with you stopped being wrong with you and nobody mentioned it.
+
+Twelve years of school used to have no consequence whatever. Two of the eight
+trades want the certificate to have meant something, and the average mark
+decides whether they are open — about one life in six clears the line, and
+the account says which it was.
+
 A job has a name and can change. It used to be one item in a pool of
 fifteen, so a life with a trade worked two days in five and thirty years
 running were all called "working"; and once the works closed nothing ever

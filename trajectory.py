@@ -110,12 +110,23 @@ class Chronicle:
             outside.setdefault(age, []).extend(texts)
         peak = max(year['n'] for year in years.values()) or 1
         preoccupation = None
+        # a year that would say exactly what last year said says what is new
+        # in it instead, because two identical rows say less than one
+        said, before = None, Counter()
         for age in sorted(years):
             year = years[age]
             filled = round(BAR * year['n'] / peak)
             bar = '█' * filled + '·' * (BAR - filled)
-            out.append('  %3d  %s  %s'
-                       % (age, bar, fit(year['done'].most_common(3), room)))
+            plain = fit(year['done'].most_common(3), room)
+            says = plain
+            if says == said:
+                fresh = [(name, n) for name, n in year['done'].most_common(14)
+                         if n > 3 * before[name]]
+                says = (fit(fresh[:3], room)
+                        or fit(year['done'].most_common(7)[3:], room)
+                        or plain)
+            said, before = says, year['done']
+            out.append('  %3d  %s  %s' % (age, bar, says))
             for text in outside.get(age, []):
                 out += under('~', text, room, 21)
             for text in happened.get(age, []):
