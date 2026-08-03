@@ -25,6 +25,8 @@ const state = {
   lang: (navigator.language || "en").startsWith("hr") ? "hr" : "en",
   seed: Math.floor(Math.random() * 1e6),
   set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
+  showSetup: true,           // the conditions are only in the way afterwards
+  path: null,                // the way down to one minute, while it opens
   open: new Set(),           // which rows are unfolded
   more: new Set(),           // which "… n more" rows have been asked for
   nodes: new Map(),          // what is on screen, so a click can be answered
@@ -390,16 +392,11 @@ function account() {
            { when: pc(life.health), what: t("healthLeft"), cls: "quiet", leaf: true }),
       node("acct/carried/m", "leafrow",
            { when: pc(life.money), what: t("moneyLeft"), cls: "quiet", leaf: true }),
-      node("acct/carried/y", "leafrow",
-           { when: String(life.yearsInJob), what: t("yearsInJob"), cls: "quiet",
-             leaf: true }),
     ],
   }));
 
   out.push(plain(fmt(life.mornings), t("mornings")));
-  out.push(plain(fmt(life.totalDone), t("thingsDone")));
-  out.push(plain(fmt(life.totalThoughts), t("thoughts") + ", " +
-                 fmt(life.thoughtCount.size) + " " + t("different")));
+  out.push(plain(fmt(life.thoughtCount.size), t("different")));
   out.push(node("acct/mind", "held", {
     when: pc(life.wandering / life.waking), what: t("elsewhere"),
     cls: "ev", tail: t("measuredAt"), leaf: false,
@@ -410,7 +407,12 @@ function account() {
     what: t("whoAbout"), cls: "ev world", leaf: false, kids: castRows(),
   }));
 
-  out.push(plain(fmt(life.neverTotal), t("knewBetter")));
+  let worst = "", wn = 0;
+  for (const [k, v] of life.doneCount) {
+    if (v > wn && REGRET[k]) { wn = v; worst = k; }
+  }
+  out.push(plain(fmt(life.neverTotal), t("knewBetter") +
+                 (worst ? " — " + t("mostlyThat") + " " + worst : "")));
   out.push(plain(fmt(life.gotRoundTo), t("gotRoundTo"), "ev kept"));
   out.push(plain(fmt(life.insomniaNights), t("nightsAwake")));
   out.push(plain(fmt(life.questions), t("questions")));
@@ -449,10 +451,7 @@ function mindRows() {
     { when: pc(count / total), what: label, cls: cls, leaf: true }));
   say("ahead", life.points.get("ahead") || 0, t("ptAhead"), "ev kept");
   say("behind", life.points.get("behind") || 0, t("ptBehind"), "ev loss");
-  say("now", life.points.get("now") || 0, t("ptNow"), "quiet");
-  say("always", life.points.get("always") || 0, t("ptAlways"), "quiet");
   say("good", life.tone.get(1) || 0, t("tonePlus"), "ev kept");
-  say("flat", life.tone.get(0) || 0, t("toneZero"), "quiet");
   say("bad", life.tone.get(-1) || 0, t("toneMinus"), "ev loss");
   return out;
 }
@@ -497,7 +496,8 @@ function shown(n) {
 
 function row(n, depth, open) {
   const cls = "node d" + depth + " " + (n.cls || "") +
-              (open ? " open" : "") + (n.leaf ? " leaf" : "");
+              (open ? " open" : "") + (n.leaf ? " leaf" : "") +
+              (state.path && state.path.indexOf(n.id) >= 0 ? " here" : "");
   return '<button class="' + cls + '" style="--d:' + depth + '" data-id="' +
     esc(n.id) + '" type="button">' +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
@@ -522,13 +522,79 @@ function draw() {
   $("#tree").innerHTML = out.join("");
 }
 
+function drawAll() { draw(); drawBar(); }
+
 function clicked(id) {
   const n = state.nodes.get(id);
   if (!n) return;
-  if (n.kind === "more") { state.more.add(n.of); draw(); return; }
+  if (n.kind === "more") { state.more.add(n.of); drawAll(); return; }
   if (n.leaf) return;
   if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
-  draw();
+  state.path = null;
+  drawAll();
+}
+
+// ------------------------------------------------------------------ the life bar
+
+// The page's premise is that everything is a row and any row can be opened.
+// This row is the life: one tick a year, and what it was is its colour.
+function drawBar() {
+  const bar = $("#bar");
+  if (!state.years) { bar.hidden = true; return; }
+  bar.hidden = false;
+  bar.innerHTML = state.years.map(function (y) {
+    const kind = y.events.length ? (CLS[y.events[0].kind] || "ev") : "";
+    const cls = kind.replace("ev ", "") || (y.events.length ? "ev" : "");
+    const said = y.events.length ? y.events.map((e) => e.text).join(" · ")
+                                 : mostly(y.mins);
+    return '<button type="button" data-age="' + y.age + '" class="' +
+      (kind ? cls + (kind.indexOf("ev") === 0 ? " ev" : "") : "") +
+      '" title="' + esc(y.age + " — " + said) + '"></button>';
+  }).join("");
+  for (const b of bar.querySelectorAll("button")) {
+    if (state.open.has("life/y" + b.dataset.age)) b.classList.add("open");
+  }
+}
+
+// ------------------------------------------------------------------ a moment
+
+// A life here is about twenty-six million minutes that were actually lived.
+// This opens the way down to one of them, a level at a time, because the
+// point of the thing is that any one of them is reachable.
+function aMoment() {
+  const life = state.life;
+  if (!life || !life.days.length) return;
+  let rec = null, tries = 0;
+  while (tries++ < 60) {
+    const pick = life.days[Math.floor(Math.random() * life.days.length)];
+    if (pick.acts.length) { rec = pick; break; }
+  }
+  if (!rec) return;
+  const acts = rec.acts.length / 5;
+  const which = Math.floor(Math.random() * acts) * 5;
+  const y = state.years[rec.age];
+  if (!y) return;
+  const path = ["life", "life/y" + rec.age, "life/y" + rec.age + "/m" + rec.month,
+                "life/y" + rec.age + "/m" + rec.month + "/d" + rec.dayOfLife];
+  path.push(path[3] + "/a" + which);
+  const from = which ? rec.acts[which - 1] : 0, to = rec.acts[which + 4];
+  if (to > from) {
+    path.push(path[4] + "/t" + (from + Math.floor(Math.random() * (to - from))));
+  }
+  // the day may be one of the ones a month is not showing
+  state.more.add(path[2]);
+  state.open = new Set();
+  state.path = path;
+  let step = 0;
+  (function down() {
+    if (step >= path.length) { state.path = path; draw(); drawBar(); return; }
+    state.open.add(path[step]);
+    step++;
+    draw(); drawBar();
+    const last = $('.node[data-id="' + path[step - 1] + '"]');
+    if (last) last.scrollIntoView({ block: "center", behavior: "smooth" });
+    setTimeout(down, 240);
+  })();
 }
 
 // ------------------------------------------------------------------ the knobs
@@ -590,7 +656,15 @@ function buildKnobs() {
 
 // a life is a second or so of work now; say so, and let the browser paint
 // before it starts, or the click looks like it did nothing
+// "run another" does not run another; it puts the conditions back, because
+// changing them is the only reason to want them
 function run() {
+  if (state.life && !state.showSetup) {
+    state.showSetup = true;
+    chrome();
+    $("#knobs").scrollIntoView({ block: "nearest", behavior: "smooth" });
+    return;
+  }
   $("#run").textContent = t("running");
   $("#run").disabled = true;
   setTimeout(live, 20);
@@ -611,9 +685,11 @@ function live() {
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
   state.more = new Set();
+  state.path = null;
+  state.showSetup = false;
   $("#run").disabled = false;
   chrome();
-  draw();
+  drawAll();
 }
 
 function chrome() {
@@ -621,7 +697,11 @@ function chrome() {
   $("#lang").textContent = t("lang");
   $("#blurb").textContent = t("blurb");
   $("#hint").textContent = t("hint");
-  $("#run").textContent = state.life ? t("again") : t("run");
+  $("#knobs").hidden = !state.showSetup;
+  $("#moment").hidden = !state.life;
+  $("#moment").textContent = t("moment");
+  $("#run").textContent = !state.life ? t("run")
+                        : state.showSetup ? t("run") : t("again");
   $("#seedout").textContent = state.life ? t("seed") + " " + state.seed : "";
 }
 
@@ -634,9 +714,21 @@ function init() {
     if (b) clicked(b.dataset.id);
   });
   $("#run").addEventListener("click", run);
+  $("#moment").addEventListener("click", aMoment);
+  $("#bar").addEventListener("click", function (e) {
+    const b = e.target.closest ? e.target.closest("button") : null;
+    if (!b) return;
+    const id = "life/y" + b.dataset.age;
+    state.path = null;
+    state.open.add("life");
+    if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
+    drawAll();
+    const row = $('.node[data-id="' + id + '"]');
+    if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
   $("#lang").addEventListener("click", function () {
     state.lang = state.lang === "hr" ? "en" : "hr";
-    chrome(); buildKnobs(); draw();
+    chrome(); buildKnobs(); drawAll();
   });
 }
 

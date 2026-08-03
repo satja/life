@@ -79,6 +79,21 @@ button.ghost { font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
 button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* ---- the whole life, as one row of years ----
+   The page's premise is that everything is a row. This row is the life. */
+.bar { display: flex; gap: 1px; margin: 0 0 18px; height: 34px; align-items: stretch; }
+.bar button {
+  flex: 1 1 0; min-width: 0; border: 0; padding: 0; cursor: pointer;
+  background: var(--hair); position: relative;
+}
+.bar button:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
+.bar button.ev    { background: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
+.bar button.world { background: var(--warm); }
+.bar button.loss  { background: var(--loss); }
+.bar button.kept  { background: var(--accent); }
+.bar button.dead  { background: var(--ink); }
+.bar button.open  { outline: 1px solid var(--accent); outline-offset: -1px; }
+
 /* ---- one row, at every scale ----
    Every row is indented by its depth, and behind it runs one hairline rail
    per level above it, so where a thing sits is legible without counting. */
@@ -123,6 +138,11 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .node.d0, .node.d1 { border-bottom: 1px solid var(--hair); }
 .node.d0 { border-bottom-color: var(--faint); }
 
+/* the way down to one minute of it, while the way is being opened */
+.node.here { background-color: color-mix(in srgb, var(--accent) 14%, transparent); }
+.node.here > .what { color: var(--ink); }
+.node.here.thought > .what { color: var(--accent); font-style: italic; }
+
 /* each level is a little quieter than the one it hangs from */
 .node.d2 { font-size: 13px; }
 .node.d3 { font-size: 12.6px; }
@@ -162,12 +182,14 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 
   <p class="blurb" id="blurb"></p>
 
-  <div class="knobs" id="knobs"></div>
+  <div class="knobs" id="knobs" hidden></div>
 
   <div class="controls">
     <button class="go" id="run" type="button"></button>
+    <button class="ghost" id="moment" type="button" hidden></button>
   </div>
 
+  <div class="bar" id="bar" hidden></div>
   <div class="tree" id="tree"></div>
 
   <p class="foot" id="hint"></p>
@@ -180,20 +202,22 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a tree. Set the conditions, run one, and you see only what " +
-      "happened in it; open a year and you get its months, a month and you get its " +
-      "days, a day and you get the things you did, a thing and you get the thoughts " +
-      "you had on the way to it. A year also holds the six numbers the loop was " +
-      "reading while it passed.",
-    run: "run one life", again: "run another", running: "living it…",
+    blurb: "A life is a tree, and everything in it is a row. The bar is the whole " +
+      "of it, a tick to a year. The rows below are the same life opened: a year " +
+      "holds its months, a month its days, a day the things you did, a thing the " +
+      "thoughts you had on the way to it.",
+    run: "run one life", again: "change the conditions", running: "living it…",
+    moment: "a moment of it",
     seed: "seed", roll: "roll",
-    hint: "Every year is there and every year opens, including the ones nothing " +
-      "happened in, which were lived through all the same. Below the year the rule is " +
-      "the same at every depth: the children something happened in are shown, the rest " +
-      "are counted. The six numbers are computed by wind_up() in " +
-      "world.py out of what you were given, what was done to you before you could " +
-      "object, and what happens to be going on — and beside each one is the line of " +
-      "live.py that reads it.",
+    hint: "A moment of it takes one of the twenty million or so minutes that were " +
+      "actually lived and opens the way down to it, a level at a time, ending on " +
+      "whatever was being thought. Every year is there and every year opens, " +
+      "including the ones nothing happened in, which were lived through all the " +
+      "same; below the year the children something happened in are shown and the " +
+      "rest are counted. A year also holds the six numbers the loop was reading " +
+      "while it passed, computed by wind_up() in world.py out of what you were " +
+      "given, what was done to you before you could object, and what happens to be " +
+      "going on — and beside each one is the line of live.py that reads it.",
 
     century: "the century",
     centuryWhy: "How much happens that is not about you. Governments, borders, money, " +
@@ -235,7 +259,8 @@ const UI = {
     inOrder: "the bases, in that order",
     died: "died at", inTheYearOf: "in the year of",
     mornings: "mornings", thingsDone: "things done", thoughts: "thoughts",
-    different: "of them different", knewBetter: "things it knew better than to do",
+    different: "different things to think", mostlyThat: "mostly",
+    knewBetter: "things it knew better than to do",
     gotRoundTo: "things it got round to", nightsAwake: "nights still awake at three",
     questions: "questions left open at school",
     meaningTo: "still meaning to", nothingLeft: "nothing left on the list",
@@ -244,18 +269,20 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stablo. Postavi uvjete, pokreni jedan, i vidiš samo ono što se u " +
-      "njemu dogodilo; otvoriš godinu i dobiješ njezine mjesece, mjesec i dobiješ dane, " +
-      "dan i dobiješ ono što si radio, radnju i dobiješ misli koje su joj prethodile. " +
-      "Godina drži i šest brojeva koje je petlja čitala dok je prolazila.",
-    run: "pokreni jedan život", again: "pokreni još jedan", running: "živi se…",
+    blurb: "Život je stablo, a sve je u njemu redak. Traka je cijeli život, crtica " +
+      "po godini. Redci ispod isti su taj život, otvoren: godina drži svoje mjesece, " +
+      "mjesec dane, dan ono što si radio, radnja misli koje su joj prethodile.",
+    run: "pokreni jedan život", again: "promijeni uvjete", running: "živi se…",
+    moment: "jedan njegov trenutak",
     seed: "sjeme", roll: "baci",
-    hint: "Svaka je godina tu i svaka se otvara, i one u kojima se ništa nije dogodilo, " +
-      "koje su svejedno proživljene. Ispod godine pravilo je na svakoj dubini isto: " +
-      "prikazuje se ono u čemu se nešto dogodilo, ostalo se prebroji. Šest brojeva " +
-      "računa wind_up() u world.py iz onoga što si " +
-      "dobio, onoga što ti je učinjeno prije nego si mogao prigovoriti, i onoga što se " +
-      "u tom trenutku događa — a uz svaki piše redak iz live.py koji ga čita.",
+    hint: "Jedan njegov trenutak uzima jednu od dvadesetak milijuna stvarno " +
+      "proživljenih minuta i otvara put do nje, razinu po razinu, sve do onoga što " +
+      "se u njoj mislilo. Svaka je godina tu i svaka se otvara, i one u kojima se " +
+      "ništa nije dogodilo; ispod godine prikazuje se ono u čemu se nešto dogodilo, " +
+      "ostalo se prebroji. Godina drži i šest brojeva koje je petlja čitala, a " +
+      "računa ih wind_up() u world.py iz onoga što si dobio, onoga što ti je " +
+      "učinjeno prije nego si mogao prigovoriti, i onoga što se u tom trenutku " +
+      "događa — uz svaki piše redak iz live.py koji ga čita.",
 
     century: "stoljeće",
     centuryWhy: "Koliko se toga događa što nije o tebi. Vlade, granice, novac, vrijeme, " +
@@ -296,7 +323,8 @@ const UI = {
     inOrder: "baze, tim redom",
     died: "umro u", inTheYearOf: "u godini u kojoj je bilo:",
     mornings: "jutara", thingsDone: "obavljenih stvari", thoughts: "misli",
-    different: "različitih", knewBetter: "stvari za koje je znao da ih ne treba raditi",
+    different: "različitih stvari za misliti", mostlyThat: "uglavnom",
+    knewBetter: "stvari za koje je znao da ih ne treba raditi",
     gotRoundTo: "stvari kojih se dohvatio", nightsAwake: "noći budan u tri",
     questions: "pitanja ostalih bez odgovora",
     meaningTo: "još uvijek namjerava", nothingLeft: "na popisu nije ostalo ništa",
@@ -1950,6 +1978,8 @@ const state = {
   lang: (navigator.language || "en").startsWith("hr") ? "hr" : "en",
   seed: Math.floor(Math.random() * 1e6),
   set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
+  showSetup: true,           // the conditions are only in the way afterwards
+  path: null,                // the way down to one minute, while it opens
   open: new Set(),           // which rows are unfolded
   more: new Set(),           // which "… n more" rows have been asked for
   nodes: new Map(),          // what is on screen, so a click can be answered
@@ -2315,16 +2345,11 @@ function account() {
            { when: pc(life.health), what: t("healthLeft"), cls: "quiet", leaf: true }),
       node("acct/carried/m", "leafrow",
            { when: pc(life.money), what: t("moneyLeft"), cls: "quiet", leaf: true }),
-      node("acct/carried/y", "leafrow",
-           { when: String(life.yearsInJob), what: t("yearsInJob"), cls: "quiet",
-             leaf: true }),
     ],
   }));
 
   out.push(plain(fmt(life.mornings), t("mornings")));
-  out.push(plain(fmt(life.totalDone), t("thingsDone")));
-  out.push(plain(fmt(life.totalThoughts), t("thoughts") + ", " +
-                 fmt(life.thoughtCount.size) + " " + t("different")));
+  out.push(plain(fmt(life.thoughtCount.size), t("different")));
   out.push(node("acct/mind", "held", {
     when: pc(life.wandering / life.waking), what: t("elsewhere"),
     cls: "ev", tail: t("measuredAt"), leaf: false,
@@ -2335,7 +2360,12 @@ function account() {
     what: t("whoAbout"), cls: "ev world", leaf: false, kids: castRows(),
   }));
 
-  out.push(plain(fmt(life.neverTotal), t("knewBetter")));
+  let worst = "", wn = 0;
+  for (const [k, v] of life.doneCount) {
+    if (v > wn && REGRET[k]) { wn = v; worst = k; }
+  }
+  out.push(plain(fmt(life.neverTotal), t("knewBetter") +
+                 (worst ? " — " + t("mostlyThat") + " " + worst : "")));
   out.push(plain(fmt(life.gotRoundTo), t("gotRoundTo"), "ev kept"));
   out.push(plain(fmt(life.insomniaNights), t("nightsAwake")));
   out.push(plain(fmt(life.questions), t("questions")));
@@ -2374,10 +2404,7 @@ function mindRows() {
     { when: pc(count / total), what: label, cls: cls, leaf: true }));
   say("ahead", life.points.get("ahead") || 0, t("ptAhead"), "ev kept");
   say("behind", life.points.get("behind") || 0, t("ptBehind"), "ev loss");
-  say("now", life.points.get("now") || 0, t("ptNow"), "quiet");
-  say("always", life.points.get("always") || 0, t("ptAlways"), "quiet");
   say("good", life.tone.get(1) || 0, t("tonePlus"), "ev kept");
-  say("flat", life.tone.get(0) || 0, t("toneZero"), "quiet");
   say("bad", life.tone.get(-1) || 0, t("toneMinus"), "ev loss");
   return out;
 }
@@ -2422,7 +2449,8 @@ function shown(n) {
 
 function row(n, depth, open) {
   const cls = "node d" + depth + " " + (n.cls || "") +
-              (open ? " open" : "") + (n.leaf ? " leaf" : "");
+              (open ? " open" : "") + (n.leaf ? " leaf" : "") +
+              (state.path && state.path.indexOf(n.id) >= 0 ? " here" : "");
   return '<button class="' + cls + '" style="--d:' + depth + '" data-id="' +
     esc(n.id) + '" type="button">' +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
@@ -2447,13 +2475,79 @@ function draw() {
   $("#tree").innerHTML = out.join("");
 }
 
+function drawAll() { draw(); drawBar(); }
+
 function clicked(id) {
   const n = state.nodes.get(id);
   if (!n) return;
-  if (n.kind === "more") { state.more.add(n.of); draw(); return; }
+  if (n.kind === "more") { state.more.add(n.of); drawAll(); return; }
   if (n.leaf) return;
   if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
-  draw();
+  state.path = null;
+  drawAll();
+}
+
+// ------------------------------------------------------------------ the life bar
+
+// The page's premise is that everything is a row and any row can be opened.
+// This row is the life: one tick a year, and what it was is its colour.
+function drawBar() {
+  const bar = $("#bar");
+  if (!state.years) { bar.hidden = true; return; }
+  bar.hidden = false;
+  bar.innerHTML = state.years.map(function (y) {
+    const kind = y.events.length ? (CLS[y.events[0].kind] || "ev") : "";
+    const cls = kind.replace("ev ", "") || (y.events.length ? "ev" : "");
+    const said = y.events.length ? y.events.map((e) => e.text).join(" · ")
+                                 : mostly(y.mins);
+    return '<button type="button" data-age="' + y.age + '" class="' +
+      (kind ? cls + (kind.indexOf("ev") === 0 ? " ev" : "") : "") +
+      '" title="' + esc(y.age + " — " + said) + '"></button>';
+  }).join("");
+  for (const b of bar.querySelectorAll("button")) {
+    if (state.open.has("life/y" + b.dataset.age)) b.classList.add("open");
+  }
+}
+
+// ------------------------------------------------------------------ a moment
+
+// A life here is about twenty-six million minutes that were actually lived.
+// This opens the way down to one of them, a level at a time, because the
+// point of the thing is that any one of them is reachable.
+function aMoment() {
+  const life = state.life;
+  if (!life || !life.days.length) return;
+  let rec = null, tries = 0;
+  while (tries++ < 60) {
+    const pick = life.days[Math.floor(Math.random() * life.days.length)];
+    if (pick.acts.length) { rec = pick; break; }
+  }
+  if (!rec) return;
+  const acts = rec.acts.length / 5;
+  const which = Math.floor(Math.random() * acts) * 5;
+  const y = state.years[rec.age];
+  if (!y) return;
+  const path = ["life", "life/y" + rec.age, "life/y" + rec.age + "/m" + rec.month,
+                "life/y" + rec.age + "/m" + rec.month + "/d" + rec.dayOfLife];
+  path.push(path[3] + "/a" + which);
+  const from = which ? rec.acts[which - 1] : 0, to = rec.acts[which + 4];
+  if (to > from) {
+    path.push(path[4] + "/t" + (from + Math.floor(Math.random() * (to - from))));
+  }
+  // the day may be one of the ones a month is not showing
+  state.more.add(path[2]);
+  state.open = new Set();
+  state.path = path;
+  let step = 0;
+  (function down() {
+    if (step >= path.length) { state.path = path; draw(); drawBar(); return; }
+    state.open.add(path[step]);
+    step++;
+    draw(); drawBar();
+    const last = $('.node[data-id="' + path[step - 1] + '"]');
+    if (last) last.scrollIntoView({ block: "center", behavior: "smooth" });
+    setTimeout(down, 240);
+  })();
 }
 
 // ------------------------------------------------------------------ the knobs
@@ -2515,7 +2609,15 @@ function buildKnobs() {
 
 // a life is a second or so of work now; say so, and let the browser paint
 // before it starts, or the click looks like it did nothing
+// "run another" does not run another; it puts the conditions back, because
+// changing them is the only reason to want them
 function run() {
+  if (state.life && !state.showSetup) {
+    state.showSetup = true;
+    chrome();
+    $("#knobs").scrollIntoView({ block: "nearest", behavior: "smooth" });
+    return;
+  }
   $("#run").textContent = t("running");
   $("#run").disabled = true;
   setTimeout(live, 20);
@@ -2536,9 +2638,11 @@ function live() {
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
   state.more = new Set();
+  state.path = null;
+  state.showSetup = false;
   $("#run").disabled = false;
   chrome();
-  draw();
+  drawAll();
 }
 
 function chrome() {
@@ -2546,7 +2650,11 @@ function chrome() {
   $("#lang").textContent = t("lang");
   $("#blurb").textContent = t("blurb");
   $("#hint").textContent = t("hint");
-  $("#run").textContent = state.life ? t("again") : t("run");
+  $("#knobs").hidden = !state.showSetup;
+  $("#moment").hidden = !state.life;
+  $("#moment").textContent = t("moment");
+  $("#run").textContent = !state.life ? t("run")
+                        : state.showSetup ? t("run") : t("again");
   $("#seedout").textContent = state.life ? t("seed") + " " + state.seed : "";
 }
 
@@ -2559,9 +2667,21 @@ function init() {
     if (b) clicked(b.dataset.id);
   });
   $("#run").addEventListener("click", run);
+  $("#moment").addEventListener("click", aMoment);
+  $("#bar").addEventListener("click", function (e) {
+    const b = e.target.closest ? e.target.closest("button") : null;
+    if (!b) return;
+    const id = "life/y" + b.dataset.age;
+    state.path = null;
+    state.open.add("life");
+    if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
+    drawAll();
+    const row = $('.node[data-id="' + id + '"]');
+    if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
   $("#lang").addEventListener("click", function () {
     state.lang = state.lang === "hr" ? "en" : "hr";
-    chrome(); buildKnobs(); draw();
+    chrome(); buildKnobs(); drawAll();
   });
 }
 

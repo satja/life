@@ -28,6 +28,20 @@ row, drawn at every scale, and you see only what happened in it:
                  whether this is the job
       ... 25 more
 
+Above the rows is a bar: the whole life, a tick to a year, coloured by what
+happened in it. It is the same idea one scale up — everything here is a row,
+and this row is the life. Clicking a tick goes there.
+
+There is also "a moment of it", which takes one of the twenty million or so
+minutes that were actually lived and opens the way down to it a level at a
+time, ending on whatever was being thought:
+
+    21   prices double, and then double                        young
+      jun  mostly working                                       494 h
+        18 jun  mostly working                            07:32-00:12
+          08:22  the cheaper shop                               45 min
+                 what Branko would say about this
+
 Every year is there and every year opens, including the ones nothing
 happened in. Open a year and you get its months, a month
 and you get its days, a day and you get the things you did, a thing and you

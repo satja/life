@@ -77,6 +77,21 @@ button.ghost { font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
 button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* ---- the whole life, as one row of years ----
+   The page's premise is that everything is a row. This row is the life. */
+.bar { display: flex; gap: 1px; margin: 0 0 18px; height: 34px; align-items: stretch; }
+.bar button {
+  flex: 1 1 0; min-width: 0; border: 0; padding: 0; cursor: pointer;
+  background: var(--hair); position: relative;
+}
+.bar button:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
+.bar button.ev    { background: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
+.bar button.world { background: var(--warm); }
+.bar button.loss  { background: var(--loss); }
+.bar button.kept  { background: var(--accent); }
+.bar button.dead  { background: var(--ink); }
+.bar button.open  { outline: 1px solid var(--accent); outline-offset: -1px; }
+
 /* ---- one row, at every scale ----
    Every row is indented by its depth, and behind it runs one hairline rail
    per level above it, so where a thing sits is legible without counting. */
@@ -120,6 +135,11 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
    rails carry the structure and a rule every row would only be noise */
 .node.d0, .node.d1 { border-bottom: 1px solid var(--hair); }
 .node.d0 { border-bottom-color: var(--faint); }
+
+/* the way down to one minute of it, while the way is being opened */
+.node.here { background-color: color-mix(in srgb, var(--accent) 14%, transparent); }
+.node.here > .what { color: var(--ink); }
+.node.here.thought > .what { color: var(--accent); font-style: italic; }
 
 /* each level is a little quieter than the one it hangs from */
 .node.d2 { font-size: 13px; }

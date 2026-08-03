@@ -5,20 +5,22 @@
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a tree. Set the conditions, run one, and you see only what " +
-      "happened in it; open a year and you get its months, a month and you get its " +
-      "days, a day and you get the things you did, a thing and you get the thoughts " +
-      "you had on the way to it. A year also holds the six numbers the loop was " +
-      "reading while it passed.",
-    run: "run one life", again: "run another", running: "living it…",
+    blurb: "A life is a tree, and everything in it is a row. The bar is the whole " +
+      "of it, a tick to a year. The rows below are the same life opened: a year " +
+      "holds its months, a month its days, a day the things you did, a thing the " +
+      "thoughts you had on the way to it.",
+    run: "run one life", again: "change the conditions", running: "living it…",
+    moment: "a moment of it",
     seed: "seed", roll: "roll",
-    hint: "Every year is there and every year opens, including the ones nothing " +
-      "happened in, which were lived through all the same. Below the year the rule is " +
-      "the same at every depth: the children something happened in are shown, the rest " +
-      "are counted. The six numbers are computed by wind_up() in " +
-      "world.py out of what you were given, what was done to you before you could " +
-      "object, and what happens to be going on — and beside each one is the line of " +
-      "live.py that reads it.",
+    hint: "A moment of it takes one of the twenty million or so minutes that were " +
+      "actually lived and opens the way down to it, a level at a time, ending on " +
+      "whatever was being thought. Every year is there and every year opens, " +
+      "including the ones nothing happened in, which were lived through all the " +
+      "same; below the year the children something happened in are shown and the " +
+      "rest are counted. A year also holds the six numbers the loop was reading " +
+      "while it passed, computed by wind_up() in world.py out of what you were " +
+      "given, what was done to you before you could object, and what happens to be " +
+      "going on — and beside each one is the line of live.py that reads it.",
 
     century: "the century",
     centuryWhy: "How much happens that is not about you. Governments, borders, money, " +
@@ -60,7 +62,8 @@ const UI = {
     inOrder: "the bases, in that order",
     died: "died at", inTheYearOf: "in the year of",
     mornings: "mornings", thingsDone: "things done", thoughts: "thoughts",
-    different: "of them different", knewBetter: "things it knew better than to do",
+    different: "different things to think", mostlyThat: "mostly",
+    knewBetter: "things it knew better than to do",
     gotRoundTo: "things it got round to", nightsAwake: "nights still awake at three",
     questions: "questions left open at school",
     meaningTo: "still meaning to", nothingLeft: "nothing left on the list",
@@ -69,18 +72,20 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stablo. Postavi uvjete, pokreni jedan, i vidiš samo ono što se u " +
-      "njemu dogodilo; otvoriš godinu i dobiješ njezine mjesece, mjesec i dobiješ dane, " +
-      "dan i dobiješ ono što si radio, radnju i dobiješ misli koje su joj prethodile. " +
-      "Godina drži i šest brojeva koje je petlja čitala dok je prolazila.",
-    run: "pokreni jedan život", again: "pokreni još jedan", running: "živi se…",
+    blurb: "Život je stablo, a sve je u njemu redak. Traka je cijeli život, crtica " +
+      "po godini. Redci ispod isti su taj život, otvoren: godina drži svoje mjesece, " +
+      "mjesec dane, dan ono što si radio, radnja misli koje su joj prethodile.",
+    run: "pokreni jedan život", again: "promijeni uvjete", running: "živi se…",
+    moment: "jedan njegov trenutak",
     seed: "sjeme", roll: "baci",
-    hint: "Svaka je godina tu i svaka se otvara, i one u kojima se ništa nije dogodilo, " +
-      "koje su svejedno proživljene. Ispod godine pravilo je na svakoj dubini isto: " +
-      "prikazuje se ono u čemu se nešto dogodilo, ostalo se prebroji. Šest brojeva " +
-      "računa wind_up() u world.py iz onoga što si " +
-      "dobio, onoga što ti je učinjeno prije nego si mogao prigovoriti, i onoga što se " +
-      "u tom trenutku događa — a uz svaki piše redak iz live.py koji ga čita.",
+    hint: "Jedan njegov trenutak uzima jednu od dvadesetak milijuna stvarno " +
+      "proživljenih minuta i otvara put do nje, razinu po razinu, sve do onoga što " +
+      "se u njoj mislilo. Svaka je godina tu i svaka se otvara, i one u kojima se " +
+      "ništa nije dogodilo; ispod godine prikazuje se ono u čemu se nešto dogodilo, " +
+      "ostalo se prebroji. Godina drži i šest brojeva koje je petlja čitala, a " +
+      "računa ih wind_up() u world.py iz onoga što si dobio, onoga što ti je " +
+      "učinjeno prije nego si mogao prigovoriti, i onoga što se u tom trenutku " +
+      "događa — uz svaki piše redak iz live.py koji ga čita.",
 
     century: "stoljeće",
     centuryWhy: "Koliko se toga događa što nije o tebi. Vlade, granice, novac, vrijeme, " +
@@ -121,7 +126,8 @@ const UI = {
     inOrder: "baze, tim redom",
     died: "umro u", inTheYearOf: "u godini u kojoj je bilo:",
     mornings: "jutara", thingsDone: "obavljenih stvari", thoughts: "misli",
-    different: "različitih", knewBetter: "stvari za koje je znao da ih ne treba raditi",
+    different: "različitih stvari za misliti", mostlyThat: "uglavnom",
+    knewBetter: "stvari za koje je znao da ih ne treba raditi",
     gotRoundTo: "stvari kojih se dohvatio", nightsAwake: "noći budan u tri",
     questions: "pitanja ostalih bez odgovora",
     meaningTo: "još uvijek namjerava", nothingLeft: "na popisu nije ostalo ništa",
