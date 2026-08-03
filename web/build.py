@@ -3,7 +3,7 @@
 
 import os
 import re
-import subprocess
+import hashlib
 import time
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -42,21 +42,17 @@ if taken:
                      % ', '.join(sorted(taken)))
 
 page = read('template.html')
-# A page served from a CDN and republished twenty times is a page you can
-# be looking at an old copy of without knowing. Say which one this is.
-try:
-    stamp = subprocess.check_output(
-        ['git', 'rev-parse', '--short', 'HEAD'], cwd=here,
-        stderr=subprocess.DEVNULL).decode().strip()
-except Exception:
-    stamp = 'unbuilt'
-stamp = '%s · %s' % (time.strftime('%Y-%m-%d'), stamp)
-
 page = page.replace('/*CSS*/', read('style.css'))
-page = page.replace('<!--STAMP-->', stamp)
 page = page.replace('/*LANG*/', lang)
 page = page.replace('/*ENGINE*/', engine)
 page = page.replace('/*APP*/', app)
+
+# A page served from a CDN and republished twenty times is a page you can be
+# looking at an old copy of without knowing. The stamp is a hash of the page
+# itself, so it cannot be one build out of step with what it is stamping.
+stamp = '%s · %s' % (time.strftime('%Y-%m-%d'),
+                    hashlib.sha1(page.encode('utf-8')).hexdigest()[:7])
+page = page.replace('<!--STAMP-->', stamp)
 
 out = os.path.join(here, 'life.html')
 with open(out, 'w', encoding='utf-8') as f:
