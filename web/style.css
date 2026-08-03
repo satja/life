@@ -44,6 +44,7 @@ h1 { font-size: 19px; font-weight: 400; margin: 0; letter-spacing: .02em; }
        text-transform: uppercase; }
 .blurb { color: var(--muted); max-width: 66ch; margin: 16px 0 0; }
 .foot { color: var(--faint); font-size: 12px; max-width: 74ch; margin: 22px 0 0; }
+.stamp { font-size: 10.5px; letter-spacing: .08em; margin-top: 10px; }
 
 .controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
             margin: 0 0 26px; }

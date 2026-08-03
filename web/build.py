@@ -3,6 +3,8 @@
 
 import os
 import re
+import subprocess
+import time
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -40,7 +42,18 @@ if taken:
                      % ', '.join(sorted(taken)))
 
 page = read('template.html')
+# A page served from a CDN and republished twenty times is a page you can
+# be looking at an old copy of without knowing. Say which one this is.
+try:
+    stamp = subprocess.check_output(
+        ['git', 'rev-parse', '--short', 'HEAD'], cwd=here,
+        stderr=subprocess.DEVNULL).decode().strip()
+except Exception:
+    stamp = 'unbuilt'
+stamp = '%s · %s' % (time.strftime('%Y-%m-%d'), stamp)
+
 page = page.replace('/*CSS*/', read('style.css'))
+page = page.replace('<!--STAMP-->', stamp)
 page = page.replace('/*LANG*/', lang)
 page = page.replace('/*ENGINE*/', engine)
 page = page.replace('/*APP*/', app)
