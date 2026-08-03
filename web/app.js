@@ -26,6 +26,7 @@ const state = {
   seed: Math.floor(Math.random() * 1e6),
   set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
   showSetup: true,           // the conditions are only in the way afterwards
+  just: null,                // the band opened last, whose children sprout
   path: null,                // the way down to one minute
   only: null,                // and, while it is being taken, the only way shown
   open: new Set(),           // which rows are unfolded
@@ -218,20 +219,34 @@ function thoughtNodes(rec, from, to, prefix) {
   return out;
 }
 
+function yearNode(y) {
+  const ev = y.events.length ? said(y.events)
+    : y.change ? { what: t(y.change[0]) + " " + y.change[1], cls: "quiet" }
+    : { what: mostly(y.mins), cls: "quiet" };
+  return node("life/y" + y.age, "year", {
+    when: String(y.age), what: ev.what, cls: ev.cls, y: y,
+    tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
+  });
+}
+
 function childrenOf(n) {
   const life = state.life;
   switch (n.kind) {
-    case "life":
-      return state.years.map(function (y) {
-        const ev = y.events.length ? said(y.events)
-          : y.change ? { what: t(y.change[0]) + " " + y.change[1], cls: "quiet" }
-          : { what: mostly(y.mins), cls: "quiet" };
-        return node("life/y" + y.age, "year", {
-          when: String(y.age), what: ev.what, cls: ev.cls, y: y, size: y.size,
-          tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
-        });
-      });
-
+    case "life": {
+      // the column gets landmarks: a stage is named where it begins, and
+      // taking a moment is a thing in the column rather than beside it
+      const out = [node("life/pick", "pick",
+                        { what: t("moment"), cls: "pick", leaf: true })];
+      let stage = null;
+      for (const y of state.years) {
+        if (stageAt(y.age) !== stage) {
+          stage = stageAt(y.age);
+          out.push(node("life/s" + y.age, "stage", { what: stage, leaf: true }));
+        }
+        out.push(yearNode(y));
+      }
+      return out;
+    }
     case "year": {
       const out = n.y.months.map(function (mo) {
         const ev = mo.events.length ? said(mo.events)
@@ -529,39 +544,52 @@ function saying(n) {
   return bits.join(" · ");
 }
 
-function cap(n, open) {
+function cap(n, open, style) {
+  if (n.kind === "pick") {
+    return '<button class="cap pick" data-id="' + esc(n.id) + '" type="button"' +
+      (style || "") + '><span class="mark">\u2733</span><span class="when"></span>' +
+      '<span class="what">' + esc(n.what) + '</span><span class="tail"></span></button>';
+  }
   return '<button class="cap ' + classOf(n) + (open ? " open" : "") +
-    (n.leaf ? " leaf" : "") + '" data-id="' + esc(n.id) + '" type="button">' +
+    (n.leaf ? " leaf" : "") + '" data-id="' + esc(n.id) + '" type="button"' +
+    (style || "") + ">" +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
     '<span class="when">' + esc(n.when || "") + "</span>" +
     '<span class="what">' + esc(n.what || "") + "</span>" +
     '<span class="tail">' + esc(n.tail || "") + "</span></button>";
 }
 
-// A closed band's width is how full that stretch of the life was, so the
-// column has a silhouette — thin at either end of a life, thick through the
-// middle of it — rather than being a barcode.
-function tick(n) {
-  const w = 26 + Math.round(74 * Math.max(0, Math.min(1, n.size || 0)));
+// A closed band is a colour, but never a blank: it carries its own number,
+// so you always know which year or which day you are looking at. Width used
+// to mean how full the stretch was, which is not a thing anybody can read
+// off a ragged edge, so it means nothing now and every band is the same.
+function tick(n, style) {
   return '<button class="tick ' + classOf(n) + '" data-id="' + esc(n.id) +
-    '" type="button" style="width:' + w + '%" title="' +
-    esc(saying(n)) + '"></button>';
+    '" type="button"' + (style || "") + ' title="' + esc(saying(n)) + '">' +
+    '<span class="num">' + esc(n.when || "") + "</span>" +
+    '<span class="fill"></span></button>';
 }
 
-function bands(nodes) {
+function bands(nodes, sprout) {
   const asColour = nodes.length > CAP;
   let out = "";
-  for (const n of nodes) {
+  nodes.forEach(function (n, i) {
     state.nodes.set(n.id, n);
+    // a stage is a landmark, not a thing you can open
+    if (n.kind === "stage") { out += '<div class="stageline">' + esc(n.what) + "</div>"; return; }
+    const style = sprout ? ' style="--i:' + Math.min(i, 40) + '"' : "";
+    // taking a moment is always words, however many colours it sits among
+    if (n.kind === "pick") { out += cap(n, false, style); return; }
     if (!n.leaf && state.open.has(n.id)) {
-      out += '<div class="band">' + cap(n, true) +
-             '<div class="kids">' + bands(shown(n)) + "</div></div>";
+      out += '<div class="band">' + cap(n, true, style) +
+             '<div class="kids' + (state.just === n.id ? " sprout" : "") + '">' +
+             bands(shown(n), state.just === n.id) + "</div></div>";
     } else if (asColour) {
-      out += tick(n);
+      out += tick(n, style);
     } else {
-      out += cap(n, false);
+      out += cap(n, false, style);
     }
-  }
+  });
   return out;
 }
 
@@ -583,8 +611,10 @@ function clicked(id) {
     state.only = null; state.path = null;
     if (onBranch || n.leaf) { drawAll(); return; }
   }
+  if (n.kind === "pick") { aMoment(); return; }
   if (n.leaf) return;
-  if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
+  if (state.open.has(id)) { state.open.delete(id); state.just = null; }
+  else { state.open.add(id); state.just = id; }
   state.path = null;
   drawAll();
 }
@@ -629,6 +659,7 @@ function aMoment() {
   (function down() {
     if (step >= path.length) return;
     state.open.add(path[step]);
+    state.just = path[step];
     step++;
     drawAll();
     if (step >= path.length) {
@@ -746,8 +777,6 @@ function chrome() {
   $("#blurb").textContent = t("blurb");
   $("#hint").textContent = t("hint");
   $("#knobs").hidden = !state.showSetup;
-  $("#moment").hidden = !state.life;
-  $("#moment").textContent = t("moment");
   $("#run").textContent = !state.life ? t("run")
                         : state.showSetup ? t("run") : t("again");
   $("#seedout").textContent = state.life ? t("seed") + " " + state.seed : "";
@@ -762,7 +791,6 @@ function init() {
     if (b) clicked(b.dataset.id);
   });
   $("#run").addEventListener("click", run);
-  $("#moment").addEventListener("click", aMoment);
   $("#lang").addEventListener("click", function () {
     state.lang = state.lang === "hr" ? "en" : "hr";
     chrome(); buildKnobs(); drawAll();

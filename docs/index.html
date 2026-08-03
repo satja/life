@@ -96,21 +96,47 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
         border-left: 1px solid var(--rail); }
 
 .tick {
-  display: block; height: 9px; margin: 0 0 2px;
-  border: 0; padding: 0; cursor: pointer; background: var(--hair);
-  transition: width .12s ease;
+  display: grid; grid-template-columns: 2.6em 1fr; gap: 0 9px;
+  align-items: center; width: 100%; height: 13px; margin: 0 0 2px;
+  border: 0; padding: 0; cursor: pointer; background: none;
+  font: inherit;
 }
-.tick:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
-.tick.ev    { background: color-mix(in srgb, var(--ink) 62%, var(--paper)); }
-.tick.world { background: var(--warm); }
-.tick.loss  { background: var(--loss); }
-.tick.kept  { background: var(--accent); }
-.tick.dead  { background: var(--ink); }
-.tick.quiet { background: var(--hair); }
+.tick > .num { font-size: 9.5px; line-height: 1; color: var(--faint);
+               text-align: right; font-variant-numeric: tabular-nums; }
+.tick > .fill { height: 9px; background: var(--hair); }
+.tick:hover > .num { color: var(--ink); }
+.tick:hover > .fill { outline: 1px solid var(--ink); outline-offset: -1px; }
+.tick.ev    > .fill { background: color-mix(in srgb, var(--ink) 62%, var(--paper)); }
+.tick.world > .fill { background: var(--warm); }
+.tick.loss  > .fill { background: var(--loss); }
+.tick.kept  > .fill { background: var(--accent); }
+.tick.dead  > .fill { background: var(--ink); }
+.tick.quiet > .fill { background: var(--hair); }
 /* a night that did not go well is not an event, but it is not nothing */
-.tick.restless { background: color-mix(in srgb, var(--loss) 32%, var(--hair)); }
-.tick.here  { background: var(--accent); outline: 2px solid var(--ink);
-              outline-offset: -1px; }
+.tick.restless > .fill { background: color-mix(in srgb, var(--loss) 32%, var(--hair)); }
+.tick.here  > .fill { background: var(--accent); outline: 2px solid var(--ink);
+                      outline-offset: -1px; }
+.tick.here  > .num { color: var(--ink); }
+
+/* a stage is a landmark in the column, not a thing you can open */
+.stageline { font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+             color: var(--faint); margin: 9px 0 4px; padding-left: 2px; }
+
+/* taking a moment is a thing in the column, at the top of the life */
+.cap.pick { color: var(--accent); cursor: pointer; padding: 5px 4px;
+            border-bottom: 1px dashed var(--rail); }
+.cap.pick > .what { color: var(--accent); }
+.cap.pick:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.cap.pick > .mark { color: var(--accent); }
+
+/* opening a band unrolls what is under it, one after another */
+@keyframes sprout {
+  from { opacity: 0; transform: translateX(-7px) scaleY(.55); }
+  to   { opacity: 1; transform: none; }
+}
+.kids.sprout > * { animation: sprout .22s ease-out backwards;
+                   animation-delay: calc(var(--i, 0) * 16ms);
+                   transform-origin: left top; }
 
 .cap {
   display: grid;
@@ -145,12 +171,16 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .cap.head > .what { font-size: 15px; letter-spacing: .02em; }
 .cap.head > .mark { color: var(--ink); }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .kids.sprout > * { animation: none !important; }
+}
 @media (max-width: 620px) {
   body { font-size: 12.5px; }
   .wrap { padding: 20px 12px 60px; }
   /* a colour has to be worth aiming a thumb at */
-  .tick { height: 13px; margin-bottom: 2px; }
+  .tick { height: 17px; margin-bottom: 2px; grid-template-columns: 2.2em 1fr; }
+  .tick > .fill { height: 11px; }
   .kids { margin-left: 5px; padding-left: 5px; }
   .cap { grid-template-columns: 1em 4.4em 1fr; }
   .cap > .tail { grid-column: 2 / -1; font-size: 10.5px;
@@ -175,13 +205,12 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 
   <div class="controls">
     <button class="go" id="run" type="button"></button>
-    <button class="ghost" id="moment" type="button" hidden></button>
   </div>
 
   <div class="tree" id="tree"></div>
 
   <p class="foot" id="hint"></p>
-  <p class="foot stamp">2026-08-03 · 16e43a9</p>
+  <p class="foot stamp">2026-08-03 · 8eaaa1c</p>
 </div>
 
 <script>// Only the commentary is translated. Everything the program says — the names
@@ -191,11 +220,11 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a column of colour, a band to a year, as wide as the year " +
-      "was full. Open one and it says what it was, and holds its twelve months; " +
-      "open a month and it holds its days, again as colour; open a day and it " +
-      "holds the things you did, and a thing holds the thoughts you had on the " +
-      "way to it.",
+    blurb: "A life is a column of colour, a band to a year, and the colour is " +
+      "what happened in it. Open one and it says what it was, and holds its " +
+      "twelve months; open a month and it holds its days, again as colour; open " +
+      "a day and it holds the things you did, and a thing holds the thoughts you " +
+      "had on the way to it.",
     run: "run one life", again: "change the conditions", running: "living it…",
     moment: "a moment of it",
     seed: "seed", roll: "roll",
@@ -261,10 +290,10 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stupac boje, traka po godini, širok koliko je godina bila " +
-      "puna. Otvoriš jednu i kaže što je bila, i drži svojih dvanaest mjeseci; " +
-      "otvoriš mjesec i drži svoje dane, opet kao boju; otvoriš dan i drži ono " +
-      "što si radio, a radnja drži misli koje su joj prethodile.",
+    blurb: "Život je stupac boje, traka po godini, a boja je ono što se u njoj " +
+      "dogodilo. Otvoriš jednu i kaže što je bila, i drži svojih dvanaest " +
+      "mjeseci; otvoriš mjesec i drži svoje dane, opet kao boju; otvoriš dan i " +
+      "drži ono što si radio, a radnja drži misli koje su joj prethodile.",
     run: "pokreni jedan život", again: "promijeni uvjete", running: "živi se…",
     moment: "jedan njegov trenutak",
     seed: "sjeme", roll: "baci",
@@ -1974,6 +2003,7 @@ const state = {
   seed: Math.floor(Math.random() * 1e6),
   set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
   showSetup: true,           // the conditions are only in the way afterwards
+  just: null,                // the band opened last, whose children sprout
   path: null,                // the way down to one minute
   only: null,                // and, while it is being taken, the only way shown
   open: new Set(),           // which rows are unfolded
@@ -2166,20 +2196,34 @@ function thoughtNodes(rec, from, to, prefix) {
   return out;
 }
 
+function yearNode(y) {
+  const ev = y.events.length ? said(y.events)
+    : y.change ? { what: t(y.change[0]) + " " + y.change[1], cls: "quiet" }
+    : { what: mostly(y.mins), cls: "quiet" };
+  return node("life/y" + y.age, "year", {
+    when: String(y.age), what: ev.what, cls: ev.cls, y: y,
+    tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
+  });
+}
+
 function childrenOf(n) {
   const life = state.life;
   switch (n.kind) {
-    case "life":
-      return state.years.map(function (y) {
-        const ev = y.events.length ? said(y.events)
-          : y.change ? { what: t(y.change[0]) + " " + y.change[1], cls: "quiet" }
-          : { what: mostly(y.mins), cls: "quiet" };
-        return node("life/y" + y.age, "year", {
-          when: String(y.age), what: ev.what, cls: ev.cls, y: y, size: y.size,
-          tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
-        });
-      });
-
+    case "life": {
+      // the column gets landmarks: a stage is named where it begins, and
+      // taking a moment is a thing in the column rather than beside it
+      const out = [node("life/pick", "pick",
+                        { what: t("moment"), cls: "pick", leaf: true })];
+      let stage = null;
+      for (const y of state.years) {
+        if (stageAt(y.age) !== stage) {
+          stage = stageAt(y.age);
+          out.push(node("life/s" + y.age, "stage", { what: stage, leaf: true }));
+        }
+        out.push(yearNode(y));
+      }
+      return out;
+    }
     case "year": {
       const out = n.y.months.map(function (mo) {
         const ev = mo.events.length ? said(mo.events)
@@ -2477,39 +2521,52 @@ function saying(n) {
   return bits.join(" · ");
 }
 
-function cap(n, open) {
+function cap(n, open, style) {
+  if (n.kind === "pick") {
+    return '<button class="cap pick" data-id="' + esc(n.id) + '" type="button"' +
+      (style || "") + '><span class="mark">\u2733</span><span class="when"></span>' +
+      '<span class="what">' + esc(n.what) + '</span><span class="tail"></span></button>';
+  }
   return '<button class="cap ' + classOf(n) + (open ? " open" : "") +
-    (n.leaf ? " leaf" : "") + '" data-id="' + esc(n.id) + '" type="button">' +
+    (n.leaf ? " leaf" : "") + '" data-id="' + esc(n.id) + '" type="button"' +
+    (style || "") + ">" +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
     '<span class="when">' + esc(n.when || "") + "</span>" +
     '<span class="what">' + esc(n.what || "") + "</span>" +
     '<span class="tail">' + esc(n.tail || "") + "</span></button>";
 }
 
-// A closed band's width is how full that stretch of the life was, so the
-// column has a silhouette — thin at either end of a life, thick through the
-// middle of it — rather than being a barcode.
-function tick(n) {
-  const w = 26 + Math.round(74 * Math.max(0, Math.min(1, n.size || 0)));
+// A closed band is a colour, but never a blank: it carries its own number,
+// so you always know which year or which day you are looking at. Width used
+// to mean how full the stretch was, which is not a thing anybody can read
+// off a ragged edge, so it means nothing now and every band is the same.
+function tick(n, style) {
   return '<button class="tick ' + classOf(n) + '" data-id="' + esc(n.id) +
-    '" type="button" style="width:' + w + '%" title="' +
-    esc(saying(n)) + '"></button>';
+    '" type="button"' + (style || "") + ' title="' + esc(saying(n)) + '">' +
+    '<span class="num">' + esc(n.when || "") + "</span>" +
+    '<span class="fill"></span></button>';
 }
 
-function bands(nodes) {
+function bands(nodes, sprout) {
   const asColour = nodes.length > CAP;
   let out = "";
-  for (const n of nodes) {
+  nodes.forEach(function (n, i) {
     state.nodes.set(n.id, n);
+    // a stage is a landmark, not a thing you can open
+    if (n.kind === "stage") { out += '<div class="stageline">' + esc(n.what) + "</div>"; return; }
+    const style = sprout ? ' style="--i:' + Math.min(i, 40) + '"' : "";
+    // taking a moment is always words, however many colours it sits among
+    if (n.kind === "pick") { out += cap(n, false, style); return; }
     if (!n.leaf && state.open.has(n.id)) {
-      out += '<div class="band">' + cap(n, true) +
-             '<div class="kids">' + bands(shown(n)) + "</div></div>";
+      out += '<div class="band">' + cap(n, true, style) +
+             '<div class="kids' + (state.just === n.id ? " sprout" : "") + '">' +
+             bands(shown(n), state.just === n.id) + "</div></div>";
     } else if (asColour) {
-      out += tick(n);
+      out += tick(n, style);
     } else {
-      out += cap(n, false);
+      out += cap(n, false, style);
     }
-  }
+  });
   return out;
 }
 
@@ -2531,8 +2588,10 @@ function clicked(id) {
     state.only = null; state.path = null;
     if (onBranch || n.leaf) { drawAll(); return; }
   }
+  if (n.kind === "pick") { aMoment(); return; }
   if (n.leaf) return;
-  if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
+  if (state.open.has(id)) { state.open.delete(id); state.just = null; }
+  else { state.open.add(id); state.just = id; }
   state.path = null;
   drawAll();
 }
@@ -2577,6 +2636,7 @@ function aMoment() {
   (function down() {
     if (step >= path.length) return;
     state.open.add(path[step]);
+    state.just = path[step];
     step++;
     drawAll();
     if (step >= path.length) {
@@ -2694,8 +2754,6 @@ function chrome() {
   $("#blurb").textContent = t("blurb");
   $("#hint").textContent = t("hint");
   $("#knobs").hidden = !state.showSetup;
-  $("#moment").hidden = !state.life;
-  $("#moment").textContent = t("moment");
   $("#run").textContent = !state.life ? t("run")
                         : state.showSetup ? t("run") : t("again");
   $("#seedout").textContent = state.life ? t("seed") + " " + state.seed : "";
@@ -2710,7 +2768,6 @@ function init() {
     if (b) clicked(b.dataset.id);
   });
   $("#run").addEventListener("click", run);
-  $("#moment").addEventListener("click", aMoment);
   $("#lang").addEventListener("click", function () {
     state.lang = state.lang === "hr" ? "en" : "hr";
     chrome(); buildKnobs(); drawAll();

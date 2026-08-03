@@ -19,10 +19,11 @@ For one row per year instead, which is shorter and shows the shape better:
 
 There is also a web version in "web/". You set the conditions — the century,
 conscience, temptation, sleep, and the seed — and run one life. What comes
-back is a column of colour: a band to a year, as wide as the year was full,
-so it is thin at either end of a life and thick through the middle of it.
-The colour is what happened — an event, something out in the world, a loss,
-something kept, and the last one.
+back is a column of colour: a band to a year, numbered, and the colour is
+what happened in it — an event, something out in the world, a loss,
+something kept, and the last one. The stages are named where they begin, so
+the column has landmarks to steer by rather than being seventy anonymous
+stripes. Opening a band unrolls what is under it, one after another.
 
 Whether a thing is a colour or a sentence is decided by how many of them
 there are. Few enough to read and they are read; too many and they are a
@@ -36,7 +37,8 @@ in full. Nothing is hidden behind a count.
           19:10  looking for work                               180 min
                  whether this is the job
 
-There is also "a moment of it", which takes one of the twenty million or so
+"A moment of it" sits at the top of the column rather than beside it, and
+takes one of the twenty million or so
 minutes that were actually lived and opens the way down to it a level at a
 time. While it is being taken, each level offers only the child the moment
 went through, so one branch grows out of the column and there is nothing

@@ -5,11 +5,11 @@
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a column of colour, a band to a year, as wide as the year " +
-      "was full. Open one and it says what it was, and holds its twelve months; " +
-      "open a month and it holds its days, again as colour; open a day and it " +
-      "holds the things you did, and a thing holds the thoughts you had on the " +
-      "way to it.",
+    blurb: "A life is a column of colour, a band to a year, and the colour is " +
+      "what happened in it. Open one and it says what it was, and holds its " +
+      "twelve months; open a month and it holds its days, again as colour; open " +
+      "a day and it holds the things you did, and a thing holds the thoughts you " +
+      "had on the way to it.",
     run: "run one life", again: "change the conditions", running: "living it…",
     moment: "a moment of it",
     seed: "seed", roll: "roll",
@@ -75,10 +75,10 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stupac boje, traka po godini, širok koliko je godina bila " +
-      "puna. Otvoriš jednu i kaže što je bila, i drži svojih dvanaest mjeseci; " +
-      "otvoriš mjesec i drži svoje dane, opet kao boju; otvoriš dan i drži ono " +
-      "što si radio, a radnja drži misli koje su joj prethodile.",
+    blurb: "Život je stupac boje, traka po godini, a boja je ono što se u njoj " +
+      "dogodilo. Otvoriš jednu i kaže što je bila, i drži svojih dvanaest " +
+      "mjeseci; otvoriš mjesec i drži svoje dane, opet kao boju; otvoriš dan i " +
+      "drži ono što si radio, a radnja drži misli koje su joj prethodile.",
     run: "pokreni jedan život", again: "promijeni uvjete", running: "živi se…",
     moment: "jedan njegov trenutak",
     seed: "sjeme", roll: "baci",
