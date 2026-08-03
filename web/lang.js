@@ -44,6 +44,7 @@ const UI = {
     seedWhy: "The same seed and the same settings give the same life, exactly, every time.",
 
     aLife: "a life", years: "years", account: "what it came to",
+    months: "months", days: "days", doing: "doing", thinking: "thinking",
     more: "… % more", mostly: "mostly",
     theDials: "what the loop was reading", base: "base", readBy: "read at",
     asFar: "as far as it is allowed to go",
@@ -111,6 +112,7 @@ const UI = {
     seedWhy: "Isto sjeme i iste postavke daju točno isti život, svaki put.",
 
     aLife: "jedan život", years: "godina", account: "što je od toga ostalo",
+    months: "mjeseci", days: "dana", doing: "radnje", thinking: "misli",
     more: "… još %", mostly: "uglavnom",
     theDials: "što je petlja čitala", base: "temelj", readBy: "čita se u",
     asFar: "dalje ne smije",

@@ -44,6 +44,14 @@ time. While it is being taken, each level offers only the child the moment
 went through, so one branch grows out of the column and there is nothing
 beside it. Touching the branch puts the rest of the life back around it.
 
+Above the words it draws itself the way it would be drawn on paper: the
+years as a short column of dashes, a curve leaving the one it went through
+and arriving at that year's months, another at that month's days, and so on
+down to the thoughts. Each column is a window of seventeen with the chosen
+one held inside it, and says underneath what it is a column of and how many
+there really were — a window on seventy-odd years, on twelve months, on
+thirty days.
+
     17   falls in love, silently                           teenager
       jan  mostly staying up too late                          493 h
         the 24  mostly staying in                        08:28-00:51

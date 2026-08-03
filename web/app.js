@@ -26,6 +26,8 @@ const state = {
   seed: Math.floor(Math.random() * 1e6),
   set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
   showSetup: true,           // the conditions are only in the way afterwards
+  diagram: null,             // the branch, drawn as columns and curves
+  shown: 0,                  // how much of it has been drawn so far
   just: null,                // the band opened last, whose children sprout
   path: null,                // the way down to one minute
   only: null,                // and, while it is being taken, the only way shown
@@ -595,7 +597,8 @@ function bands(nodes, sprout) {
 
 function draw() {
   state.nodes = new Map();
-  $("#tree").innerHTML = state.life ? bands(roots()) : "";
+  const tree = state.life ? bands(roots()) : "";
+  $("#tree").innerHTML = (state.only ? branchHTML() : "") + tree;
 }
 
 function drawAll() { draw(); }
@@ -608,7 +611,7 @@ function clicked(id) {
   if (state.only) {
     const onBranch = state.only.indexOf(id) >= 0;
     state.open = new Set(state.only);
-    state.only = null; state.path = null;
+    state.only = null; state.path = null; state.diagram = null;
     if (onBranch || n.leaf) { drawAll(); return; }
   }
   if (n.kind === "pick") { aMoment(); return; }
@@ -617,6 +620,76 @@ function clicked(id) {
   else { state.open.add(id); state.just = id; }
   state.path = null;
   drawAll();
+}
+
+// ---------------------------------------------------------------- the branch
+
+// The way down to a minute, drawn the way it would be drawn on paper: each
+// level a short column of its own kind — the years, then that year's months,
+// then that month's days — and a curve leaving the one it went through and
+// arriving at the next. Only a window of each column is shown, because a
+// column of sixty-eight is a wall and a column of fifteen is a diagram.
+const COLW = 54, GAP = 26, ROWH = 8, WINDOW = 17;
+const LEVELS = ["years", "months", "days", "doing", "thinking"];
+
+function branchOf(path) {
+  const levels = [];
+  // walked down from the top rather than looked up: the drawing has to know
+  // the whole way before any of it has been drawn
+  let parent = roots()[0];
+  for (let i = 1; i < path.length && parent; i++) {
+    // only what is actually a stretch of time: a stage is a landmark, taking
+    // a moment is a button, and the dials are a reading, not a thirteenth month
+    const kids = (parent.kids || childrenOf(parent))
+      .filter((k) => k.kind !== "stage" && k.kind !== "pick" && k.kind !== "dials");
+    const at = kids.findIndex((k) => k.id === path[i]);
+    if (at < 0) break;
+    const start = Math.max(0, Math.min(at - (WINDOW >> 1), kids.length - WINDOW));
+    levels.push({
+      at: at - start,
+      cls: kids.slice(start, start + WINDOW).map((k) => k.cls || ""),
+      of: kids.length,
+      from: start,
+    });
+    parent = kids[at];
+  }
+  return levels;
+}
+
+function branchHTML() {
+  const levels = state.diagram;
+  if (!levels || !levels.length) return "";
+  const shown = Math.max(1, Math.min(state.shown, levels.length));
+  const w = levels.length * COLW + (levels.length - 1) * GAP;
+  const h = WINDOW * ROWH;
+  // a column of five and a column of seventeen hung from the same line looks
+  // like a mistake, so every column is centred on the same middle
+  const off = (lv) => (h - lv.cls.length * ROWH) / 2;
+  const mid = (lv) => off(lv) + lv.at * ROWH + ROWH / 2;
+  let cols = "", curves = "";
+  levels.forEach(function (lv, i) {
+    const x = i * (COLW + GAP);
+    const top = off(lv);
+    const dashes = lv.cls.map(function (c, k) {
+      return '<i class="mdash ' + c + (k === lv.at ? " on" : "") +
+             '" style="top:' + (top + k * ROWH) + 'px"></i>';
+    }).join("");
+    cols += '<div class="mcol' + (i < shown ? " in" : "") + '" style="left:' + x +
+            'px;--i:' + i + '">' + dashes +
+            '<span class="mname">' + esc(t(LEVELS[i]) || "") +
+            '<b>' + lv.of + "</b></span></div>";
+    if (i) {
+      const x0 = (i - 1) * (COLW + GAP) + COLW, y0 = mid(levels[i - 1]);
+      const y1 = mid(lv);
+      curves += '<path class="mcurve' + (i < shown ? " in" : "") +
+        '" style="--i:' + i + '" d="M' + x0 + ' ' + y0 +
+        ' C' + (x0 + GAP * 0.62) + ' ' + y0 + ' ' + (x - GAP * 0.62) + ' ' + y1 +
+        ' ' + x + ' ' + y1 + '"/>';
+    }
+  });
+  return '<div class="moment" style="width:' + w + 'px;height:' + (h + 30) + 'px">' +
+         '<svg class="mlinks" width="' + w + '" height="' + h + '" aria-hidden="true">' +
+         curves + "</svg>" + cols + "</div>";
 }
 
 // ------------------------------------------------------------------ a moment
@@ -647,6 +720,8 @@ function aMoment() {
   state.open = new Set();
   state.path = path;
   state.only = path;
+  state.diagram = branchOf(path);
+  state.shown = 0;
   drawAll();
 
   // put the top of the life where it can be watched, once, and then leave
@@ -661,6 +736,7 @@ function aMoment() {
     state.open.add(path[step]);
     state.just = path[step];
     step++;
+    state.shown = step;
     drawAll();
     if (step >= path.length) {
       // only if the end of it fell off the bottom, and only by as much as
@@ -764,7 +840,7 @@ function live() {
   while (state.life.alive && guard++ < 130) state.life.stepYear();
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
-  state.path = null; state.only = null;
+  state.path = null; state.only = null; state.diagram = null;
   state.showSetup = false;
   $("#run").disabled = false;
   chrome();

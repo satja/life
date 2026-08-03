@@ -125,6 +125,42 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .cap.pick:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .cap.pick > .mark { color: var(--accent); }
 
+/* ---- the branch, drawn the way it would be drawn on paper ----
+   Each level is a short column of its own kind, and a curve leaves the band
+   the way went through and arrives at the next. */
+.moment { position: relative; margin: 10px 0 16px 2px; }
+.mlinks { position: absolute; left: 0; top: 0; overflow: visible; }
+.mcurve { fill: none; stroke: var(--accent); stroke-width: 1.4;
+          stroke-linecap: round; opacity: 0;
+          stroke-dasharray: 120; stroke-dashoffset: 120; }
+.mcurve.in { animation: drawn .5s ease-out forwards;
+             animation-delay: calc(var(--i) * 260ms - 130ms); }
+@keyframes drawn { from { opacity: 0; stroke-dashoffset: 120; }
+                   20% { opacity: 1; }
+                   to { opacity: 1; stroke-dashoffset: 0; } }
+
+.mcol { position: absolute; top: 0; width: 54px; height: 100%; opacity: 0; }
+/* each column says what it is a column of, and how many it is a window on */
+.mname { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+         white-space: nowrap; font-size: 9px; letter-spacing: .1em;
+         text-transform: uppercase; color: var(--faint); text-align: center; }
+.mname > b { display: block; font-weight: 400; letter-spacing: 0;
+             font-variant-numeric: tabular-nums; color: var(--muted); }
+.mcol.in { animation: arrive .34s ease-out forwards;
+           animation-delay: calc(var(--i) * 260ms); }
+@keyframes arrive { from { opacity: 0; transform: translateX(-10px); }
+                    to { opacity: 1; transform: none; } }
+.mdash { position: absolute; left: 0; width: 62%; height: 3px;
+         background: var(--hair); border-radius: 2px; }
+.mdash.ev    { background: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
+.mdash.world { background: var(--warm); }
+.mdash.loss  { background: var(--loss); }
+.mdash.kept  { background: var(--accent); }
+.mdash.dead  { background: var(--ink); }
+.mdash.restless { background: color-mix(in srgb, var(--loss) 32%, var(--hair)); }
+.mdash.on { width: 100%; height: 4px; background: var(--accent);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent); }
+
 /* opening a band unrolls what is under it, one after another */
 @keyframes sprout {
   from { opacity: 0; transform: translateX(-7px) scaleY(.55); }
@@ -169,7 +205,8 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
-  .kids.sprout > * { animation: none !important; }
+  .kids.sprout > *, .mcol, .mcurve { animation: none !important; }
+  .mcol.in, .mcurve.in { opacity: 1; stroke-dashoffset: 0; }
 }
 @media (max-width: 620px) {
   body { font-size: 12.5px; }
@@ -179,6 +216,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
   .tick > .fill { height: 11px; }
   .kids { margin-left: 5px; padding-left: 5px; }
   .cap { grid-template-columns: 1em 4.4em 1fr; }
+  .moment { transform: scale(.86); transform-origin: left top; }
   .cap > .tail { grid-column: 2 / -1; font-size: 10.5px;
                  white-space: normal; min-width: 0; }
   .seedline { margin-left: 0; }
@@ -203,7 +241,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
   <div class="tree" id="tree"></div>
 
   <p class="foot" id="hint"></p>
-  <p class="foot stamp">2026-08-03 · 8eaaa1c</p>
+  <p class="foot stamp">2026-08-03 · 2d60e29</p>
 </div>
 
 <script>// Only the commentary is translated. Everything the program says — the names
@@ -252,6 +290,7 @@ const UI = {
     seedWhy: "The same seed and the same settings give the same life, exactly, every time.",
 
     aLife: "a life", years: "years", account: "what it came to",
+    months: "months", days: "days", doing: "doing", thinking: "thinking",
     more: "… % more", mostly: "mostly",
     theDials: "what the loop was reading", base: "base", readBy: "read at",
     asFar: "as far as it is allowed to go",
@@ -319,6 +358,7 @@ const UI = {
     seedWhy: "Isto sjeme i iste postavke daju točno isti život, svaki put.",
 
     aLife: "jedan život", years: "godina", account: "što je od toga ostalo",
+    months: "mjeseci", days: "dana", doing: "radnje", thinking: "misli",
     more: "… još %", mostly: "uglavnom",
     theDials: "što je petlja čitala", base: "temelj", readBy: "čita se u",
     asFar: "dalje ne smije",
@@ -1996,6 +2036,8 @@ const state = {
   seed: Math.floor(Math.random() * 1e6),
   set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
   showSetup: true,           // the conditions are only in the way afterwards
+  diagram: null,             // the branch, drawn as columns and curves
+  shown: 0,                  // how much of it has been drawn so far
   just: null,                // the band opened last, whose children sprout
   path: null,                // the way down to one minute
   only: null,                // and, while it is being taken, the only way shown
@@ -2565,7 +2607,8 @@ function bands(nodes, sprout) {
 
 function draw() {
   state.nodes = new Map();
-  $("#tree").innerHTML = state.life ? bands(roots()) : "";
+  const tree = state.life ? bands(roots()) : "";
+  $("#tree").innerHTML = (state.only ? branchHTML() : "") + tree;
 }
 
 function drawAll() { draw(); }
@@ -2578,7 +2621,7 @@ function clicked(id) {
   if (state.only) {
     const onBranch = state.only.indexOf(id) >= 0;
     state.open = new Set(state.only);
-    state.only = null; state.path = null;
+    state.only = null; state.path = null; state.diagram = null;
     if (onBranch || n.leaf) { drawAll(); return; }
   }
   if (n.kind === "pick") { aMoment(); return; }
@@ -2587,6 +2630,76 @@ function clicked(id) {
   else { state.open.add(id); state.just = id; }
   state.path = null;
   drawAll();
+}
+
+// ---------------------------------------------------------------- the branch
+
+// The way down to a minute, drawn the way it would be drawn on paper: each
+// level a short column of its own kind — the years, then that year's months,
+// then that month's days — and a curve leaving the one it went through and
+// arriving at the next. Only a window of each column is shown, because a
+// column of sixty-eight is a wall and a column of fifteen is a diagram.
+const COLW = 54, GAP = 26, ROWH = 8, WINDOW = 17;
+const LEVELS = ["years", "months", "days", "doing", "thinking"];
+
+function branchOf(path) {
+  const levels = [];
+  // walked down from the top rather than looked up: the drawing has to know
+  // the whole way before any of it has been drawn
+  let parent = roots()[0];
+  for (let i = 1; i < path.length && parent; i++) {
+    // only what is actually a stretch of time: a stage is a landmark, taking
+    // a moment is a button, and the dials are a reading, not a thirteenth month
+    const kids = (parent.kids || childrenOf(parent))
+      .filter((k) => k.kind !== "stage" && k.kind !== "pick" && k.kind !== "dials");
+    const at = kids.findIndex((k) => k.id === path[i]);
+    if (at < 0) break;
+    const start = Math.max(0, Math.min(at - (WINDOW >> 1), kids.length - WINDOW));
+    levels.push({
+      at: at - start,
+      cls: kids.slice(start, start + WINDOW).map((k) => k.cls || ""),
+      of: kids.length,
+      from: start,
+    });
+    parent = kids[at];
+  }
+  return levels;
+}
+
+function branchHTML() {
+  const levels = state.diagram;
+  if (!levels || !levels.length) return "";
+  const shown = Math.max(1, Math.min(state.shown, levels.length));
+  const w = levels.length * COLW + (levels.length - 1) * GAP;
+  const h = WINDOW * ROWH;
+  // a column of five and a column of seventeen hung from the same line looks
+  // like a mistake, so every column is centred on the same middle
+  const off = (lv) => (h - lv.cls.length * ROWH) / 2;
+  const mid = (lv) => off(lv) + lv.at * ROWH + ROWH / 2;
+  let cols = "", curves = "";
+  levels.forEach(function (lv, i) {
+    const x = i * (COLW + GAP);
+    const top = off(lv);
+    const dashes = lv.cls.map(function (c, k) {
+      return '<i class="mdash ' + c + (k === lv.at ? " on" : "") +
+             '" style="top:' + (top + k * ROWH) + 'px"></i>';
+    }).join("");
+    cols += '<div class="mcol' + (i < shown ? " in" : "") + '" style="left:' + x +
+            'px;--i:' + i + '">' + dashes +
+            '<span class="mname">' + esc(t(LEVELS[i]) || "") +
+            '<b>' + lv.of + "</b></span></div>";
+    if (i) {
+      const x0 = (i - 1) * (COLW + GAP) + COLW, y0 = mid(levels[i - 1]);
+      const y1 = mid(lv);
+      curves += '<path class="mcurve' + (i < shown ? " in" : "") +
+        '" style="--i:' + i + '" d="M' + x0 + ' ' + y0 +
+        ' C' + (x0 + GAP * 0.62) + ' ' + y0 + ' ' + (x - GAP * 0.62) + ' ' + y1 +
+        ' ' + x + ' ' + y1 + '"/>';
+    }
+  });
+  return '<div class="moment" style="width:' + w + 'px;height:' + (h + 30) + 'px">' +
+         '<svg class="mlinks" width="' + w + '" height="' + h + '" aria-hidden="true">' +
+         curves + "</svg>" + cols + "</div>";
 }
 
 // ------------------------------------------------------------------ a moment
@@ -2617,6 +2730,8 @@ function aMoment() {
   state.open = new Set();
   state.path = path;
   state.only = path;
+  state.diagram = branchOf(path);
+  state.shown = 0;
   drawAll();
 
   // put the top of the life where it can be watched, once, and then leave
@@ -2631,6 +2746,7 @@ function aMoment() {
     state.open.add(path[step]);
     state.just = path[step];
     step++;
+    state.shown = step;
     drawAll();
     if (step >= path.length) {
       // only if the end of it fell off the bottom, and only by as much as
@@ -2734,7 +2850,7 @@ function live() {
   while (state.life.alive && guard++ < 130) state.life.stepYear();
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
-  state.path = null; state.only = null;
+  state.path = null; state.only = null; state.diagram = null;
   state.showSetup = false;
   $("#run").disabled = false;
   chrome();
