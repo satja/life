@@ -609,14 +609,31 @@ function aMoment() {
   state.open = new Set();
   state.path = path;
   state.only = path;
+  drawAll();
+
+  // put the bar where it can be watched, once, and then leave the page
+  // alone: the branch is supposed to grow out of the bar, and it cannot do
+  // that if every level drags the view somewhere else
+  const bar = $("#bar");
+  window.scrollTo({ top: Math.max(0, bar.offsetTop - 80), behavior: "smooth" });
+
   let step = 0;
   (function down() {
-    if (step >= path.length) { drawAll(); return; }
+    if (step >= path.length) return;
     state.open.add(path[step]);
     step++;
     drawAll();
-    const last = $('.node[data-id="' + path[step - 1] + '"]');
-    if (last) last.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (step >= path.length) {
+      // only if the end of it fell off the bottom, and only by as much as
+      // it fell off by
+      const last = $('.node[data-id="' + path[path.length - 1] + '"]');
+      if (last) {
+        const box = last.getBoundingClientRect();
+        const over = box.bottom - window.innerHeight + 20;
+        if (over > 0) window.scrollBy({ top: over, behavior: "smooth" });
+      }
+      return;
+    }
     setTimeout(down, 260);
   })();
 }
