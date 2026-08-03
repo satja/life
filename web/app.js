@@ -29,12 +29,11 @@ const state = {
   path: null,                // the way down to one minute
   only: null,                // and, while it is being taken, the only way shown
   open: new Set(),           // which rows are unfolded
-  more: new Set(),           // which "… n more" rows have been asked for
   nodes: new Map(),          // what is on screen, so a click can be answered
 };
 const t = (k) => UI[state.lang][k];
 
-const CAP = 12;              // more children than this and the quiet ones fold away
+const CAP = 24;              // more children than this and they are a colour, not a line
 
 // which line of live.py reads which dial. The lines are not shown any more,
 // but a number is worth less if you cannot say where it is read.
@@ -69,13 +68,18 @@ function indexLife(life) {
       mo.mins.set(name, (mo.mins.get(name) || 0) + rec.acts[i + 2]);
     }
   }
+  let fullest = 1;
   for (const y of years) {
     for (const mo of y.months) {
       if (!mo) continue;
       for (const [k, v] of mo.mins) y.mins.set(k, (y.mins.get(k) || 0) + v);
     }
     y.months = y.months.filter(Boolean);
+    y.busy = 0;
+    for (const v of y.mins.values()) y.busy += v;
+    if (y.busy > fullest) fullest = y.busy;
   }
+  for (const y of years) y.size = y.busy / fullest;
   // What a year was is not what there was most of — forty years running that
   // all say "mostly working" say nothing at all. What a year was is what
   // arrived in it, what left it, or what it drifted towards; and a year that
@@ -223,7 +227,7 @@ function childrenOf(n) {
           : y.change ? { what: t(y.change[0]) + " " + y.change[1], cls: "quiet" }
           : { what: mostly(y.mins), cls: "quiet" };
         return node("life/y" + y.age, "year", {
-          when: String(y.age), what: ev.what, cls: ev.cls, y: y,
+          when: String(y.age), what: ev.what, cls: ev.cls, y: y, size: y.size,
           tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
         });
       });
@@ -245,7 +249,16 @@ function childrenOf(n) {
       return out;
     }
 
-    case "month":
+    case "month": {
+      // a day's width is how full it was against the fullest day of its own
+      // month, so a month of ordinary days still has a shape
+      let fullest = 1;
+      for (const rec of n.mo.days) {
+        let busy = 0;
+        for (let i = 2; i < rec.acts.length; i += 5) busy += rec.acts[i];
+        rec.busy = busy;
+        if (busy > fullest) fullest = busy;
+      }
       return n.mo.days.map(function (rec) {
         const ev = rec.events.length ? said(rec.events)
                                      : { what: dayLabel(rec), cls: "quiet" };
@@ -253,12 +266,16 @@ function childrenOf(n) {
         // the number is a day of its month and is not given the month's name
         const dom = (rec.dayOfLife % 365) - Math.floor(rec.month * 365 / 12) + 1;
         return node(n.id + "/d" + rec.dayOfLife, "day", {
-          when: "the " + dom, what: ev.what, cls: ev.cls, rec: rec,
+          when: "the " + dom,
+          what: ev.what,
+          cls: ev.cls + (!rec.events.length && rec.insomnia ? " restless" : ""),
+          rec: rec, size: rec.busy / fullest,
           tail: clock(rec.wake) + "–" + clock(rec.asleep),
           notable: rec.events.length > 0 || rec.insomnia,
           leaf: !rec.acts.length && !rec.thoughts.length,
         });
       });
+    }
 
     case "day": {
       const rec = n.rec, out = [];
@@ -481,11 +498,17 @@ function castRows() {
 
 // the one rule, applied at every scale: if there are few enough, show them
 // all; otherwise show the ones something happened in, and count the rest
+// A band is either closed — a colour, no words — or open: its own line, and
+// then its children, nested and inset. Which of a set of children get words
+// is the rule that was already here: few enough to read and they are read;
+// too many and they are a colour you can tap. So a life is seventy colours
+// and a month is thirty, while a year's months, a day's things and a thing's
+// thoughts are said in full. Nothing is hidden behind a count any more.
+
 function shown(n) {
   const kids = n.kids || childrenOf(n);
-  // A moment is one branch. While it is being taken the tree shows that
-  // branch and nothing beside it, so it grows out of the bar rather than
-  // being found somewhere in eighty years of rows.
+  // a moment is one branch: while it is being taken, each level offers only
+  // the child the moment went through, so it grows out of its own colour
   if (state.only) {
     const at = state.only.indexOf(n.id);
     if (at >= 0 && at + 1 < state.only.length) {
@@ -493,60 +516,70 @@ function shown(n) {
       if (next) return [next];
     }
   }
-  // every year is there and every year opens, including the ones with
-  // nothing in them; a year nothing happened in was still lived through
-  if (n.kind === "life" || n.kind === "year") return kids;
-  if (kids.length <= CAP || state.more.has(n.id)) return kids;
-  const worth = kids.filter((k) => k.notable);
-  // if nothing happened in any of them there is nothing to fold away, and a
-  // stretch in which nothing happened is still the thing you asked for
-  if (!worth.length || worth.length === kids.length) return kids;
-  return worth.concat([node(n.id + "/+", "more", {
-    what: t("more").replace("%", fmt(kids.length - worth.length)), cls: "more",
-    leaf: true, of: n.id,
-  })]);
+  return kids;
 }
 
-function row(n, depth, open) {
-  const cls = "node d" + depth + " " + (n.cls || "") +
-              (open ? " open" : "") + (n.leaf ? " leaf" : "") +
-              (state.path && state.path.indexOf(n.id) >= 0 ? " here" : "");
-  return '<button class="' + cls + '" style="--d:' + depth + '" data-id="' +
-    esc(n.id) + '" type="button">' +
+function classOf(n) {
+  return (n.cls || "") +
+         (state.path && state.path.indexOf(n.id) >= 0 ? " here" : "");
+}
+
+function saying(n) {
+  const bits = [n.when, n.what, n.tail].filter(Boolean);
+  return bits.join(" · ");
+}
+
+function cap(n, open) {
+  return '<button class="cap ' + classOf(n) + (open ? " open" : "") +
+    (n.leaf ? " leaf" : "") + '" data-id="' + esc(n.id) + '" type="button">' +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
     '<span class="when">' + esc(n.when || "") + "</span>" +
     '<span class="what">' + esc(n.what || "") + "</span>" +
     '<span class="tail">' + esc(n.tail || "") + "</span></button>";
 }
 
-function emit(out, nodes, depth) {
+// A closed band's width is how full that stretch of the life was, so the
+// column has a silhouette — thin at either end of a life, thick through the
+// middle of it — rather than being a barcode.
+function tick(n) {
+  const w = 26 + Math.round(74 * Math.max(0, Math.min(1, n.size || 0)));
+  return '<button class="tick ' + classOf(n) + '" data-id="' + esc(n.id) +
+    '" type="button" style="width:' + w + '%" title="' +
+    esc(saying(n)) + '"></button>';
+}
+
+function bands(nodes) {
+  const asColour = nodes.length > CAP;
+  let out = "";
   for (const n of nodes) {
     state.nodes.set(n.id, n);
-    const open = !n.leaf && state.open.has(n.id);
-    out.push(row(n, depth, open));
-    if (open) emit(out, shown(n), depth + 1);
+    if (!n.leaf && state.open.has(n.id)) {
+      out += '<div class="band">' + cap(n, true) +
+             '<div class="kids">' + bands(shown(n)) + "</div></div>";
+    } else if (asColour) {
+      out += tick(n);
+    } else {
+      out += cap(n, false);
+    }
   }
+  return out;
 }
 
 function draw() {
-  const out = [];
   state.nodes = new Map();
-  emit(out, roots(), 0);
-  $("#tree").innerHTML = out.join("");
+  $("#tree").innerHTML = state.life ? bands(roots()) : "";
 }
 
-function drawAll() { draw(); drawBar(); }
+function drawAll() { draw(); }
 
 function clicked(id) {
   const n = state.nodes.get(id);
   if (!n) return;
-  if (n.kind === "more") { state.more.add(n.of); drawAll(); return; }
   // touching the branch puts the rest of the life back around it, still
   // open; touching anything else does that and then does what was asked
   if (state.only) {
     const onBranch = state.only.indexOf(id) >= 0;
     state.open = new Set(state.only);
-    state.more.add(state.only[2]);
     state.only = null; state.path = null;
     if (onBranch || n.leaf) { drawAll(); return; }
   }
@@ -554,31 +587,6 @@ function clicked(id) {
   if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
   state.path = null;
   drawAll();
-}
-
-// ------------------------------------------------------------------ the life bar
-
-// The page's premise is that everything is a row and any row can be opened.
-// This row is the life: one tick a year, and what it was is its colour.
-function drawBar() {
-  const bar = $("#bar");
-  if (!state.years) { bar.hidden = true; return; }
-  bar.hidden = false;
-  bar.innerHTML = state.years.map(function (y) {
-    const kind = y.events.length ? (CLS[y.events[0].kind] || "ev") : "";
-    const cls = kind.replace("ev ", "") || (y.events.length ? "ev" : "");
-    const said = y.events.length ? y.events.map((e) => e.text).join(" · ")
-                                 : mostly(y.mins);
-    return '<button type="button" data-age="' + y.age + '" class="' +
-      (kind ? cls + (kind.indexOf("ev") === 0 ? " ev" : "") : "") +
-      '" title="' + esc(y.age + " — " + said) + '"></button>';
-  }).join("");
-  const from = state.path ? state.path[1] : null;
-  for (const b of bar.querySelectorAll("button")) {
-    const id = "life/y" + b.dataset.age;
-    if (id === from) b.classList.add("here");
-    else if (state.open.has(id)) b.classList.add("open");
-  }
 }
 
 // ------------------------------------------------------------------ a moment
@@ -611,11 +619,11 @@ function aMoment() {
   state.only = path;
   drawAll();
 
-  // put the bar where it can be watched, once, and then leave the page
-  // alone: the branch is supposed to grow out of the bar, and it cannot do
-  // that if every level drags the view somewhere else
-  const bar = $("#bar");
-  window.scrollTo({ top: Math.max(0, bar.offsetTop - 80), behavior: "smooth" });
+  // put the top of the life where it can be watched, once, and then leave
+  // the page alone: the branch is supposed to grow out of the colours, and
+  // it cannot do that if every level drags the view somewhere else
+  const tree = $("#tree");
+  window.scrollTo({ top: Math.max(0, tree.offsetTop - 70), behavior: "smooth" });
 
   let step = 0;
   (function down() {
@@ -626,7 +634,7 @@ function aMoment() {
     if (step >= path.length) {
       // only if the end of it fell off the bottom, and only by as much as
       // it fell off by
-      const last = $('.node[data-id="' + path[path.length - 1] + '"]');
+      const last = $('[data-id="' + path[path.length - 1] + '"]');
       if (last) {
         const box = last.getBoundingClientRect();
         const over = box.bottom - window.innerHeight + 20;
@@ -725,7 +733,6 @@ function live() {
   while (state.life.alive && guard++ < 130) state.life.stepYear();
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
-  state.more = new Set();
   state.path = null; state.only = null;
   state.showSetup = false;
   $("#run").disabled = false;
@@ -751,22 +758,11 @@ function init() {
   buildKnobs();
   draw();
   $("#tree").addEventListener("click", function (e) {
-    const b = e.target.closest ? e.target.closest(".node") : null;
+    const b = e.target.closest ? e.target.closest("[data-id]") : null;
     if (b) clicked(b.dataset.id);
   });
   $("#run").addEventListener("click", run);
   $("#moment").addEventListener("click", aMoment);
-  $("#bar").addEventListener("click", function (e) {
-    const b = e.target.closest ? e.target.closest("button") : null;
-    if (!b) return;
-    const id = "life/y" + b.dataset.age;
-    state.path = null; state.only = null;
-    state.open.add("life");
-    if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
-    drawAll();
-    const row = $('.node[data-id="' + id + '"]');
-    if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
-  });
   $("#lang").addEventListener("click", function () {
     state.lang = state.lang === "hr" ? "en" : "hr";
     chrome(); buildKnobs(); drawAll();

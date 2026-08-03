@@ -5,19 +5,22 @@
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a tree, and everything in it is a row. The bar is the whole " +
-      "of it, a tick to a year. The rows below are the same life opened: a year " +
-      "holds its months, a month its days, a day the things you did, a thing the " +
-      "thoughts you had on the way to it.",
+    blurb: "A life is a column of colour, a band to a year, as wide as the year " +
+      "was full. Open one and it says what it was, and holds its twelve months; " +
+      "open a month and it holds its days, again as colour; open a day and it " +
+      "holds the things you did, and a thing holds the thoughts you had on the " +
+      "way to it.",
     run: "run one life", again: "change the conditions", running: "living it…",
     moment: "a moment of it",
     seed: "seed", roll: "roll",
-    hint: "A moment of it takes one of the twenty million or so minutes that were " +
-      "actually lived and opens the way down to it, a level at a time, ending on " +
-      "whatever was being thought. Every year is there and every year opens, " +
-      "including the ones nothing happened in, which were lived through all the " +
-      "same; below the year the children something happened in are shown and the " +
-      "rest are counted. A year also holds the six numbers the loop was reading " +
+    hint: "Whether a thing is a colour or a sentence is decided by how many of " +
+      "them there are: few enough to read and they are read, too many and they " +
+      "are a colour you can open. So a life is seventy colours and a month is " +
+      "thirty, while a year's months, a day's things and a thing's thoughts are " +
+      "said in full. A moment of it takes one of the twenty million or so minutes " +
+      "that were actually lived and opens the way down to it, a level at a time, " +
+      "ending on whatever was being thought. A year also holds the six numbers " +
+      "the loop was reading " +
       "while it passed, computed by wind_up() in world.py out of what you were " +
       "given, what was done to you before you could object, and what happens to be " +
       "going on — and beside each one is the line of live.py that reads it.",
@@ -72,17 +75,20 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stablo, a sve je u njemu redak. Traka je cijeli život, crtica " +
-      "po godini. Redci ispod isti su taj život, otvoren: godina drži svoje mjesece, " +
-      "mjesec dane, dan ono što si radio, radnja misli koje su joj prethodile.",
+    blurb: "Život je stupac boje, traka po godini, širok koliko je godina bila " +
+      "puna. Otvoriš jednu i kaže što je bila, i drži svojih dvanaest mjeseci; " +
+      "otvoriš mjesec i drži svoje dane, opet kao boju; otvoriš dan i drži ono " +
+      "što si radio, a radnja drži misli koje su joj prethodile.",
     run: "pokreni jedan život", again: "promijeni uvjete", running: "živi se…",
     moment: "jedan njegov trenutak",
     seed: "sjeme", roll: "baci",
-    hint: "Jedan njegov trenutak uzima jednu od dvadesetak milijuna stvarno " +
-      "proživljenih minuta i otvara put do nje, razinu po razinu, sve do onoga što " +
-      "se u njoj mislilo. Svaka je godina tu i svaka se otvara, i one u kojima se " +
-      "ništa nije dogodilo; ispod godine prikazuje se ono u čemu se nešto dogodilo, " +
-      "ostalo se prebroji. Godina drži i šest brojeva koje je petlja čitala, a " +
+    hint: "Je li nešto boja ili rečenica, odlučuje koliko ih ima: ako ih je malo " +
+      "da se pročitaju, čitaju se; ako ih je previše, boja su koju možeš otvoriti. " +
+      "Tako je život sedamdeset boja, a mjesec trideset, dok su mjeseci u godini, " +
+      "radnje u danu i misli uz radnju izrečene u cijelosti. Jedan njegov trenutak " +
+      "uzima jednu od dvadesetak milijuna stvarno proživljenih minuta i otvara put " +
+      "do nje, razinu po razinu, sve do onoga što se u njoj mislilo. Godina drži i " +
+      "šest brojeva koje je petlja čitala, a " +
       "računa ih wind_up() u world.py iz onoga što si dobio, onoga što ti je " +
       "učinjeno prije nego si mogao prigovoriti, i onoga što se u tom trenutku " +
       "događa — uz svaki piše redak iz live.py koji ga čita.",

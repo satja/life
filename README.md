@@ -18,42 +18,35 @@ For one row per year instead, which is shorter and shows the shape better:
     $ LIFE_DETAIL=year python3 main.py
 
 There is also a web version in "web/". You set the conditions — the century,
-conscience, temptation, sleep, and the seed — and run one life. It is one
-row, drawn at every scale, and you see only what happened in it:
+conscience, temptation, sleep, and the seed — and run one life. What comes
+back is a column of colour: a band to a year, as wide as the year was full,
+so it is thin at either end of a life and thick through the middle of it.
+The colour is what happened — an event, something out in the world, a loss,
+something kept, and the last one.
+
+Whether a thing is a colour or a sentence is decided by how many of them
+there are. Few enough to read and they are read; too many and they are a
+colour you can open. So a life is seventy colours and a month is thirty,
+while a year's twelve months, a day's things and a thing's thoughts are said
+in full. Nothing is hidden behind a count.
 
     43   the factory closes                                    middle
       jan  the factory closes                                    402 h
-        1 jan  the factory closes                          07:24-21:09
+        the 1   the factory closes                        07:24-21:09
           19:10  looking for work                               180 min
                  whether this is the job
-      ... 25 more
-
-Above the rows is a bar: the whole life, a tick to a year, coloured by what
-happened in it. It is the same idea one scale up — everything here is a row,
-and this row is the life. Clicking a tick goes there.
 
 There is also "a moment of it", which takes one of the twenty million or so
 minutes that were actually lived and opens the way down to it a level at a
-time. While it is being taken the tree shows that branch and nothing beside
-it, so it grows out of its own tick on the bar rather than being found
-somewhere in eighty years of rows, and it ends on whatever was being
-thought:
+time. While it is being taken, each level offers only the child the moment
+went through, so one branch grows out of the column and there is nothing
+beside it. Touching the branch puts the rest of the life back around it.
 
     17   falls in love, silently                           teenager
       jan  mostly staying up too late                          493 h
         the 24  mostly staying in                        08:28-00:51
           22:08  the shopping                                  90 min
                  whether they meant it
-
-Touching the branch puts the rest of the life back around it, still open.
-
-Every year is there and every year opens, including the ones nothing
-happened in. Open a year and you get its months, a month
-and you get its days, a day and you get the things you did, a thing and you
-get the thoughts you had on the way to it. Below the year the rule is the
-same at every depth: the children something happened in are shown, the rest
-are counted. What is left after the last thing done belongs to the night,
-which is where the thinking goes that the day had no room for.
 
 A year also holds the six numbers the loop was reading while it passed, and
 each of them opens into its working — the base the knobs set, then what
@@ -69,7 +62,9 @@ The account at the end goes the other way: a trait opens into the dials it
 turns, and each says which line reads it.
 
 The commentary is Croatian and English; the program and everything it says
-stay in the language it was written in.
+stay in the language it was written in. The footer carries the day the page
+was built and a hash of its own bytes, so an old copy out of a cache is
+visible rather than argued about.
 
 Build with "python3 web/build.py", which writes "web/life.html" and
 "docs/index.html". GitHub Pages serves the /docs folder at

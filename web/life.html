@@ -80,99 +80,77 @@ button.ghost { font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
 button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-/* ---- the whole life, as one row of years ----
-   The page's premise is that everything is a row. This row is the life. */
-.bar { display: flex; gap: 1px; margin: 0 0 18px; height: 34px; align-items: stretch; }
-.bar button {
-  flex: 1 1 0; min-width: 0; border: 0; padding: 0; cursor: pointer;
-  background: var(--hair); position: relative;
-}
-.bar button:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
-.bar button.ev    { background: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
-.bar button.world { background: var(--warm); }
-.bar button.loss  { background: var(--loss); }
-.bar button.kept  { background: var(--accent); }
-.bar button.dead  { background: var(--ink); }
-.bar button.open  { outline: 1px solid var(--accent); outline-offset: -1px; }
-/* the year a moment was taken out of, which the branch below hangs from */
-.bar button.here  { background: var(--accent); outline: 2px solid var(--ink);
-                    outline-offset: -1px; }
+/* ---- one band, at every scale ----
+   A band is either closed — a colour, no words — or open: its own line, and
+   then its children, nested and inset. Which of a set of children get words
+   is decided by how many there are: few enough to read and they are read,
+   too many and they are a colour you can tap. So a life is seventy colours
+   and a month is thirty, while a year's months, a day's things and a thing's
+   thoughts are said in full. */
+.tree { border-top: 1px solid var(--ink); padding-top: 6px; }
+.kids { margin-left: 13px; padding-left: 10px;
+        border-left: 1px solid var(--rail); }
 
-/* ---- one row, at every scale ----
-   Every row is indented by its depth, and behind it runs one hairline rail
-   per level above it, so where a thing sits is legible without counting. */
-/* a fixed step, so the rails stay aligned when the type steps down */
-.tree { --step: 31px; border-top: 1px solid var(--ink); }
-.node {
+.tick {
+  display: block; height: 9px; margin: 0 0 2px;
+  border: 0; padding: 0; cursor: pointer; background: var(--hair);
+  transition: width .12s ease;
+}
+.tick:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
+.tick.ev    { background: color-mix(in srgb, var(--ink) 62%, var(--paper)); }
+.tick.world { background: var(--warm); }
+.tick.loss  { background: var(--loss); }
+.tick.kept  { background: var(--accent); }
+.tick.dead  { background: var(--ink); }
+.tick.quiet { background: var(--hair); }
+/* a night that did not go well is not an event, but it is not nothing */
+.tick.restless { background: color-mix(in srgb, var(--loss) 32%, var(--hair)); }
+.tick.here  { background: var(--accent); outline: 2px solid var(--ink);
+              outline-offset: -1px; }
+
+.cap {
   display: grid;
   grid-template-columns: 1.1em 5.6em 1fr auto;
-  gap: 0 10px;
-  align-items: baseline;
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  border: 0;
-  padding: 4px 4px 4px calc(var(--d) * var(--step) + 6px);
-  cursor: pointer;
-  color: inherit;
-  background-color: transparent;
-  background-image: repeating-linear-gradient(to right,
-      var(--rail) 0 1px, transparent 1px var(--step));
-  background-size: calc(var(--d) * var(--step)) 100%;
-  background-repeat: no-repeat;
-  background-position: 0.5em 0;
+  gap: 0 10px; align-items: baseline; width: 100%;
+  font: inherit; text-align: left; border: 0; color: inherit;
+  background: none; padding: 3px 4px; cursor: pointer;
 }
-.node:hover { background-color: color-mix(in srgb, var(--accent) 8%, transparent); }
-.node.leaf { cursor: default; }
-.node.leaf:hover { background-color: transparent; }
-/* an open row is the ground its children stand on, so it is given some */
-.node.open { background-color: color-mix(in srgb, var(--accent) 5%, transparent); }
-.node.open:hover { background-color: color-mix(in srgb, var(--accent) 11%, transparent); }
-.node > .mark { color: var(--faint); }
-.node.open > .mark { color: var(--accent); }
-.node > .when { color: var(--muted); font-variant-numeric: tabular-nums;
-                white-space: nowrap; text-align: right; overflow: hidden; }
-.node > .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-                min-width: 0; }
-.node > .tail { color: var(--faint); font-size: 11.5px; white-space: nowrap;
-                font-variant-numeric: tabular-nums; }
+.cap:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.cap.leaf { cursor: default; }
+.cap.leaf:hover { background: none; }
+.cap.open { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.cap.here { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.cap > .mark { color: var(--faint); }
+.cap.open > .mark { color: var(--accent); }
+.cap > .when { color: var(--muted); font-variant-numeric: tabular-nums;
+               white-space: nowrap; text-align: right; overflow: hidden; }
+.cap > .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+               min-width: 0; }
+.cap > .tail { color: var(--faint); font-size: 11.5px; white-space: nowrap;
+               font-variant-numeric: tabular-nums; }
 
-/* the hairline between rows belongs to the top two levels; deeper down the
-   rails carry the structure and a rule every row would only be noise */
-.node.d0, .node.d1 { border-bottom: 1px solid var(--hair); }
-.node.d0 { border-bottom-color: var(--faint); }
-
-/* the way down to one minute of it, while the way is being opened */
-.node.here { background-color: color-mix(in srgb, var(--accent) 14%, transparent); }
-.node.here > .what { color: var(--ink); }
-.node.here.thought > .what { color: var(--accent); font-style: italic; }
-
-/* each level is a little quieter than the one it hangs from */
-.node.d2 { font-size: 13px; }
-.node.d3 { font-size: 12.6px; }
-.node.d4 { font-size: 12.3px; }
-.node.d5, .node.d6, .node.d7 { font-size: 12px; }
-
-.node.ev > .what { color: var(--ink); }
-.node.ev.world > .what { color: var(--warm); }
-.node.ev.loss > .what { color: var(--loss); }
-.node.ev.kept > .what { color: var(--accent); }
-.node.quiet > .what { color: var(--muted); }
-.node.thought > .what { color: var(--muted); font-style: italic; }
-.node.more > .what { color: var(--faint); }
-.node.dead > .what { color: var(--faint); }
-.node.head { border-bottom-color: var(--ink); padding-top: 10px; padding-bottom: 6px; }
-.node.head > .what { font-size: 15px; letter-spacing: .02em; }
-.node.head > .mark { color: var(--ink); }
+.cap.ev > .what { color: var(--ink); }
+.cap.ev.world > .what { color: var(--warm); }
+.cap.ev.loss > .what { color: var(--loss); }
+.cap.ev.kept > .what { color: var(--accent); }
+.cap.quiet > .what { color: var(--muted); }
+.cap.thought > .what { color: var(--muted); font-style: italic; }
+.cap.here.thought > .what { color: var(--accent); }
+.cap.dead > .what { color: var(--faint); }
+.cap.head { border-bottom: 1px solid var(--ink); padding: 8px 4px 6px; }
+.cap.head > .what { font-size: 15px; letter-spacing: .02em; }
+.cap.head > .mark { color: var(--ink); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 620px) {
   body { font-size: 12.5px; }
   .wrap { padding: 20px 12px 60px; }
-  .tree { --step: 19px; }
-  .node { grid-template-columns: 1em 4.4em 1fr; }
-  .node > .tail { grid-column: 2 / -1; font-size: 10.5px;
-                  white-space: normal; min-width: 0; }
+  /* a colour has to be worth aiming a thumb at */
+  .tick { height: 13px; margin-bottom: 2px; }
+  .kids { margin-left: 5px; padding-left: 5px; }
+  .cap { grid-template-columns: 1em 4.4em 1fr; }
+  .cap > .tail { grid-column: 2 / -1; font-size: 10.5px;
+                 white-space: normal; min-width: 0; }
   .seedline { margin-left: 0; }
 }
 </style>
@@ -193,11 +171,10 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
     <button class="ghost" id="moment" type="button" hidden></button>
   </div>
 
-  <div class="bar" id="bar" hidden></div>
   <div class="tree" id="tree"></div>
 
   <p class="foot" id="hint"></p>
-  <p class="foot stamp">2026-08-03 · 59acf6b</p>
+  <p class="foot stamp">2026-08-03 · 16e43a9</p>
 </div>
 
 <script>// Only the commentary is translated. Everything the program says — the names
@@ -207,19 +184,22 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 const UI = {
   en: {
     lang: "hrvatski",
-    blurb: "A life is a tree, and everything in it is a row. The bar is the whole " +
-      "of it, a tick to a year. The rows below are the same life opened: a year " +
-      "holds its months, a month its days, a day the things you did, a thing the " +
-      "thoughts you had on the way to it.",
+    blurb: "A life is a column of colour, a band to a year, as wide as the year " +
+      "was full. Open one and it says what it was, and holds its twelve months; " +
+      "open a month and it holds its days, again as colour; open a day and it " +
+      "holds the things you did, and a thing holds the thoughts you had on the " +
+      "way to it.",
     run: "run one life", again: "change the conditions", running: "living it…",
     moment: "a moment of it",
     seed: "seed", roll: "roll",
-    hint: "A moment of it takes one of the twenty million or so minutes that were " +
-      "actually lived and opens the way down to it, a level at a time, ending on " +
-      "whatever was being thought. Every year is there and every year opens, " +
-      "including the ones nothing happened in, which were lived through all the " +
-      "same; below the year the children something happened in are shown and the " +
-      "rest are counted. A year also holds the six numbers the loop was reading " +
+    hint: "Whether a thing is a colour or a sentence is decided by how many of " +
+      "them there are: few enough to read and they are read, too many and they " +
+      "are a colour you can open. So a life is seventy colours and a month is " +
+      "thirty, while a year's months, a day's things and a thing's thoughts are " +
+      "said in full. A moment of it takes one of the twenty million or so minutes " +
+      "that were actually lived and opens the way down to it, a level at a time, " +
+      "ending on whatever was being thought. A year also holds the six numbers " +
+      "the loop was reading " +
       "while it passed, computed by wind_up() in world.py out of what you were " +
       "given, what was done to you before you could object, and what happens to be " +
       "going on — and beside each one is the line of live.py that reads it.",
@@ -274,17 +254,20 @@ const UI = {
   },
   hr: {
     lang: "english",
-    blurb: "Život je stablo, a sve je u njemu redak. Traka je cijeli život, crtica " +
-      "po godini. Redci ispod isti su taj život, otvoren: godina drži svoje mjesece, " +
-      "mjesec dane, dan ono što si radio, radnja misli koje su joj prethodile.",
+    blurb: "Život je stupac boje, traka po godini, širok koliko je godina bila " +
+      "puna. Otvoriš jednu i kaže što je bila, i drži svojih dvanaest mjeseci; " +
+      "otvoriš mjesec i drži svoje dane, opet kao boju; otvoriš dan i drži ono " +
+      "što si radio, a radnja drži misli koje su joj prethodile.",
     run: "pokreni jedan život", again: "promijeni uvjete", running: "živi se…",
     moment: "jedan njegov trenutak",
     seed: "sjeme", roll: "baci",
-    hint: "Jedan njegov trenutak uzima jednu od dvadesetak milijuna stvarno " +
-      "proživljenih minuta i otvara put do nje, razinu po razinu, sve do onoga što " +
-      "se u njoj mislilo. Svaka je godina tu i svaka se otvara, i one u kojima se " +
-      "ništa nije dogodilo; ispod godine prikazuje se ono u čemu se nešto dogodilo, " +
-      "ostalo se prebroji. Godina drži i šest brojeva koje je petlja čitala, a " +
+    hint: "Je li nešto boja ili rečenica, odlučuje koliko ih ima: ako ih je malo " +
+      "da se pročitaju, čitaju se; ako ih je previše, boja su koju možeš otvoriti. " +
+      "Tako je život sedamdeset boja, a mjesec trideset, dok su mjeseci u godini, " +
+      "radnje u danu i misli uz radnju izrečene u cijelosti. Jedan njegov trenutak " +
+      "uzima jednu od dvadesetak milijuna stvarno proživljenih minuta i otvara put " +
+      "do nje, razinu po razinu, sve do onoga što se u njoj mislilo. Godina drži i " +
+      "šest brojeva koje je petlja čitala, a " +
       "računa ih wind_up() u world.py iz onoga što si dobio, onoga što ti je " +
       "učinjeno prije nego si mogao prigovoriti, i onoga što se u tom trenutku " +
       "događa — uz svaki piše redak iz live.py koji ga čita.",
@@ -1987,12 +1970,11 @@ const state = {
   path: null,                // the way down to one minute
   only: null,                // and, while it is being taken, the only way shown
   open: new Set(),           // which rows are unfolded
-  more: new Set(),           // which "… n more" rows have been asked for
   nodes: new Map(),          // what is on screen, so a click can be answered
 };
 const t = (k) => UI[state.lang][k];
 
-const CAP = 12;              // more children than this and the quiet ones fold away
+const CAP = 24;              // more children than this and they are a colour, not a line
 
 // which line of live.py reads which dial. The lines are not shown any more,
 // but a number is worth less if you cannot say where it is read.
@@ -2027,13 +2009,18 @@ function indexLife(life) {
       mo.mins.set(name, (mo.mins.get(name) || 0) + rec.acts[i + 2]);
     }
   }
+  let fullest = 1;
   for (const y of years) {
     for (const mo of y.months) {
       if (!mo) continue;
       for (const [k, v] of mo.mins) y.mins.set(k, (y.mins.get(k) || 0) + v);
     }
     y.months = y.months.filter(Boolean);
+    y.busy = 0;
+    for (const v of y.mins.values()) y.busy += v;
+    if (y.busy > fullest) fullest = y.busy;
   }
+  for (const y of years) y.size = y.busy / fullest;
   // What a year was is not what there was most of — forty years running that
   // all say "mostly working" say nothing at all. What a year was is what
   // arrived in it, what left it, or what it drifted towards; and a year that
@@ -2181,7 +2168,7 @@ function childrenOf(n) {
           : y.change ? { what: t(y.change[0]) + " " + y.change[1], cls: "quiet" }
           : { what: mostly(y.mins), cls: "quiet" };
         return node("life/y" + y.age, "year", {
-          when: String(y.age), what: ev.what, cls: ev.cls, y: y,
+          when: String(y.age), what: ev.what, cls: ev.cls, y: y, size: y.size,
           tail: stageAt(y.age), notable: y.events.length > 0, leaf: false,
         });
       });
@@ -2203,7 +2190,16 @@ function childrenOf(n) {
       return out;
     }
 
-    case "month":
+    case "month": {
+      // a day's width is how full it was against the fullest day of its own
+      // month, so a month of ordinary days still has a shape
+      let fullest = 1;
+      for (const rec of n.mo.days) {
+        let busy = 0;
+        for (let i = 2; i < rec.acts.length; i += 5) busy += rec.acts[i];
+        rec.busy = busy;
+        if (busy > fullest) fullest = busy;
+      }
       return n.mo.days.map(function (rec) {
         const ev = rec.events.length ? said(rec.events)
                                      : { what: dayLabel(rec), cls: "quiet" };
@@ -2211,12 +2207,16 @@ function childrenOf(n) {
         // the number is a day of its month and is not given the month's name
         const dom = (rec.dayOfLife % 365) - Math.floor(rec.month * 365 / 12) + 1;
         return node(n.id + "/d" + rec.dayOfLife, "day", {
-          when: "the " + dom, what: ev.what, cls: ev.cls, rec: rec,
+          when: "the " + dom,
+          what: ev.what,
+          cls: ev.cls + (!rec.events.length && rec.insomnia ? " restless" : ""),
+          rec: rec, size: rec.busy / fullest,
           tail: clock(rec.wake) + "–" + clock(rec.asleep),
           notable: rec.events.length > 0 || rec.insomnia,
           leaf: !rec.acts.length && !rec.thoughts.length,
         });
       });
+    }
 
     case "day": {
       const rec = n.rec, out = [];
@@ -2439,11 +2439,17 @@ function castRows() {
 
 // the one rule, applied at every scale: if there are few enough, show them
 // all; otherwise show the ones something happened in, and count the rest
+// A band is either closed — a colour, no words — or open: its own line, and
+// then its children, nested and inset. Which of a set of children get words
+// is the rule that was already here: few enough to read and they are read;
+// too many and they are a colour you can tap. So a life is seventy colours
+// and a month is thirty, while a year's months, a day's things and a thing's
+// thoughts are said in full. Nothing is hidden behind a count any more.
+
 function shown(n) {
   const kids = n.kids || childrenOf(n);
-  // A moment is one branch. While it is being taken the tree shows that
-  // branch and nothing beside it, so it grows out of the bar rather than
-  // being found somewhere in eighty years of rows.
+  // a moment is one branch: while it is being taken, each level offers only
+  // the child the moment went through, so it grows out of its own colour
   if (state.only) {
     const at = state.only.indexOf(n.id);
     if (at >= 0 && at + 1 < state.only.length) {
@@ -2451,60 +2457,70 @@ function shown(n) {
       if (next) return [next];
     }
   }
-  // every year is there and every year opens, including the ones with
-  // nothing in them; a year nothing happened in was still lived through
-  if (n.kind === "life" || n.kind === "year") return kids;
-  if (kids.length <= CAP || state.more.has(n.id)) return kids;
-  const worth = kids.filter((k) => k.notable);
-  // if nothing happened in any of them there is nothing to fold away, and a
-  // stretch in which nothing happened is still the thing you asked for
-  if (!worth.length || worth.length === kids.length) return kids;
-  return worth.concat([node(n.id + "/+", "more", {
-    what: t("more").replace("%", fmt(kids.length - worth.length)), cls: "more",
-    leaf: true, of: n.id,
-  })]);
+  return kids;
 }
 
-function row(n, depth, open) {
-  const cls = "node d" + depth + " " + (n.cls || "") +
-              (open ? " open" : "") + (n.leaf ? " leaf" : "") +
-              (state.path && state.path.indexOf(n.id) >= 0 ? " here" : "");
-  return '<button class="' + cls + '" style="--d:' + depth + '" data-id="' +
-    esc(n.id) + '" type="button">' +
+function classOf(n) {
+  return (n.cls || "") +
+         (state.path && state.path.indexOf(n.id) >= 0 ? " here" : "");
+}
+
+function saying(n) {
+  const bits = [n.when, n.what, n.tail].filter(Boolean);
+  return bits.join(" · ");
+}
+
+function cap(n, open) {
+  return '<button class="cap ' + classOf(n) + (open ? " open" : "") +
+    (n.leaf ? " leaf" : "") + '" data-id="' + esc(n.id) + '" type="button">' +
     '<span class="mark">' + (n.leaf ? "" : open ? "▾" : "▸") + "</span>" +
     '<span class="when">' + esc(n.when || "") + "</span>" +
     '<span class="what">' + esc(n.what || "") + "</span>" +
     '<span class="tail">' + esc(n.tail || "") + "</span></button>";
 }
 
-function emit(out, nodes, depth) {
+// A closed band's width is how full that stretch of the life was, so the
+// column has a silhouette — thin at either end of a life, thick through the
+// middle of it — rather than being a barcode.
+function tick(n) {
+  const w = 26 + Math.round(74 * Math.max(0, Math.min(1, n.size || 0)));
+  return '<button class="tick ' + classOf(n) + '" data-id="' + esc(n.id) +
+    '" type="button" style="width:' + w + '%" title="' +
+    esc(saying(n)) + '"></button>';
+}
+
+function bands(nodes) {
+  const asColour = nodes.length > CAP;
+  let out = "";
   for (const n of nodes) {
     state.nodes.set(n.id, n);
-    const open = !n.leaf && state.open.has(n.id);
-    out.push(row(n, depth, open));
-    if (open) emit(out, shown(n), depth + 1);
+    if (!n.leaf && state.open.has(n.id)) {
+      out += '<div class="band">' + cap(n, true) +
+             '<div class="kids">' + bands(shown(n)) + "</div></div>";
+    } else if (asColour) {
+      out += tick(n);
+    } else {
+      out += cap(n, false);
+    }
   }
+  return out;
 }
 
 function draw() {
-  const out = [];
   state.nodes = new Map();
-  emit(out, roots(), 0);
-  $("#tree").innerHTML = out.join("");
+  $("#tree").innerHTML = state.life ? bands(roots()) : "";
 }
 
-function drawAll() { draw(); drawBar(); }
+function drawAll() { draw(); }
 
 function clicked(id) {
   const n = state.nodes.get(id);
   if (!n) return;
-  if (n.kind === "more") { state.more.add(n.of); drawAll(); return; }
   // touching the branch puts the rest of the life back around it, still
   // open; touching anything else does that and then does what was asked
   if (state.only) {
     const onBranch = state.only.indexOf(id) >= 0;
     state.open = new Set(state.only);
-    state.more.add(state.only[2]);
     state.only = null; state.path = null;
     if (onBranch || n.leaf) { drawAll(); return; }
   }
@@ -2512,31 +2528,6 @@ function clicked(id) {
   if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
   state.path = null;
   drawAll();
-}
-
-// ------------------------------------------------------------------ the life bar
-
-// The page's premise is that everything is a row and any row can be opened.
-// This row is the life: one tick a year, and what it was is its colour.
-function drawBar() {
-  const bar = $("#bar");
-  if (!state.years) { bar.hidden = true; return; }
-  bar.hidden = false;
-  bar.innerHTML = state.years.map(function (y) {
-    const kind = y.events.length ? (CLS[y.events[0].kind] || "ev") : "";
-    const cls = kind.replace("ev ", "") || (y.events.length ? "ev" : "");
-    const said = y.events.length ? y.events.map((e) => e.text).join(" · ")
-                                 : mostly(y.mins);
-    return '<button type="button" data-age="' + y.age + '" class="' +
-      (kind ? cls + (kind.indexOf("ev") === 0 ? " ev" : "") : "") +
-      '" title="' + esc(y.age + " — " + said) + '"></button>';
-  }).join("");
-  const from = state.path ? state.path[1] : null;
-  for (const b of bar.querySelectorAll("button")) {
-    const id = "life/y" + b.dataset.age;
-    if (id === from) b.classList.add("here");
-    else if (state.open.has(id)) b.classList.add("open");
-  }
 }
 
 // ------------------------------------------------------------------ a moment
@@ -2569,11 +2560,11 @@ function aMoment() {
   state.only = path;
   drawAll();
 
-  // put the bar where it can be watched, once, and then leave the page
-  // alone: the branch is supposed to grow out of the bar, and it cannot do
-  // that if every level drags the view somewhere else
-  const bar = $("#bar");
-  window.scrollTo({ top: Math.max(0, bar.offsetTop - 80), behavior: "smooth" });
+  // put the top of the life where it can be watched, once, and then leave
+  // the page alone: the branch is supposed to grow out of the colours, and
+  // it cannot do that if every level drags the view somewhere else
+  const tree = $("#tree");
+  window.scrollTo({ top: Math.max(0, tree.offsetTop - 70), behavior: "smooth" });
 
   let step = 0;
   (function down() {
@@ -2584,7 +2575,7 @@ function aMoment() {
     if (step >= path.length) {
       // only if the end of it fell off the bottom, and only by as much as
       // it fell off by
-      const last = $('.node[data-id="' + path[path.length - 1] + '"]');
+      const last = $('[data-id="' + path[path.length - 1] + '"]');
       if (last) {
         const box = last.getBoundingClientRect();
         const over = box.bottom - window.innerHeight + 20;
@@ -2683,7 +2674,6 @@ function live() {
   while (state.life.alive && guard++ < 130) state.life.stepYear();
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
-  state.more = new Set();
   state.path = null; state.only = null;
   state.showSetup = false;
   $("#run").disabled = false;
@@ -2709,22 +2699,11 @@ function init() {
   buildKnobs();
   draw();
   $("#tree").addEventListener("click", function (e) {
-    const b = e.target.closest ? e.target.closest(".node") : null;
+    const b = e.target.closest ? e.target.closest("[data-id]") : null;
     if (b) clicked(b.dataset.id);
   });
   $("#run").addEventListener("click", run);
   $("#moment").addEventListener("click", aMoment);
-  $("#bar").addEventListener("click", function (e) {
-    const b = e.target.closest ? e.target.closest("button") : null;
-    if (!b) return;
-    const id = "life/y" + b.dataset.age;
-    state.path = null; state.only = null;
-    state.open.add("life");
-    if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
-    drawAll();
-    const row = $('.node[data-id="' + id + '"]');
-    if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
-  });
   $("#lang").addEventListener("click", function () {
     state.lang = state.lang === "hr" ? "en" : "hr";
     chrome(); buildKnobs(); drawAll();

@@ -78,98 +78,76 @@ button.ghost { font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
 button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-/* ---- the whole life, as one row of years ----
-   The page's premise is that everything is a row. This row is the life. */
-.bar { display: flex; gap: 1px; margin: 0 0 18px; height: 34px; align-items: stretch; }
-.bar button {
-  flex: 1 1 0; min-width: 0; border: 0; padding: 0; cursor: pointer;
-  background: var(--hair); position: relative;
-}
-.bar button:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
-.bar button.ev    { background: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
-.bar button.world { background: var(--warm); }
-.bar button.loss  { background: var(--loss); }
-.bar button.kept  { background: var(--accent); }
-.bar button.dead  { background: var(--ink); }
-.bar button.open  { outline: 1px solid var(--accent); outline-offset: -1px; }
-/* the year a moment was taken out of, which the branch below hangs from */
-.bar button.here  { background: var(--accent); outline: 2px solid var(--ink);
-                    outline-offset: -1px; }
+/* ---- one band, at every scale ----
+   A band is either closed — a colour, no words — or open: its own line, and
+   then its children, nested and inset. Which of a set of children get words
+   is decided by how many there are: few enough to read and they are read,
+   too many and they are a colour you can tap. So a life is seventy colours
+   and a month is thirty, while a year's months, a day's things and a thing's
+   thoughts are said in full. */
+.tree { border-top: 1px solid var(--ink); padding-top: 6px; }
+.kids { margin-left: 13px; padding-left: 10px;
+        border-left: 1px solid var(--rail); }
 
-/* ---- one row, at every scale ----
-   Every row is indented by its depth, and behind it runs one hairline rail
-   per level above it, so where a thing sits is legible without counting. */
-/* a fixed step, so the rails stay aligned when the type steps down */
-.tree { --step: 31px; border-top: 1px solid var(--ink); }
-.node {
+.tick {
+  display: block; height: 9px; margin: 0 0 2px;
+  border: 0; padding: 0; cursor: pointer; background: var(--hair);
+  transition: width .12s ease;
+}
+.tick:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
+.tick.ev    { background: color-mix(in srgb, var(--ink) 62%, var(--paper)); }
+.tick.world { background: var(--warm); }
+.tick.loss  { background: var(--loss); }
+.tick.kept  { background: var(--accent); }
+.tick.dead  { background: var(--ink); }
+.tick.quiet { background: var(--hair); }
+/* a night that did not go well is not an event, but it is not nothing */
+.tick.restless { background: color-mix(in srgb, var(--loss) 32%, var(--hair)); }
+.tick.here  { background: var(--accent); outline: 2px solid var(--ink);
+              outline-offset: -1px; }
+
+.cap {
   display: grid;
   grid-template-columns: 1.1em 5.6em 1fr auto;
-  gap: 0 10px;
-  align-items: baseline;
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  border: 0;
-  padding: 4px 4px 4px calc(var(--d) * var(--step) + 6px);
-  cursor: pointer;
-  color: inherit;
-  background-color: transparent;
-  background-image: repeating-linear-gradient(to right,
-      var(--rail) 0 1px, transparent 1px var(--step));
-  background-size: calc(var(--d) * var(--step)) 100%;
-  background-repeat: no-repeat;
-  background-position: 0.5em 0;
+  gap: 0 10px; align-items: baseline; width: 100%;
+  font: inherit; text-align: left; border: 0; color: inherit;
+  background: none; padding: 3px 4px; cursor: pointer;
 }
-.node:hover { background-color: color-mix(in srgb, var(--accent) 8%, transparent); }
-.node.leaf { cursor: default; }
-.node.leaf:hover { background-color: transparent; }
-/* an open row is the ground its children stand on, so it is given some */
-.node.open { background-color: color-mix(in srgb, var(--accent) 5%, transparent); }
-.node.open:hover { background-color: color-mix(in srgb, var(--accent) 11%, transparent); }
-.node > .mark { color: var(--faint); }
-.node.open > .mark { color: var(--accent); }
-.node > .when { color: var(--muted); font-variant-numeric: tabular-nums;
-                white-space: nowrap; text-align: right; overflow: hidden; }
-.node > .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-                min-width: 0; }
-.node > .tail { color: var(--faint); font-size: 11.5px; white-space: nowrap;
-                font-variant-numeric: tabular-nums; }
+.cap:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.cap.leaf { cursor: default; }
+.cap.leaf:hover { background: none; }
+.cap.open { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.cap.here { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.cap > .mark { color: var(--faint); }
+.cap.open > .mark { color: var(--accent); }
+.cap > .when { color: var(--muted); font-variant-numeric: tabular-nums;
+               white-space: nowrap; text-align: right; overflow: hidden; }
+.cap > .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+               min-width: 0; }
+.cap > .tail { color: var(--faint); font-size: 11.5px; white-space: nowrap;
+               font-variant-numeric: tabular-nums; }
 
-/* the hairline between rows belongs to the top two levels; deeper down the
-   rails carry the structure and a rule every row would only be noise */
-.node.d0, .node.d1 { border-bottom: 1px solid var(--hair); }
-.node.d0 { border-bottom-color: var(--faint); }
-
-/* the way down to one minute of it, while the way is being opened */
-.node.here { background-color: color-mix(in srgb, var(--accent) 14%, transparent); }
-.node.here > .what { color: var(--ink); }
-.node.here.thought > .what { color: var(--accent); font-style: italic; }
-
-/* each level is a little quieter than the one it hangs from */
-.node.d2 { font-size: 13px; }
-.node.d3 { font-size: 12.6px; }
-.node.d4 { font-size: 12.3px; }
-.node.d5, .node.d6, .node.d7 { font-size: 12px; }
-
-.node.ev > .what { color: var(--ink); }
-.node.ev.world > .what { color: var(--warm); }
-.node.ev.loss > .what { color: var(--loss); }
-.node.ev.kept > .what { color: var(--accent); }
-.node.quiet > .what { color: var(--muted); }
-.node.thought > .what { color: var(--muted); font-style: italic; }
-.node.more > .what { color: var(--faint); }
-.node.dead > .what { color: var(--faint); }
-.node.head { border-bottom-color: var(--ink); padding-top: 10px; padding-bottom: 6px; }
-.node.head > .what { font-size: 15px; letter-spacing: .02em; }
-.node.head > .mark { color: var(--ink); }
+.cap.ev > .what { color: var(--ink); }
+.cap.ev.world > .what { color: var(--warm); }
+.cap.ev.loss > .what { color: var(--loss); }
+.cap.ev.kept > .what { color: var(--accent); }
+.cap.quiet > .what { color: var(--muted); }
+.cap.thought > .what { color: var(--muted); font-style: italic; }
+.cap.here.thought > .what { color: var(--accent); }
+.cap.dead > .what { color: var(--faint); }
+.cap.head { border-bottom: 1px solid var(--ink); padding: 8px 4px 6px; }
+.cap.head > .what { font-size: 15px; letter-spacing: .02em; }
+.cap.head > .mark { color: var(--ink); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media (max-width: 620px) {
   body { font-size: 12.5px; }
   .wrap { padding: 20px 12px 60px; }
-  .tree { --step: 19px; }
-  .node { grid-template-columns: 1em 4.4em 1fr; }
-  .node > .tail { grid-column: 2 / -1; font-size: 10.5px;
-                  white-space: normal; min-width: 0; }
+  /* a colour has to be worth aiming a thumb at */
+  .tick { height: 13px; margin-bottom: 2px; }
+  .kids { margin-left: 5px; padding-left: 5px; }
+  .cap { grid-template-columns: 1em 4.4em 1fr; }
+  .cap > .tail { grid-column: 2 / -1; font-size: 10.5px;
+                 white-space: normal; min-width: 0; }
   .seedline { margin-left: 0; }
 }
