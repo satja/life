@@ -91,6 +91,9 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .bar button.kept  { background: var(--accent); }
 .bar button.dead  { background: var(--ink); }
 .bar button.open  { outline: 1px solid var(--accent); outline-offset: -1px; }
+/* the year a moment was taken out of, which the branch below hangs from */
+.bar button.here  { background: var(--accent); outline: 2px solid var(--ink);
+                    outline-offset: -1px; }
 
 /* ---- one row, at every scale ----
    Every row is indented by its depth, and behind it runs one hairline rail

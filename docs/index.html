@@ -97,6 +97,9 @@ button.ghost:hover { color: var(--ink); border-color: var(--ink); }
 .bar button.kept  { background: var(--accent); }
 .bar button.dead  { background: var(--ink); }
 .bar button.open  { outline: 1px solid var(--accent); outline-offset: -1px; }
+/* the year a moment was taken out of, which the branch below hangs from */
+.bar button.here  { background: var(--accent); outline: 2px solid var(--ink);
+                    outline-offset: -1px; }
 
 /* ---- one row, at every scale ----
    Every row is indented by its depth, and behind it runs one hairline rail
@@ -1986,7 +1989,8 @@ const state = {
   seed: Math.floor(Math.random() * 1e6),
   set: { century: 1, conscience: 1, temptation: 1, sleep: 1 },
   showSetup: true,           // the conditions are only in the way afterwards
-  path: null,                // the way down to one minute, while it opens
+  path: null,                // the way down to one minute
+  only: null,                // and, while it is being taken, the only way shown
   open: new Set(),           // which rows are unfolded
   more: new Set(),           // which "… n more" rows have been asked for
   nodes: new Map(),          // what is on screen, so a click can be answered
@@ -2208,9 +2212,11 @@ function childrenOf(n) {
       return n.mo.days.map(function (rec) {
         const ev = rec.events.length ? said(rec.events)
                                      : { what: dayLabel(rec), cls: "quiet" };
+        // the year here is twelve equal months of thirty days and a bit, so
+        // the number is a day of its month and is not given the month's name
         const dom = (rec.dayOfLife % 365) - Math.floor(rec.month * 365 / 12) + 1;
         return node(n.id + "/d" + rec.dayOfLife, "day", {
-          when: dom + " " + MONTHS[rec.month], what: ev.what, cls: ev.cls, rec: rec,
+          when: "the " + dom, what: ev.what, cls: ev.cls, rec: rec,
           tail: clock(rec.wake) + "–" + clock(rec.asleep),
           notable: rec.events.length > 0 || rec.insomnia,
           leaf: !rec.acts.length && !rec.thoughts.length,
@@ -2440,6 +2446,16 @@ function castRows() {
 // all; otherwise show the ones something happened in, and count the rest
 function shown(n) {
   const kids = n.kids || childrenOf(n);
+  // A moment is one branch. While it is being taken the tree shows that
+  // branch and nothing beside it, so it grows out of the bar rather than
+  // being found somewhere in eighty years of rows.
+  if (state.only) {
+    const at = state.only.indexOf(n.id);
+    if (at >= 0 && at + 1 < state.only.length) {
+      const next = kids.find((k) => k.id === state.only[at + 1]);
+      if (next) return [next];
+    }
+  }
   // every year is there and every year opens, including the ones with
   // nothing in them; a year nothing happened in was still lived through
   if (n.kind === "life" || n.kind === "year") return kids;
@@ -2488,6 +2504,15 @@ function clicked(id) {
   const n = state.nodes.get(id);
   if (!n) return;
   if (n.kind === "more") { state.more.add(n.of); drawAll(); return; }
+  // touching the branch puts the rest of the life back around it, still
+  // open; touching anything else does that and then does what was asked
+  if (state.only) {
+    const onBranch = state.only.indexOf(id) >= 0;
+    state.open = new Set(state.only);
+    state.more.add(state.only[2]);
+    state.only = null; state.path = null;
+    if (onBranch || n.leaf) { drawAll(); return; }
+  }
   if (n.leaf) return;
   if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
   state.path = null;
@@ -2511,8 +2536,11 @@ function drawBar() {
       (kind ? cls + (kind.indexOf("ev") === 0 ? " ev" : "") : "") +
       '" title="' + esc(y.age + " — " + said) + '"></button>';
   }).join("");
+  const from = state.path ? state.path[1] : null;
   for (const b of bar.querySelectorAll("button")) {
-    if (state.open.has("life/y" + b.dataset.age)) b.classList.add("open");
+    const id = "life/y" + b.dataset.age;
+    if (id === from) b.classList.add("here");
+    else if (state.open.has(id)) b.classList.add("open");
   }
 }
 
@@ -2541,19 +2569,18 @@ function aMoment() {
   if (to > from) {
     path.push(path[4] + "/t" + (from + Math.floor(Math.random() * (to - from))));
   }
-  // the day may be one of the ones a month is not showing
-  state.more.add(path[2]);
   state.open = new Set();
   state.path = path;
+  state.only = path;
   let step = 0;
   (function down() {
-    if (step >= path.length) { state.path = path; draw(); drawBar(); return; }
+    if (step >= path.length) { drawAll(); return; }
     state.open.add(path[step]);
     step++;
-    draw(); drawBar();
+    drawAll();
     const last = $('.node[data-id="' + path[step - 1] + '"]');
     if (last) last.scrollIntoView({ block: "center", behavior: "smooth" });
-    setTimeout(down, 240);
+    setTimeout(down, 260);
   })();
 }
 
@@ -2645,7 +2672,7 @@ function live() {
   state.years = indexLife(state.life);
   state.open = new Set(["life", "acct"]);
   state.more = new Set();
-  state.path = null;
+  state.path = null; state.only = null;
   state.showSetup = false;
   $("#run").disabled = false;
   chrome();
@@ -2679,7 +2706,7 @@ function init() {
     const b = e.target.closest ? e.target.closest("button") : null;
     if (!b) return;
     const id = "life/y" + b.dataset.age;
-    state.path = null;
+    state.path = null; state.only = null;
     state.open.add("life");
     if (state.open.has(id)) state.open.delete(id); else state.open.add(id);
     drawAll();

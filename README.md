@@ -34,13 +34,18 @@ and this row is the life. Clicking a tick goes there.
 
 There is also "a moment of it", which takes one of the twenty million or so
 minutes that were actually lived and opens the way down to it a level at a
-time, ending on whatever was being thought:
+time. While it is being taken the tree shows that branch and nothing beside
+it, so it grows out of its own tick on the bar rather than being found
+somewhere in eighty years of rows, and it ends on whatever was being
+thought:
 
-    21   prices double, and then double                        young
-      jun  mostly working                                       494 h
-        18 jun  mostly working                            07:32-00:12
-          08:22  the cheaper shop                               45 min
-                 what Branko would say about this
+    17   falls in love, silently                           teenager
+      jan  mostly staying up too late                          493 h
+        the 24  mostly staying in                        08:28-00:51
+          22:08  the shopping                                  90 min
+                 whether they meant it
+
+Touching the branch puts the rest of the life back around it, still open.
 
 Every year is there and every year opens, including the ones nothing
 happened in. Open a year and you get its months, a month
